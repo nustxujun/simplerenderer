@@ -193,10 +193,13 @@ namespace RCP
 		ymax = ceil(pri.vertex[2].pos.y);
 
 
-		Vertex point1, point2, point3;
+		Vertex point1, point2;
+		Pixel point3;
 		float ratio1,ratio2,ratio3;
 		for (unsigned int y = ymin; y < ymax; ++y )
 		{
+			point3.y = y;
+
 			ratio1 = (y - pri.vertex[0].pos.y) / (pri.vertex[2 - offset].pos.y -  pri.vertex[0].pos.y);
 			ratio2 = (y - pri.vertex[1 - offset].pos.y) / (pri.vertex[2].pos.y -  pri.vertex[1 - offset].pos.y);
 
@@ -206,20 +209,12 @@ namespace RCP
 			interpolate(point2.color,ratio2,pri.vertex[1 - offset].color,pri.vertex[2].color);
 			interpolate(point1.norm,ratio1,pri.vertex[0].norm,pri.vertex[2 - offset].norm);
 			interpolate(point2.norm,ratio2,pri.vertex[1 - offset].norm,pri.vertex[2].norm);
-			//point1.pos = pri.vertex[0].pos + (pri.vertex[2 - offset].pos - pri.vertex[0].pos) * ratio1;
-			//point2.pos = pri.vertex[1 - offset].pos + (pri.vertex[2].pos -  pri.vertex[1 - offset].pos) * ratio2;
-			//point1.color = pri.vertex[0].color + (pri.vertex[2 - offset].color - pri.vertex[0].color) * ratio1;
-			//point2.color = pri.vertex[1 - offset].color + (pri.vertex[2].color -  pri.vertex[1 - offset].color) * ratio2;
-			//point1.norm = pri.vertex[0].norm + (pri.vertex[2 - offset].norm - pri.vertex[0].norm) * ratio1;
-			//point2.norm = pri.vertex[1 - offset].norm + (pri.vertex[2].norm -  pri.vertex[1 - offset].norm) * ratio2;
 
 			for (unsigned int i = 0; i < 8; ++i)
 				if (pri.tex[i] != NULL)
 				{
 					interpolate(point1.texCrood[i],ratio1,pri.vertex[0].texCrood[i],pri.vertex[2 - offset].texCrood[i]);
 					interpolate(point2.texCrood[i],ratio2,pri.vertex[1 - offset].texCrood[i],pri.vertex[2].texCrood[i]);
-					//point1.texCrood[i] = pri.vertex[0].texCrood[i] + (pri.vertex[2 - offset].texCrood[i] - pri.vertex[0].texCrood[i]) * ratio1;
-					//point2.texCrood[i] = pri.vertex[1 - offset].texCrood[i] + (pri.vertex[2].texCrood[i] -  pri.vertex[1 - offset].texCrood[i]) * ratio2;
 				}
 
 
@@ -227,21 +222,24 @@ namespace RCP
 			xmax = ceil(point2.pos.x);
 			for (unsigned int x = xmin; x < xmax; ++x)
 			{
+				point3.x = x;
+
 				ratio3 = (x - point1.pos.x) / (point2.pos.x -  point1.pos.x);
+				//颜色
 				interpolate(point3.color, ratio3,point1.color,point2.color);
 				//需要z 
-				interpolate(point3.pos, ratio3,point1.pos,point2.pos);
-				//float精度會出問題，這裡恢復
-				point3.pos.x = x;
-				point3.pos.y = y;
+				interpolate(point3.z, ratio3,point1.pos.z,point2.pos.z);	
+				
+				//临时处理
 				Vector4 colorBlend;
 				for (unsigned int i = 0; i < 8; ++i)
 				{
 					if (pri.tex[i] != NULL)
 					{
-						interpolate(point3.texCrood[i],ratio3,point1.texCrood[i],point2.texCrood[i]);
+						interpolate(point3.u,ratio3,point1.texCrood[i].x,point2.texCrood[i].x);
+						interpolate(point3.v,ratio3,point1.texCrood[i].y,point2.texCrood[i].y);
 						//先這裡就不混合了，到時候還要給混合公式
-						colorBlend = addressTex(pri.tex[i],point3.texCrood[i].x, point3.texCrood[i].y);
+						colorBlend = addressTex(pri.tex[i],point3.u, point3.v);
 					}
 				}
 				//這裡也是
@@ -252,22 +250,19 @@ namespace RCP
 		
 	}
 
-	void Rasterizer::drawImpl(const Vertex& v)
+	void Rasterizer::drawImpl(const Pixel& p)
 	{
-		if (!colorTest(v))
+		if (!colorTest(p))
 			return;
 
-		unsigned char color[4];
-		color[3] = v.color.w;
-		color[2] = v.color.x;
-		color[1] = v.color.y;
-		color[0] = v.color.z;
-		size_t pos = (v.pos.x + v.pos.y * mTempBuffer->getWidth()) * mTempBuffer->getColourDepth();
+		unsigned int color;
+		color = p.color.get32BitARGB();
+		size_t pos = (p.x + p.y * mTempBuffer->getWidth()) * mTempBuffer->getColourDepth();
 		mTempBuffer->seek(pos);
-		mTempBuffer->write(color,sizeof(color));
+		mTempBuffer->write(&color,sizeof(color));
 	}
 
-	bool Rasterizer::colorTest(const Vertex& v)
+	bool Rasterizer::colorTest(const Pixel& p)
 	{
 		return true;
 	}

@@ -3,7 +3,7 @@
 
 #include "Prerequisites.h"
 #include "Vector4.h"
-
+#include "Colour.h"
 namespace RCP
 {
 
@@ -11,11 +11,19 @@ namespace RCP
 	{
 		Vector4 pos;
 		Vector3 norm;
-		Vector4 color;
+		Colour color;
 		Vector2 texCrood[8];
 		Vertex()
 		{}
 
+	};
+
+	struct Pixel
+	{
+		unsigned int x,y;
+		float z;
+		Colour color;
+		float u,v;
 	};
 
 	struct Primitive
@@ -70,6 +78,13 @@ namespace RCP
 
 		void clear();
 
+		template<class T>
+		void interpolate(T& output,float input0, float input1, float inputx, const T& value0, const T& value1);
+
+		template<class T>
+		void interpolate(T& output,float ratio, const T& value0, const T& value1);
+
+
 	protected:
 		inline bool fequal(float a, float b,float epslon)
 		{
@@ -93,14 +108,9 @@ namespace RCP
 		void drawLine(const Primitive& pri);
 		void drawTriangle(const Primitive& pri);
 
-		void drawImpl(const Vertex& v);
-		bool colorTest(const Vertex& v);
+		void drawImpl(const Pixel& p);
+		bool colorTest(const Pixel& p);
 
-		template<class T>
-		void interpolate(T& output,float input0, float input1, float inputx, const T& value0, const T& value1);
-
-		template<class T>
-		void interpolate(T& output,float ratio, const T& value0, const T& value1);
 
 		Vector4 addressTex(const Texture* tex,float u,float v);
 		

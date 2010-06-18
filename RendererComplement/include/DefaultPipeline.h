@@ -50,7 +50,8 @@ namespace RCP
 		bool culling(const Primitive& prim);
 		bool checkPointInScreen(const Vector4& point);
 		void generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2,const Vector4& plane);
-		inline void vecInterpolate(Vector4& result, const Vector4& vec1, const Vector4& vec2, float scale);
+		template<class T>
+		inline void Interpolate(T& result, const T& vec1, const T& vec2, float scale);
 		void cliping(const Primitive& prim,Primitive prims[2]);
 		void clipingLine(const Primitive& prim,Primitive& resultPrim);
 		void clipingTriangle(const Primitive& prim,Primitive prims[2]);
