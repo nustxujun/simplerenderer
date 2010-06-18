@@ -1,0 +1,301 @@
+#include "Rasterizer.h"
+#include "Rendertarget.h"
+
+namespace RCP
+{
+	const float EPSLON = 0.1f;
+
+	Rasterizer::Rasterizer():
+		mTempBuffer(NULL)
+	{
+	
+	}
+
+	Rasterizer::~Rasterizer()
+	{
+		SAFE_DELETE(mTempBuffer);
+	}
+
+	void Rasterizer::initialize(unsigned int width, unsigned int height, PixelFormat pf)
+	{
+		//unsigned int colourDepth = PixelUtil::getNumElemBytes(pf);
+		//mTempBuffer = new RenderTarget(width, height, colourDepth);
+	}
+
+	void Rasterizer::pushPrimitive(const Primitive& pri)
+	{
+		switch (pri.type)
+		{
+		case Primitive::POINT:
+			mPrimitiveVector.push_back(pri);
+			return;
+			break;
+		case Primitive::LINE:
+			mPrimitiveVector.push_back(pri);
+			return;
+			break;
+		case Primitive::TRIANGLE:
+			break;
+		default:
+			assert(0);
+		}
+
+		//上下排序
+		unsigned int yOrder[3] = {0,1,2};
+		//開始排
+		if (pri.vertex[0].pos.y > pri.vertex[1].pos.y)
+		{
+			yOrder[0] = 1;
+			yOrder[1] = 0;
+		}
+		if (pri.vertex[yOrder[1]].pos.y > pri.vertex[2].pos.y)
+		{
+			yOrder[2] = yOrder[1];
+			yOrder[1] = 2;
+			if (pri.vertex[yOrder[0]].pos.y > pri.vertex[2].pos.y)
+			{
+				yOrder[1] = yOrder[0];
+				yOrder[0] = 2;
+			}
+		}
+		//終于排完了
+
+		Primitive resultPri = pri;
+		for (unsigned int i = 0; i < 3; ++i)
+			resultPri.vertex[i] = pri.vertex[yOrder[i]]; 
+
+		//平底
+		if (fequal(resultPri.vertex[2].pos.y, resultPri.vertex[1].pos.y,EPSLON))
+		{
+			if (resultPri.vertex[1].pos.x > resultPri.vertex[2].pos.x)
+			{
+				resultPri.vertex[1] = pri.vertex[yOrder[2]];
+				resultPri.vertex[2] = pri.vertex[yOrder[1]];
+			}
+			resultPri.triType = 1;
+			mPrimitiveVector.push_back(resultPri);
+		}
+		//平頂
+		else if (fequal(resultPri.vertex[0].pos.y, resultPri.vertex[1].pos.y,EPSLON))
+		{
+			if (resultPri.vertex[0].pos.x > resultPri.vertex[1].pos.x)
+			{
+				resultPri.vertex[0] = pri.vertex[yOrder[1]];
+				resultPri.vertex[1] = pri.vertex[yOrder[0]];
+			}
+			resultPri.triType = -1;
+			mPrimitiveVector.push_back(resultPri);
+		}
+		//普通
+		else
+		{
+			//计算新顶点
+			Vertex newVertex;
+			float ratio =( resultPri.vertex[1].pos.y - resultPri.vertex[0].pos.y ) / ( resultPri.vertex[2].pos.y - resultPri.vertex[0].pos.y );
+			
+			interpolate(newVertex.pos,ratio,resultPri.vertex[0].pos,resultPri.vertex[2].pos);
+			newVertex.pos.y = resultPri.vertex[1].pos.y;
+			interpolate(newVertex.norm,ratio,resultPri.vertex[0].norm,resultPri.vertex[2].norm);
+			interpolate(newVertex.color,ratio,resultPri.vertex[0].color,resultPri.vertex[2].color);
+			for (unsigned int i = 0; i < 8 ; ++i)
+				if (pri.tex[i] != NULL)//有纹理的话
+					interpolate(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
+
+
+			//newVertex.pos = resultPri.vertex[0].pos + ( resultPri.vertex[2].pos - resultPri.vertex[0].pos) * ratio;
+			//newVertex.pos.y = resultPri.vertex[1].pos.y;
+			//newVertex.norm = resultPri.vertex[0].norm * resultPri.vertex[0].pos.w + 
+			//	(resultPri.vertex[2].norm - resultPri.vertex[0].norm) * ratio;
+			//newVertex.color = resultPri.vertex[0].color * resultPri.vertex[0].pos.w + 
+			//	(resultPri.vertex[2].color - resultPri.vertex[0].color) * ratio;
+			//for (unsigned int i = 0; i < 8 ; ++i)
+			//	if (pri.tex[i] != NULL)//有纹理的话
+			//		newVertex.texCrood[i] = resultPri.vertex[0].texCrood[i] * resultPri.vertex[0].pos.w + 
+			//			(resultPri.vertex[2].texCrood[i] - resultPri.vertex[0].texCrood[i]) * ratio;
+
+			//分解成两个平底三角形
+			Primitive up,down;
+			up = down = resultPri;
+			up.vertex[2] = newVertex;
+			up.triType = 1;
+			down.vertex[0] = down.vertex[1];
+			down.vertex[1] = newVertex;
+			down.triType = -1;
+			bool swap = resultPri.vertex[1].pos.x > newVertex.pos.x;
+			//左右排序
+			if (swap)
+			{
+				up.vertex[1] = newVertex;
+				up.vertex[2] = resultPri.vertex[1];
+
+				down.vertex[0] = newVertex;
+				down.vertex[1] = resultPri.vertex[1];
+			}
+
+			mPrimitiveVector.push_back(up);
+			mPrimitiveVector.push_back(down);
+		}
+	}
+
+	void Rasterizer::flush(RenderTarget* target)
+	{
+		////target大小必須與初始化的時候一樣。，當然，其實小點也無所謂，不過懶得區別了
+		//assert( mTempBuffer->getWidth() == target->getWidth() && 
+		//		mTempBuffer->getHeight() == target->getHeight() &&
+		//		mTempBuffer->getColourDepth() == target->getColourDepth() );
+
+		mTempBuffer = target;
+
+		PrimitiveVector::iterator i,endi = mPrimitiveVector.end();
+		for (i = mPrimitiveVector.begin(); i != endi; ++i)
+		{
+			switch(i->type)
+			{
+			case Primitive::POINT:
+				drawPoint(*i);
+				break;
+			case Primitive::LINE:
+				drawLine(*i);
+				break;
+			case Primitive::TRIANGLE:
+				drawTriangle(*i);
+				break;
+			default:
+				assert(0);
+			}
+
+			//copyToTarget(target);
+			//clear();
+		}
+		mTempBuffer = NULL;
+		mPrimitiveVector.clear();
+
+	}
+
+	void Rasterizer::drawPoint(const Primitive& pri)
+	{
+
+	}
+
+	void Rasterizer::drawLine(const Primitive& pri)
+	{
+
+	}
+
+	void Rasterizer::drawTriangle(const Primitive& pri)
+	{
+		assert(pri.triType != 0);
+		unsigned int offset = ( pri.triType + 1 )/2;
+		unsigned int xmin,xmax,ymin,ymax;
+		xmin = ceil(pri.vertex[offset].pos.x);
+		xmax = ceil(pri.vertex[offset + 1].pos.x);
+		ymin = ceil(pri.vertex[0].pos.y);
+		ymax = ceil(pri.vertex[2].pos.y);
+
+
+		Vertex point1, point2, point3;
+		float ratio1,ratio2,ratio3;
+		for (unsigned int y = ymin; y < ymax; ++y )
+		{
+			ratio1 = (y - pri.vertex[0].pos.y) / (pri.vertex[2 - offset].pos.y -  pri.vertex[0].pos.y);
+			ratio2 = (y - pri.vertex[1 - offset].pos.y) / (pri.vertex[2].pos.y -  pri.vertex[1 - offset].pos.y);
+
+			interpolate(point1.pos,ratio1,pri.vertex[0].pos,pri.vertex[2 - offset].pos);
+			interpolate(point2.pos,ratio2,pri.vertex[1 - offset].pos,pri.vertex[2].pos);
+			interpolate(point1.color,ratio1,pri.vertex[0].color,pri.vertex[2 - offset].color);
+			interpolate(point2.color,ratio2,pri.vertex[1 - offset].color,pri.vertex[2].color);
+			interpolate(point1.norm,ratio1,pri.vertex[0].norm,pri.vertex[2 - offset].norm);
+			interpolate(point2.norm,ratio2,pri.vertex[1 - offset].norm,pri.vertex[2].norm);
+			//point1.pos = pri.vertex[0].pos + (pri.vertex[2 - offset].pos - pri.vertex[0].pos) * ratio1;
+			//point2.pos = pri.vertex[1 - offset].pos + (pri.vertex[2].pos -  pri.vertex[1 - offset].pos) * ratio2;
+			//point1.color = pri.vertex[0].color + (pri.vertex[2 - offset].color - pri.vertex[0].color) * ratio1;
+			//point2.color = pri.vertex[1 - offset].color + (pri.vertex[2].color -  pri.vertex[1 - offset].color) * ratio2;
+			//point1.norm = pri.vertex[0].norm + (pri.vertex[2 - offset].norm - pri.vertex[0].norm) * ratio1;
+			//point2.norm = pri.vertex[1 - offset].norm + (pri.vertex[2].norm -  pri.vertex[1 - offset].norm) * ratio2;
+
+			for (unsigned int i = 0; i < 8; ++i)
+				if (pri.tex[i] != NULL)
+				{
+					interpolate(point1.texCrood[i],ratio1,pri.vertex[0].texCrood[i],pri.vertex[2 - offset].texCrood[i]);
+					interpolate(point2.texCrood[i],ratio2,pri.vertex[1 - offset].texCrood[i],pri.vertex[2].texCrood[i]);
+					//point1.texCrood[i] = pri.vertex[0].texCrood[i] + (pri.vertex[2 - offset].texCrood[i] - pri.vertex[0].texCrood[i]) * ratio1;
+					//point2.texCrood[i] = pri.vertex[1 - offset].texCrood[i] + (pri.vertex[2].texCrood[i] -  pri.vertex[1 - offset].texCrood[i]) * ratio2;
+				}
+
+
+			xmin = ceil(point1.pos.x);
+			xmax = ceil(point2.pos.x);
+			for (unsigned int x = xmin; x < xmax; ++x)
+			{
+				ratio3 = (x - point1.pos.x) / (point2.pos.x -  point1.pos.x);
+				interpolate(point3.color, ratio3,point1.color,point2.color);
+				//需要z 
+				interpolate(point3.pos, ratio3,point1.pos,point2.pos);
+				//float精度會出問題，這裡恢復
+				point3.pos.x = x;
+				point3.pos.y = y;
+				Vector4 colorBlend;
+				for (unsigned int i = 0; i < 8; ++i)
+				{
+					if (pri.tex[i] != NULL)
+					{
+						interpolate(point3.texCrood[i],ratio3,point1.texCrood[i],point2.texCrood[i]);
+						//先這裡就不混合了，到時候還要給混合公式
+						colorBlend = addressTex(pri.tex[i],point3.texCrood[i].x, point3.texCrood[i].y);
+					}
+				}
+				//這裡也是
+				//point3.color = Vector4(128,128,128,128);
+				drawImpl(point3);
+			}
+		}
+		
+	}
+
+	void Rasterizer::drawImpl(const Vertex& v)
+	{
+		if (!colorTest(v))
+			return;
+
+		unsigned char color[4];
+		color[3] = v.color.w;
+		color[2] = v.color.x;
+		color[1] = v.color.y;
+		color[0] = v.color.z;
+		size_t pos = (v.pos.x + v.pos.y * mTempBuffer->getWidth()) * mTempBuffer->getColourDepth();
+		mTempBuffer->seek(pos);
+		mTempBuffer->write(color,sizeof(color));
+	}
+
+	bool Rasterizer::colorTest(const Vertex& v)
+	{
+		return true;
+	}
+
+	template<class T>
+	void Rasterizer::interpolate(T& output,float input0, float input1, float inputx, const T& value0, const T& value1)
+	{
+		interpolate(output,(inputx - input0) / (input1 - input0),value0,value1);
+	}
+
+	template<class T>
+	void Rasterizer::interpolate(T& output,float ratio, const T& value0, const T& value1)
+	{
+		output = (value1 - value0) * ratio  + value0;
+	}
+
+	Vector4 Rasterizer::addressTex(const Texture* tex,float u,float v)
+	{
+		assert(tex);
+		return Vector4(255,255,255,255);
+	}
+
+	void Rasterizer::clear()
+	{
+		memset(mTempBuffer->getData(),0,mTempBuffer->getSizeInBytes());
+	}
+
+
+
+
+}
