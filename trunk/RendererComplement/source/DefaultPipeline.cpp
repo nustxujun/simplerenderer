@@ -160,19 +160,16 @@ namespace RCP
 				if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 4)
 				{
 					const int* colorData =(const int*)( data + i * vertexSize + colorDataOffset);
-					verVec[i].color.w = (unsigned char)(*colorData>>24);
-					verVec[i].color.x = (unsigned char)((*colorData>>16) &0xff);
-					verVec[i].color.y = (unsigned char)((*colorData>>8)&0xff);
-					verVec[i].color.z = (unsigned char)(*colorData & 0xff);
+					verVec[i].color.getFromARGB(*colorData);
 					
 				}
 				else if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 16)
 				{
 					const Color* colorData =(const Color*)( data + i * vertexSize + colorDataOffset);
-					verVec[i].color.x = colorData->r;
-					verVec[i].color.y = colorData->g;
-					verVec[i].color.z = colorData->b;
-					verVec[i].color.w = colorData->a;
+					verVec[i].color.r = colorData->r;
+					verVec[i].color.g = colorData->g;
+					verVec[i].color.b = colorData->b;
+					verVec[i].color.a = colorData->a;
 				}
 				
 			}
@@ -325,7 +322,8 @@ namespace RCP
 	}
 
 
-	void DefaultPipeline::vecInterpolate(Vector4& result, const Vector4& vec1, const Vector4& vec2, float scale)
+	template<class T>
+	void DefaultPipeline::Interpolate(T& result, const T& vec1, const T& vec2, float scale)
 	{
 		result = (vec2 - vec1) * scale + vec1;
 	}
@@ -346,12 +344,12 @@ namespace RCP
 
 		float scale = length2/length1;
 
-		vecInterpolate(newVertex.color,vert1.color,vert2.color,scale);
-		vecInterpolate(newVertex.norm,vert1.norm,vert2.norm,scale);
-		vecInterpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
+		Interpolate(newVertex.color,vert1.color,vert2.color,scale);
+		Interpolate(newVertex.norm,vert1.norm,vert2.norm,scale);
+		Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
 		for (unsigned int i = 0 ; i < 8; ++i)
 		{
-			vecInterpolate(newVertex.texCrood[i],vert1.texCrood[i],vert2.texCrood[i],scale);
+			Interpolate(newVertex.texCrood[i],vert1.texCrood[i],vert2.texCrood[i],scale);
 		}
 
 

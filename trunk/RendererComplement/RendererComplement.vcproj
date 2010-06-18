@@ -238,6 +238,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\Material.h"
+				>
+			</File>
+			<File
 				RelativePath=".\source\Resource.cpp"
 				>
 			</File>
@@ -292,6 +296,10 @@
 			<Filter
 				Name="Math"
 				>
+				<File
+					RelativePath=".\include\Colour.h"
+					>
+				</File>
 				<File
 					RelativePath=".\source\Matrix4X4.cpp"
 					>
