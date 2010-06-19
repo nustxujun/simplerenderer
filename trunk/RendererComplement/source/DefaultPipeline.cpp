@@ -89,7 +89,8 @@ namespace RCP
 		//各个数据在一個頂點中的偏移大小
 		const VertexDeclaration& verDecl = vb->getVertexDeclaration();
 		unsigned int posDataOffset = verDecl.getElementOffsetInBytes(VES_POSITION);
-		unsigned int colorDataOffset = verDecl.getElementOffsetInBytes(VES_DIFFUSE);
+		unsigned int diffuseDataOffset = verDecl.getElementOffsetInBytes(VES_DIFFUSE);
+		unsigned int specularDataOffset = verDecl.getElementOffsetInBytes(VES_SPECULAR);
 		unsigned int normalDataOffset = verDecl.getElementOffsetInBytes(VES_NORMAL);
 		unsigned int texCroodDataOffset[8];
 		for (unsigned char i = 0; i < 8; ++i)
@@ -109,6 +110,8 @@ namespace RCP
 		Matrix4X4 transMat;
 		Matrix4X4 pos;
 		float weight[4] = {1,0,0,0};
+		Colour diffuse,specular,diffuseBlend,specularBlend;
+		float power;
 		for (size_t i = 0; i < vb->getVertexCount(); ++i)
 		{
 			//定位頂點position
@@ -153,30 +156,42 @@ namespace RCP
 			verVec[i].pos.w = pos.m[3][3];
 
 
-			//获取颜色(未进行材质处理) 
-			//这里没有进行固定管线的光照计算
-			if (colorDataOffset != -1)
+			//获取颜色(材质ye处理) 
+			diffuse = elem.material.diffuse;
+			specular = elem.material.specular;
+			power = elem.material.power;
+			if (diffuseDataOffset != -1 && elem.material.isDiffuseVertexColorEnable())
 			{
 				if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 4)
 				{
-					const int* colorData =(const int*)( data + i * vertexSize + colorDataOffset);
-					verVec[i].color.getFromARGB(*colorData);
+					const int* colorData =(const int*)( data + i * vertexSize + diffuseDataOffset);
+					diffuse = Colour().getFromARGB(*colorData) * diffuse ;
 					
 				}
 				else if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 16)
 				{
-					const Color* colorData =(const Color*)( data + i * vertexSize + colorDataOffset);
-					verVec[i].color.r = colorData->r;
-					verVec[i].color.g = colorData->g;
-					verVec[i].color.b = colorData->b;
-					verVec[i].color.a = colorData->a;
+					const Color* colorData =(const Color*)( data + i * vertexSize + diffuseDataOffset);
+
+					diffuse = diffuse * Colour(colorData->r,colorData->g,colorData->b,colorData->a);
 				}
 				
 			}
-			else
+			if (specularDataOffset != -1 && elem.material.isSpecularVertexColorEnable())
 			{
-			
+				if (verDecl.getElementSizeInBytes(VES_SPECULAR) == 4)
+				{
+					const int* colorData =(const int*)( data + i * vertexSize + specularDataOffset);
+					specular = specular + Colour().getFromARGB(*colorData);
+					
+				}
+				else if (verDecl.getElementSizeInBytes(VES_SPECULAR) == 16)
+				{
+					const Color* colorData =(const Color*)( data + i * vertexSize + specularDataOffset);
+
+					diffuse = diffuse + Colour(colorData->r,colorData->g,colorData->b,colorData->a);
+				}
 			}
+
 
 			//法线
 			if (normalDataOffset != -1)
@@ -186,6 +201,34 @@ namespace RCP
 				verVec[i].norm.y = normalData->y;
 				verVec[i].norm.z = normalData->z;
 			}
+
+			//光照计算
+			diffuseBlend.getFromABGR(0);
+			specular.getFromABGR(0);
+			bool enable = false;
+			for (unsigned int index = 0; index < 8; ++index)
+			{
+				if (!elem.light[index].isEnable())
+					continue;
+				enable = true;
+				diffuseBlend += elem.light[index].diffuse * 
+					std::max<float>(0,verVec[i].norm.dotProduct(elem.light[i].position - verVec[i].pos));
+			}
+
+			//如果使用了灯光。
+			if (enable)
+			{
+				diffuseBlend.r = diffuseBlend.r > 1? 1: diffuseBlend.r;
+				diffuseBlend.g = diffuseBlend.g > 1? 1: diffuseBlend.g;
+				diffuseBlend.b = diffuseBlend.b > 1? 1: diffuseBlend.b;
+				diffuseBlend.a = diffuseBlend.a > 1? 1: diffuseBlend.a;
+
+				diffuse = diffuse * diffuseBlend;
+			}
+			//temp
+			verVec[i].color = diffuse;
+				
+
 
 			//纹理坐标
 			for (unsigned char k = 0; k < 8; ++k )

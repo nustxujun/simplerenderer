@@ -238,10 +238,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\Material.h"
-				>
-			</File>
-			<File
 				RelativePath=".\source\Resource.cpp"
 				>
 			</File>
@@ -316,6 +312,22 @@
 			<Filter
 				Name="Graphic"
 				>
+				<File
+					RelativePath=".\source\Light.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Light.h"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Material.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Material.h"
+					>
+				</File>
 				<File
 					RelativePath=".\source\PaintingMethod.cpp"
 					>

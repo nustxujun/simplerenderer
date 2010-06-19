@@ -227,6 +227,7 @@ namespace RCP
 				ratio3 = (x - point1.pos.x) / (point2.pos.x -  point1.pos.x);
 				//ÑÕÉ«
 				interpolate(point3.color, ratio3,point1.color,point2.color);
+				
 				//ÐèÒªz 
 				interpolate(point3.z, ratio3,point1.pos.z,point2.pos.z);	
 				

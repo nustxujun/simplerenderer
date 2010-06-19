@@ -7,6 +7,7 @@
 #include "IndexBuffer.h"
 #include "BackBuffer.h"
 #include "PaintingMethod.h"
+#include "Light.h"
 
 
 #endif//_RendererHead_H_

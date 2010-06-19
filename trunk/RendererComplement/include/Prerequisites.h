@@ -26,8 +26,10 @@
 namespace RCP
 {
 	class BackBuffer;
+	class Colour;
 	class IndexBuffer;
 	class IndexBufferManager;
+	class Light;
 	class Material;
 	class Matrix4X4;
 	class MemoryBuffer;
