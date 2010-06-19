@@ -54,6 +54,16 @@ namespace RCP
 				w + rkVector.w);
 		}
 
+		inline Vector4 operator += ( const Vector4& rkVector )
+		{
+
+			x += rkVector.x;
+			y += rkVector.y;
+			z += rkVector.z;
+			w += rkVector.w;
+			return *this;
+		}
+
 		inline Vector4 operator - ( const Vector4& rkVector ) const
 		{
 			return Vector4(
@@ -110,6 +120,11 @@ namespace RCP
 		inline float dotProduct(const Vector4& vec) const
 		{
 			return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
+		}
+
+		inline float absDotProduct(const Vector4& vec) const
+		{
+			return fabs(x * vec.x + y * vec.y + z * vec.z + w * vec.w);
 		}
 
 		float x,y,z,w;

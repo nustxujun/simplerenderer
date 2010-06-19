@@ -2,7 +2,8 @@
 #define _RenderQueue_H_
 #include "Prerequisites.h"
 #include "RenderData.h"
-
+#include "Material.h"
+#include "Light.h"
 namespace RCP
 {
 	class RenderQueue
@@ -18,7 +19,7 @@ namespace RCP
 		RenderData& postRenderData();
 		//插入新的RenderElement到RenderData
 		void createRenderElement(unsigned int offset ,unsigned int c, Primitives type, VertexBuffer* vb,
-			const Matrix4X4 world[TS_BASALNUM],Texture* tex[8], IndexBuffer* ib = NULL , Material* mat = NULL);
+			const Matrix4X4 world[TS_BASALNUM],Texture* tex[8],const Light light[8], IndexBuffer* ib = NULL ,const Material& mat = Material::DEFAULT);
 		void destroyRenderData(RenderData* renderData);
 		bool isRenderDataReady();
 	private:

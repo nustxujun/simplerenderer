@@ -44,6 +44,15 @@ namespace RCP
 				a + color.a);
 		}
 
+		inline Colour operator += ( const Colour& color )
+		{
+			r += color.r;
+			g += color.g;
+			b += color.b;
+			a += color.a;
+			return *this;
+		}
+
 		inline Colour operator - ( const Colour& color ) const
 		{
 			return Colour(
@@ -141,56 +150,60 @@ namespace RCP
 
 		}
 
-		inline unsigned char get16bitR()const
+		inline unsigned char get8bitR()const
 		{
 			return (unsigned char)(r*255);
 		}
 
-		inline unsigned char get16bitG()const
+		inline unsigned char get8bitG()const
 		{
 			return (unsigned char)(g*255);
 		}
 
-		inline unsigned char get16bitB()const
+		inline unsigned char get8bitB()const
 		{
 			return (unsigned char)(b*255);
 		}
 
-		inline unsigned char get16bitA()const
+		inline unsigned char get8bitA()const
 		{
 			return (unsigned char)(a*255);
 		}
 
-		inline void getFromARGB(unsigned int argb)
+		inline const Colour& getFromARGB(unsigned int argb)
 		{
 			a = (argb >> 24) / 255.f;
 			r = ((argb >> 16) & 0xff) / 255.f;
 			g = ((argb >> 8) & 0xff) / 255.f;
 			b = (argb & 0xff) / 255.f;
+			return *this;
 		}
 
-		inline void getFromRGBA(unsigned int rgba)
+		inline const Colour& getFromRGBA(unsigned int rgba)
 		{
 			r = (rgba >> 24) / 255.f;
 			g = ((rgba >> 16) & 0xff) / 255.f;
 			b = ((rgba >> 8) & 0xff) / 255.f;
 			a = (rgba & 0xff) / 255.f;
+			return *this;
 		}
 
-		inline void getFromBGRA(unsigned int bgra)
+		inline const Colour& getFromBGRA(unsigned int bgra)
 		{
 			b = (bgra >> 24) / 255.f;
 			g = ((bgra >> 16) & 0xff) / 255.f;
 			r = ((bgra >> 8) & 0xff) / 255.f;
 			a = (bgra & 0xff) / 255.f;
+			return *this;
 		}
 
-		inline void getFromABGR(unsigned int abgr)
+		inline const Colour& getFromABGR(unsigned int abgr)
 		{
 			a = (abgr >> 24) / 255.f;
 			b = ((abgr >> 16) & 0xff) / 255.f;
 			g = ((abgr >> 8) & 0xff) / 255.f;
 			r = (abgr & 0xff) / 255.f;
+			return *this;
 		}
 
 

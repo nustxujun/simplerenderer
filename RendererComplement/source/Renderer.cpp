@@ -46,7 +46,9 @@ namespace RCP
 		mVertexBuffer = NULL;
 		mIndexBuffer = NULL;
 		memset(mTexture,0,sizeof(mTexture));
-		mMaterial = NULL;
+		mMaterial = Material::DEFAULT;
+		for (unsigned int i = 0; i < 8 ; ++i)
+			mLight[i].setEnable(false);
 
 		mIsInitialized = true;
 	}
@@ -87,7 +89,7 @@ namespace RCP
 		Matrix4X4 mat[TS_BASALNUM];
 		memcpy(mat,mMatrices,sizeof (Matrix4X4)*TS_BASALNUM);
 		mRenderQueue->createRenderElement(beginPrimitiveOffset,
-			primitiveCount,type,mVertexBuffer,mat,mTexture,mIndexBuffer,mMaterial);
+			primitiveCount,type,mVertexBuffer,mat,mTexture,mLight,mIndexBuffer,mMaterial);
 
 		//恢复到初始，防止被再用
 		mVertexBuffer = NULL;
@@ -114,9 +116,8 @@ namespace RCP
 		mTexture[index] = tex;
 	}
 
-	void Renderer::setMaterial(Material* mat)
+	void Renderer::setMaterial(Material mat)
 	{
-		assert(mat);
 		mMaterial = mat;
 	}
 
@@ -142,6 +143,12 @@ namespace RCP
 	void Renderer::setPaintingMethod(PaintingMethod* pm)
 	{
 		mPaitingMethod = pm;
+	}
+
+	void Renderer::setLight(unsigned int index,const Light& l)
+	{
+		assert(index < 8);
+		mLight[index] = l;
 	}
 
 }

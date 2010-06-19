@@ -47,9 +47,9 @@ namespace RCP
 
 
 	void RenderQueue::createRenderElement(unsigned int offset ,unsigned int c, Primitives type, VertexBuffer* vb,
-			const Matrix4X4 world[TS_BASALNUM],Texture* tex[8], IndexBuffer* ib  , Material* mat )
+			const Matrix4X4 world[TS_BASALNUM],Texture* tex[8],const Light light[8], IndexBuffer* ib  ,const Material& mat )
 	{
-		mPreparingRenderData->insertRenderElement(offset,c,type,vb,world,tex,ib,mat);
+		mPreparingRenderData->insertRenderElement(offset,c,type,vb,world,tex,ib,mat,light);
 	}
 
 }

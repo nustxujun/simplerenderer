@@ -4,6 +4,9 @@
 #include"Prerequisites.h"
 #include "RendererTypes.h"
 #include "Matrix4X4.h"
+#include "Material.h"
+#include "Light.h"
+
 
 
 namespace RCP
@@ -41,9 +44,10 @@ namespace RCP
 		void setVertexBuffer(VertexBuffer* vb);
 		void setIndexBuffer(IndexBuffer* ib);
 		void setTexture(unsigned int index,Texture* tex);
-		void setMaterial(Material* mat);
+		void setMaterial(Material mat);
 		void setMatrix(TransformStateType type,const Matrix4X4& mat);
 		void setPaintingMethod(PaintingMethod* pm);
+		void setLight(unsigned int index,const Light& l);
 
 	private:
 		bool mIsInitialized;
@@ -72,9 +76,11 @@ namespace RCP
 		//当前纹理,限定8层（不是有什么不可实现，只是模拟显卡最大数）
 		Texture* mTexture[8];
 		//当前材质
-		Material* mMaterial;
+		Material mMaterial;
 		//当前矩阵
 		Matrix4X4 mMatrices[TS_BASALNUM];
+		//灯光
+		Light mLight[8];
 	};
 }
 
