@@ -8,6 +8,7 @@
 #include "BackBuffer.h"
 #include "PaintingMethod.h"
 #include "Light.h"
+#include "MatrixUtil.h"
 
 
 #endif//_RendererHead_H_

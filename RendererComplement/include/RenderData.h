@@ -3,6 +3,7 @@
 #include "Prerequisites.h"
 #include "RenderElement.h"
 #include "Material.h"
+#include "Viewport.h"
 
 namespace RCP
 {
@@ -22,7 +23,7 @@ namespace RCP
 
 		const RenderElementList& getRenderElementList() const;
 		void insertRenderElement(unsigned int offset ,unsigned int c, Primitives type,
-			VertexBuffer* vb, const Matrix4X4 world[TS_BASALNUM], Texture* tex[8], IndexBuffer* ib,const Material& mat,const Light light[8]);
+			VertexBuffer* vb, const Matrix4X4 world[TS_BASALNUM], Texture* tex[8], IndexBuffer* ib,const Material& mat,const Light light[8],const Viewport& vp);
 	private:
 		
 		RenderElementList mRenderElementList;

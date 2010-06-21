@@ -1,5 +1,4 @@
 #include "RenderTarget.h"
-#include "Vector4.h"
 
 namespace RCP
 {

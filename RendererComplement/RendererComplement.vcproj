@@ -293,15 +293,23 @@
 				Name="Math"
 				>
 				<File
-					RelativePath=".\include\Colour.h"
-					>
-				</File>
-				<File
 					RelativePath=".\source\Matrix4X4.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\include\Matrix4X4.h"
+					>
+				</File>
+				<File
+					RelativePath=".\source\MatrixUtil.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\MatrixUtil.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Vector3.h"
 					>
 				</File>
 				<File
@@ -312,22 +320,6 @@
 			<Filter
 				Name="Graphic"
 				>
-				<File
-					RelativePath=".\source\Light.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\Light.h"
-					>
-				</File>
-				<File
-					RelativePath=".\source\Material.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\Material.h"
-					>
-				</File>
 				<File
 					RelativePath=".\source\PaintingMethod.cpp"
 					>
@@ -363,6 +355,38 @@
 			</File>
 			<File
 				RelativePath=".\include\DefaultPipeline.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="RenderParameters"
+			>
+			<File
+				RelativePath=".\include\Colour.h"
+				>
+			</File>
+			<File
+				RelativePath=".\source\Light.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Light.h"
+				>
+			</File>
+			<File
+				RelativePath=".\source\Material.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Material.h"
+				>
+			</File>
+			<File
+				RelativePath=".\source\Viewport.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Viewport.h"
 				>
 			</File>
 		</Filter>

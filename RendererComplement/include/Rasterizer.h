@@ -2,7 +2,6 @@
 #define _Rasterizer_H_
 
 #include "Prerequisites.h"
-#include "Vector4.h"
 #include "Colour.h"
 namespace RCP
 {
@@ -39,12 +38,14 @@ namespace RCP
 
 		Vertex vertex[3];
 		Texture* tex[8];
+		const Viewport* vp;
 		//是正三角1，还是倒三角-1，还是没分0
 		int triType;
 
 		Primitive():
 			type(ERROR),
-			triType(0)
+			triType(0),
+			vp(0)
 		{
 			memset(tex,0,sizeof(Texture*) * 8);
 		}
@@ -53,6 +54,7 @@ namespace RCP
 		{
 			type = prim.type;
 			triType = prim.triType;
+			vp = prim.vp;
 			if (prim.type == ERROR)
 				return *this;
 			for (unsigned short i = 0; i < 3; ++i)

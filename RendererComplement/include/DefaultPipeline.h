@@ -56,6 +56,9 @@ namespace RCP
 		void clipingLine(const Primitive& prim,Primitive& resultPrim);
 		void clipingTriangle(const Primitive& prim,Primitive prims[2]);
 		
+		void afterCliping(Primitive& prim);
+		void homogeneousDivide(Vector4& pos);
+		void viewportMapping(Vector4& pos,const Viewport* vp);
 		
 		void geometryProcessing(const RenderElement& elem,const VertexVector& verVec);
 		void pixelProcessing(const RenderData::RenderElementList& elems);
@@ -75,7 +78,7 @@ namespace RCP
 		//²ÃœpÇ°µÄ
 		PrimitiveVector mPrimitiveVector;
 		
-		PixelVector mPixelVector;
+	
 
 		//²Ãœp¿Õég
 		Vector4 mPlane[6];
