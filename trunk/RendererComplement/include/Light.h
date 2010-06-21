@@ -3,7 +3,6 @@
 
 #include "Prerequisites.h"
 #include "Colour.h"
-#include "Vector4.h"
 namespace RCP
 {
 	enum LightType
@@ -26,8 +25,8 @@ namespace RCP
 		Colour diffuse;
 		Colour specular;
 		Colour ambient;
-		Vector4 position;
-		Vector4 direction;
+		Vector3 position;
+		Vector3 direction;
 		float range;
 		float falloff;
 		float attenuation0;

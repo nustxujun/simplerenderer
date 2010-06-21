@@ -20,7 +20,10 @@
 
 //basal headers EX
 #include "RendererTypes.h"
+#include "Vector3.h"
+#include "Vector4.h"
 #include "PixelUtil.h"
+
 //stable classes
 
 namespace RCP
@@ -41,10 +44,12 @@ namespace RCP
 	class ResourceManager;
 	class SharedPtr;
 	class Texture;
+	class Vector3;
 	class Vector4;
 	class VertexBuffer;
 	class VertexBufferManager;
 	class VertexDeclaration;
+	class Viewport;
 }
 
 #endif//_Prerequisites_H_

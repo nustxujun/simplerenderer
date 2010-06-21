@@ -26,7 +26,6 @@ namespace RCP
 	{
 		//預處理
 		//mPositionList.clear();
-		mPixelVector.clear();
 		mPrimitiveVector.clear();
 
 		const RenderData::RenderElementList& elems = renderData.getRenderElementList();
@@ -51,22 +50,19 @@ namespace RCP
 		for (priIter = mPrimitiveVector.begin(); priIter != priEndIter; ++priIter)
 		{
 			//返回true则说明通过，false则剔除
-			 if ( !culling(*priIter) )
+			 if ((*priIter).type == Primitive::ERROR  || !culling(*priIter) )
 				 continue;
 			 cliping(*priIter,priResult);
 			 //产生的clip新结果插入
-			 if (priResult[0].type != Primitive::ERROR)
+			 for (unsigned int k = 0; k < 2; ++k)
 			 {
-				 mRasterizer.pushPrimitive(priResult[0]);
-
-				 priResult[0].type = Primitive::ERROR;
+				 //这里将进行
+				 //齐次坐标归一（透视除法。。。怎么这么多名字）
+				 //视口映射
+				 afterCliping(priResult[k]);
+				 priResult[k].type = Primitive::ERROR;
 			 }
-			 if (priResult[1].type != Primitive::ERROR)
-			 {
-				 mRasterizer.pushPrimitive(priResult[1]);
 
-				 priResult[1].type = Primitive::ERROR;
-			 }
 			 
 		}
 
@@ -108,18 +104,21 @@ namespace RCP
 		const unsigned char* data = vb->getData() ;
 		//const unsigned char* end = vb->getData() + dataSize;
 		Matrix4X4 transMat;
-		Matrix4X4 pos;
 		float weight[4] = {1,0,0,0};
 		Colour diffuse,specular,diffuseBlend,specularBlend;
 		float power;
+		bool enable = false;
+		Vector3 normVec;
+		Vector3 posVec;
+		Vector4 posVec4;
 		for (size_t i = 0; i < vb->getVertexCount(); ++i)
 		{
 			//定位頂點position
 			const Position* posData =(const Position*)( data + i * vertexSize + posDataOffset);
-			pos.m[0][3] = posData->x;
-			pos.m[1][3] = posData->y;
-			pos.m[2][3] = posData->z;
-			pos.m[3][3]= 1.0f;
+			posVec4.x = posData->x;
+			posVec4.y = posData->y;
+			posVec4.z = posData->z;
+			posVec4.w= 1.0f;
 
 			//-----------------------------------------------------
 			//這裡注意！！！！
@@ -147,14 +146,19 @@ namespace RCP
 				elem.matWorld[TS_WORLD3] * weight[2] + 
 				elem.matWorld[TS_WORLD4] * weight[3];
 			//矩阵变换
-			pos =  pos * transMat * elem.matWorld[TS_VIEW] * elem.matWorld[TS_PROJECTION]  ;
+			posVec4 =  transMat * posVec4 ;//* elem.matWorld[TS_PROJECTION]  ;
 			
-			//記錄下頂點
-			verVec[i].pos.x = pos.m[0][3];	
-			verVec[i].pos.y = pos.m[1][3];
-			verVec[i].pos.z = pos.m[2][3];
-			verVec[i].pos.w = pos.m[3][3];
+			//记录下变换前的坐标 进行光照计算
+			posVec.x = posVec4.x;
+			posVec.y = posVec4.y;
+			posVec.z = posVec4.z;
 
+			//继续变换
+			posVec4 = elem.matWorld[TS_PROJECTION] * (elem.matWorld[TS_VIEW] * posVec4);
+
+			//記錄下頂點的坐标
+			verVec[i].pos = posVec4;	
+			
 
 			//获取颜色(材质ye处理) 
 			diffuse = elem.material.diffuse;
@@ -205,14 +209,16 @@ namespace RCP
 			//光照计算
 			diffuseBlend.getFromABGR(0);
 			specular.getFromABGR(0);
-			bool enable = false;
+			enable = false;
 			for (unsigned int index = 0; index < 8; ++index)
 			{
 				if (!elem.light[index].isEnable())
 					continue;
 				enable = true;
+				normVec = elem.light[index].position - posVec;
+				normVec.normalise();
 				diffuseBlend += elem.light[index].diffuse * 
-					std::max<float>(0,verVec[i].norm.dotProduct(elem.light[i].position - verVec[i].pos));
+					std::max<float>(0,verVec[i].norm.dotProduct(normVec));
 			}
 
 			//如果使用了灯光。
@@ -227,8 +233,7 @@ namespace RCP
 			}
 			//temp
 			verVec[i].color = diffuse;
-				
-
+			
 
 			//纹理坐标
 			for (unsigned char k = 0; k < 8; ++k )
@@ -252,11 +257,13 @@ namespace RCP
 		unsigned int skipVertexCount = 0;
 		size_t realVertexCount = 0;
 		unsigned int type = 0;
+		//得到实际需要绘制的顶点数
 		if (ib != NULL)
 			realVertexCount = ib->getIndexCount();
 		else
 			realVertexCount = vb->getVertexCount();
 
+		//图元需要的顶点数
 		unsigned int vertexNumInGeom ;
 		switch (elem.ptType)
 		{
@@ -287,7 +294,7 @@ namespace RCP
 			skipVertexCount = elem.beginPrimitiveOffset * 3;
 			break;
 		default:
-			vertexNumInGeom = -1;
+			assert(0);
 			break;
 		}
 
@@ -296,20 +303,23 @@ namespace RCP
 
 		if (mPrimitiveVector.capacity() < elem.primitiveCount + mPrimitiveVector.size())
 			mPrimitiveVector.reserve(elem.primitiveCount + mPrimitiveVector.size());
+		Primitive* pri = NULL;
 		for (unsigned int i = 0; i < elem.primitiveCount; ++i)
 		{
 			mPrimitiveVector.push_back(Primitive());
-			mPrimitiveVector[i].type = type;
-			memcpy(mPrimitiveVector[i].tex, elem.texture,sizeof(Texture*) * 8);
+			pri = &*mPrimitiveVector.rbegin();
+			pri->type = type;
+			pri->vp = &elem.viewport;
+			memcpy(pri->tex, elem.texture,sizeof(Texture*) * 8);
 			for (unsigned int j = 0; j < vertexNumInGeom; ++j)
 			{
 				if (ib != NULL)
 				{
-					mPrimitiveVector[i].vertex[j] = verVec[(*ib)[skipVertexCount + i*vertexNumInGeom + j]];
+					pri->vertex[j] = verVec[(*ib)[skipVertexCount + i*vertexNumInGeom + j]];
 				}
 				else
 				{
-					mPrimitiveVector[i].vertex[j] = verVec[skipVertexCount + i*vertexNumInGeom + j];
+					pri->vertex[j] = verVec[skipVertexCount + i*vertexNumInGeom + j];
 				}
 			}
 				
@@ -320,6 +330,10 @@ namespace RCP
 	{
 		if (prim.type != Primitive::TRIANGLE)
 			return true;
+		
+		
+		//临时
+		return true;
 
 		const Vector4& pos0 = prim.vertex[0].pos;
 		const Vector4& pos1 = prim.vertex[1].pos;
@@ -364,6 +378,48 @@ namespace RCP
 	
 	}
 
+	void DefaultPipeline::afterCliping(Primitive& prim)
+	{
+		if (prim.type == Primitive::ERROR)
+			return;
+
+		unsigned int num = 0;
+		switch(prim.type)
+		{
+		case Primitive::POINT:
+			num = 1;
+			break;
+		case Primitive::LINE:
+			num = 2;
+			break;
+		case Primitive::TRIANGLE:
+			num = 3;
+			break;
+		default:
+			assert(0);
+		}
+
+		for (unsigned int i= 0; i < num; ++i)
+		{
+			homogeneousDivide(prim.vertex[i].pos);
+			viewportMapping(prim.vertex[i].pos,prim.vp);			
+		}
+		mRasterizer.pushPrimitive(prim);
+
+	}
+
+	void DefaultPipeline::homogeneousDivide(Vector4& pos)
+	{
+		pos /= pos.w;
+	}
+
+	void DefaultPipeline::viewportMapping(Vector4& pos,const Viewport* vp)
+	{
+		vp->mapping(pos);
+	}
+
+
+
 
 	template<class T>
 	void DefaultPipeline::Interpolate(T& result, const T& vec1, const T& vec2, float scale)
@@ -400,6 +456,8 @@ namespace RCP
 
 	bool DefaultPipeline::checkPointInScreen(const Vector4& point)
 	{
+		//临时
+		return true;
 		if ( /*fabs(point.x ) > point.w ||
 			fabs(point.y ) > point.w ||
 			point.z > point.w ||*/

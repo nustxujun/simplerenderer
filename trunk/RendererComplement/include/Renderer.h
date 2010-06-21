@@ -6,6 +6,7 @@
 #include "Matrix4X4.h"
 #include "Material.h"
 #include "Light.h"
+#include "Viewport.h"
 
 
 
@@ -48,6 +49,7 @@ namespace RCP
 		void setMatrix(TransformStateType type,const Matrix4X4& mat);
 		void setPaintingMethod(PaintingMethod* pm);
 		void setLight(unsigned int index,const Light& l);
+		void setViewport(const Viewport& vp);
 
 	private:
 		bool mIsInitialized;
@@ -81,6 +83,8 @@ namespace RCP
 		Matrix4X4 mMatrices[TS_BASALNUM];
 		//╣ф╧Б
 		Light mLight[8];
+		//йс©з
+		Viewport mViewport;
 	};
 }
 

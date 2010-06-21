@@ -122,18 +122,9 @@ namespace RCP
 			return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
 		}
 
-		inline float absDotProduct(const Vector4& vec) const
-		{
-			return fabs(x * vec.x + y * vec.y + z * vec.z + w * vec.w);
-		}
-
 		float x,y,z,w;
 	};
 
-
-
-	
-	typedef Vector4 Vector3;
 	typedef Vector4 Vector2;
 }
 #endif//_Vector4_H_
