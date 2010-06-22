@@ -6,20 +6,23 @@ namespace RCP
 	const float EPSLON = 0.1f;
 
 	Rasterizer::Rasterizer():
-		mTempBuffer(NULL)
+		mColorBuffer(NULL)
 	{
 	
 	}
 
 	Rasterizer::~Rasterizer()
 	{
-		SAFE_DELETE(mTempBuffer);
+		SAFE_DELETE(mColorBuffer);
+		SAFE_DELETE(mZBuffer);
 	}
 
 	void Rasterizer::initialize(unsigned int width, unsigned int height, PixelFormat pf)
 	{
 		//unsigned int colourDepth = PixelUtil::getNumElemBytes(pf);
-		//mTempBuffer = new RenderTarget(width, height, colourDepth);
+		//mColorBuffer = new RenderTarget(width, height, colourDepth);
+		//z buffer应float32 恩
+		mZBuffer = new RenderTarget(width,height,4);
 	}
 
 	void Rasterizer::pushPrimitive(const Primitive& pri)
@@ -97,6 +100,7 @@ namespace RCP
 			newVertex.pos.y = resultPri.vertex[1].pos.y;
 			interpolate(newVertex.norm,ratio,resultPri.vertex[0].norm,resultPri.vertex[2].norm);
 			interpolate(newVertex.color,ratio,resultPri.vertex[0].color,resultPri.vertex[2].color);
+			interpolate(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
 			for (unsigned int i = 0; i < 8 ; ++i)
 				if (pri.tex[i] != NULL)//有纹理的话
 					interpolate(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
@@ -137,14 +141,23 @@ namespace RCP
 		}
 	}
 
+	void Rasterizer::clear()
+	{
+		if (mZBuffer)
+		{
+		
+		}
+	}
+
 	void Rasterizer::flush(RenderTarget* target)
 	{
 		////target大小必須與初始化的時候一樣。，當然，其實小點也無所謂，不過懶得區別了
-		//assert( mTempBuffer->getWidth() == target->getWidth() && 
-		//		mTempBuffer->getHeight() == target->getHeight() &&
-		//		mTempBuffer->getColourDepth() == target->getColourDepth() );
+		//assert( mColorBuffer->getWidth() == target->getWidth() && 
+		//		mColorBuffer->getHeight() == target->getHeight() &&
+		//		mColorBuffer->getColourDepth() == target->getColourDepth() );
 
-		mTempBuffer = target;
+		clear();
+		mColorBuffer = target;
 
 		PrimitiveVector::iterator i,endi = mPrimitiveVector.end();
 		for (i = mPrimitiveVector.begin(); i != endi; ++i)
@@ -167,7 +180,7 @@ namespace RCP
 			//copyToTarget(target);
 			//clear();
 		}
-		mTempBuffer = NULL;
+		mColorBuffer = NULL;
 		mPrimitiveVector.clear();
 
 	}
@@ -209,6 +222,8 @@ namespace RCP
 			interpolate(point2.color,ratio2,pri.vertex[1 - offset].color,pri.vertex[2].color);
 			interpolate(point1.norm,ratio1,pri.vertex[0].norm,pri.vertex[2 - offset].norm);
 			interpolate(point2.norm,ratio2,pri.vertex[1 - offset].norm,pri.vertex[2].norm);
+			interpolate(point1.specular,ratio1,pri.vertex[0].specular,pri.vertex[2 - offset].specular);
+			interpolate(point2.specular,ratio2,pri.vertex[1 - offset].specular,pri.vertex[2].specular);
 
 			for (unsigned int i = 0; i < 8; ++i)
 				if (pri.tex[i] != NULL)
@@ -227,6 +242,7 @@ namespace RCP
 				ratio3 = (x - point1.pos.x) / (point2.pos.x -  point1.pos.x);
 				//颜色
 				interpolate(point3.color, ratio3,point1.color,point2.color);
+				interpolate(point3.specular, ratio3,point1.specular,point2.specular);
 				
 				//需要z 
 				interpolate(point3.z, ratio3,point1.pos.z,point2.pos.z);	
@@ -251,20 +267,42 @@ namespace RCP
 		
 	}
 
+	size_t getBufferPos(unsigned int x, unsigned int y, unsigned int width, unsigned int colorDepth)
+	{
+		return (x + y * width) * colorDepth;
+	}
+
 	void Rasterizer::drawImpl(const Pixel& p)
 	{
 		if (!colorTest(p))
 			return;
 
 		unsigned int color;
-		color = p.color.get32BitARGB();
-		size_t pos = (p.x + p.y * mTempBuffer->getWidth()) * mTempBuffer->getColourDepth();
-		mTempBuffer->seek(pos);
-		mTempBuffer->write(&color,sizeof(color));
+		color = (p.color + p.specular).clip().get32BitARGB();
+		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mColorBuffer->getColourDepth());
+		mColorBuffer->seek(pos);
+		mColorBuffer->write(&color,sizeof(color));
+		//zbuffer
+		pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mZBuffer->getColourDepth());
+		mZBuffer->seek(pos);
+		//其实已经确定好是float.....还要查询有点多余
+		mZBuffer->write(&p.z,mZBuffer->getColourDepth());
+	}
+
+	bool Rasterizer::depthTest(const Pixel& p)
+	{
+		float z = 0;
+		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mZBuffer->getColourDepth());
+		mZBuffer->seek(pos);
+		mZBuffer->read(&z,sizeof (z));
+		return p.z < z;
+
 	}
 
 	bool Rasterizer::colorTest(const Pixel& p)
 	{
+		if (!depthTest(p))
+			return false;
 		return true;
 	}
 
@@ -288,7 +326,7 @@ namespace RCP
 
 	void Rasterizer::clear()
 	{
-		memset(mTempBuffer->getData(),0,mTempBuffer->getSizeInBytes());
+		memset(mColorBuffer->getData(),0,mColorBuffer->getSizeInBytes());
 	}
 
 

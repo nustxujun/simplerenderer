@@ -105,12 +105,12 @@ namespace RCP
 		//const unsigned char* end = vb->getData() + dataSize;
 		Matrix4X4 transMat;
 		float weight[4] = {1,0,0,0};
-		Colour diffuse,specular,diffuseBlend,specularBlend;
+		Colour diffuse,specular,ambient, diffuseBlend,specularBlend, ambientBlend;
 		float power;
 		bool enable = false;
-		Vector3 normVec;
 		Vector3 posVec;
 		Vector4 posVec4;
+		Vector3 H,L,V,lightPos;
 		for (size_t i = 0; i < vb->getVertexCount(); ++i)
 		{
 			//定位頂點position
@@ -146,7 +146,7 @@ namespace RCP
 				elem.matWorld[TS_WORLD3] * weight[2] + 
 				elem.matWorld[TS_WORLD4] * weight[3];
 			//矩阵变换
-			posVec4 =  transMat * posVec4 ;//* elem.matWorld[TS_PROJECTION]  ;
+			posVec4 = elem.matWorld[TS_VIEW] *( transMat * posVec4 );//* elem.matWorld[TS_PROJECTION]  ;
 			
 			//记录下变换前的坐标 进行光照计算
 			posVec.x = posVec4.x;
@@ -154,7 +154,7 @@ namespace RCP
 			posVec.z = posVec4.z;
 
 			//继续变换
-			posVec4 = elem.matWorld[TS_PROJECTION] * (elem.matWorld[TS_VIEW] * posVec4);
+			posVec4 = elem.matWorld[TS_PROJECTION] *  posVec4;
 
 			//記錄下頂點的坐标
 			verVec[i].pos = posVec4;	
@@ -164,6 +164,7 @@ namespace RCP
 			diffuse = elem.material.diffuse;
 			specular = elem.material.specular;
 			power = elem.material.power;
+			ambient = elem.material.ambient;
 			if (diffuseDataOffset != -1 && elem.material.isDiffuseVertexColorEnable())
 			{
 				if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 4)
@@ -208,31 +209,43 @@ namespace RCP
 
 			//光照计算
 			diffuseBlend.getFromABGR(0);
-			specular.getFromABGR(0);
+			specularBlend.getFromABGR(0);
+			ambientBlend.getFromABGR(0);
 			enable = false;
 			for (unsigned int index = 0; index < 8; ++index)
 			{
 				if (!elem.light[index].isEnable())
 					continue;
 				enable = true;
-				normVec = elem.light[index].position - posVec;
-				normVec.normalise();
+				
+				lightPos = elem.matWorld[TS_VIEW] * elem.light[index].position;
+				L = lightPos - posVec;
+				L.normalise();
+				V = - posVec;
+				V.normalise();
+				H = L + V;
+				H.normalise();
 				diffuseBlend += elem.light[index].diffuse * 
-					std::max<float>(0,verVec[i].norm.dotProduct(normVec));
+					std::max<float>(0,verVec[i].norm.dotProduct(L));
+
+				specularBlend += elem.light[index].specular * pow(std::max<float>(0,H.dotProduct(verVec[i].norm)),power);
+				ambientBlend += elem.light[index].ambient;
 			}
 
 			//如果使用了灯光。
 			if (enable)
 			{
-				diffuseBlend.r = diffuseBlend.r > 1? 1: diffuseBlend.r;
-				diffuseBlend.g = diffuseBlend.g > 1? 1: diffuseBlend.g;
-				diffuseBlend.b = diffuseBlend.b > 1? 1: diffuseBlend.b;
-				diffuseBlend.a = diffuseBlend.a > 1? 1: diffuseBlend.a;
-
 				diffuse = diffuse * diffuseBlend;
+				ambient = ambient * ambientBlend;
+				specular = specular * specularBlend;
+
+				//diffuse.clip();
+				//ambient.clip();
+				//specular.clip();
 			}
 			//temp
-			verVec[i].color = diffuse;
+			verVec[i].color = diffuse + ambient;
+			verVec[i].specular = specular;
 			
 
 			//纹理坐标
@@ -444,6 +457,7 @@ namespace RCP
 		float scale = length2/length1;
 
 		Interpolate(newVertex.color,vert1.color,vert2.color,scale);
+		Interpolate(newVertex.specular,vert1.specular,vert2.specular,scale);
 		Interpolate(newVertex.norm,vert1.norm,vert2.norm,scale);
 		Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
 		for (unsigned int i = 0 ; i < 8; ++i)

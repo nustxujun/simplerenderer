@@ -206,6 +206,23 @@ namespace RCP
 			return *this;
 		}
 
+		inline const Colour& clip()
+		{
+			a = a> 1?1:a;
+			a = a<0?0:a;
+
+			r = r> 1?1:r;
+			r = r<0?0:r;
+
+			g = g> 1?1:g;
+			g = g<0?0:g;
+
+			b = b> 1?1:b;
+			b = b<0?0:b;
+
+			return *this;
+		}
+
 
 
 
