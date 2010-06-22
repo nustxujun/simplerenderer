@@ -11,7 +11,7 @@ namespace RCP
 	public:
 		~IndexBuffer();
 		void addIndex(unsigned int vertexIndex,unsigned int pos = -1);
-		void addIndex(unsigned int count,unsigned int* indexData);
+		void addIndex(unsigned int count,unsigned int numBytesPerIndex,const void* indexData);
 		const size_t getIndexCount()const;
 		unsigned int operator [](unsigned int index)const;
 	private :

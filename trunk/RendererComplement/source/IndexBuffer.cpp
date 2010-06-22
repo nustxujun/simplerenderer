@@ -32,12 +32,16 @@ namespace RCP
 		}
 	}
 
-	void IndexBuffer::addIndex(unsigned int count,unsigned int* indexData)
+	void IndexBuffer::addIndex(unsigned int count,unsigned int numBytesPerIndex,const void* indexData)
 	{
-
+		unsigned int index ;
+		const char* data = (const char*)indexData;
 		for (unsigned int i = 0; i <  count; ++i)
 		{
-			mIndexList.push_back(indexData[i]);
+			index = 0;
+			memcpy(&index,data,numBytesPerIndex);
+			mIndexList.push_back(index);
+			data = data + numBytesPerIndex;
 				
 		}
 	}
