@@ -80,7 +80,6 @@ namespace RCP
 		void pushPrimitive(const Primitive& pri);
 		void flush(RenderTarget* target);
 
-		void clear();
 
 		template<class T>
 		void interpolate(T& output,float input0, float input1, float inputx, const T& value0, const T& value1);
@@ -102,7 +101,7 @@ namespace RCP
 		inline unsigned int ceil(float a)
 		{
 			int i = (int)a;
-			if (a > i +0.01)
+			if (a > i +0.0001)
 				return i + 1;
 			else
 				return i;
@@ -117,7 +116,7 @@ namespace RCP
 		bool colorTest(const Pixel& p);
 		bool scissorTest(const Pixel& p);
 		bool alphaTest(const Pixel& p);
-		bool depthTest(const pixel& p);
+		bool depthTest(const Pixel& p);
 
 
 		Vector4 addressTex(const Texture* tex,float u,float v);

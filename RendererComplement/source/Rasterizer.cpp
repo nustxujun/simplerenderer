@@ -145,7 +145,13 @@ namespace RCP
 	{
 		if (mZBuffer)
 		{
-		
+			float value = 1.f;
+			unsigned int num = mZBuffer->getWidth() * mZBuffer->getHeight();
+			mZBuffer->seek(0);
+			for (unsigned int i = 0; i < num; ++i)
+			{
+				mZBuffer->write(&value,sizeof(float));
+			}
 		}
 	}
 
@@ -267,7 +273,7 @@ namespace RCP
 		
 	}
 
-	size_t getBufferPos(unsigned int x, unsigned int y, unsigned int width, unsigned int colorDepth)
+	size_t Rasterizer::getBufferPos(unsigned int x, unsigned int y, unsigned int width, unsigned int colorDepth)
 	{
 		return (x + y * width) * colorDepth;
 	}
@@ -323,12 +329,6 @@ namespace RCP
 		assert(tex);
 		return Vector4(255,255,255,255);
 	}
-
-	void Rasterizer::clear()
-	{
-		memset(mColorBuffer->getData(),0,mColorBuffer->getSizeInBytes());
-	}
-
 
 
 
