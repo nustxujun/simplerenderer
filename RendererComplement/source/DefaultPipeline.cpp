@@ -109,8 +109,8 @@ namespace RCP
 		float power;
 		bool enable = false;
 		Vector3 posVec;
-		Vector4 posVec4;
-		Vector3 H,L,V,lightPos;
+		Vector4 posVec4,normVec4;
+		Vector3 H,L,V,lightPos,normVec3;
 		for (size_t i = 0; i < vb->getVertexCount(); ++i)
 		{
 			//定位頂點position
@@ -225,10 +225,18 @@ namespace RCP
 				V.normalise();
 				H = L + V;
 				H.normalise();
-				diffuseBlend += elem.light[index].diffuse * 
-					std::max<float>(0,verVec[i].norm.dotProduct(L));
+				normVec4 = verVec[i].norm;
+				//normal的话只需要旋转方向，注意这里有个隐藏操作是normVec3.w设为了0，不是1
+				normVec4 = elem.matWorld[TS_VIEW] *  normVec4;
+				normVec3.x = normVec4.x;
+				normVec3.y = normVec4.y;
+				normVec3.z = normVec4.z;
 
-				specularBlend += elem.light[index].specular * pow(std::max<float>(0,H.dotProduct(verVec[i].norm)),power);
+				diffuseBlend += elem.light[index].diffuse * 
+					std::max<float>(0,normVec3.dotProduct(L));
+
+				specularBlend += elem.light[index].specular * 
+					pow(std::max<float>(0,H.dotProduct(normVec3)),power);
 				ambientBlend += elem.light[index].ambient;
 			}
 
@@ -341,12 +349,10 @@ namespace RCP
 
 	bool DefaultPipeline::culling(const Primitive& prim)
 	{
+		return true;
 		if (prim.type != Primitive::TRIANGLE)
 			return true;
 		
-		
-		//临时
-		return true;
 
 		const Vector4& pos0 = prim.vertex[0].pos;
 		const Vector4& pos1 = prim.vertex[1].pos;
@@ -442,24 +448,29 @@ namespace RCP
 
 	void DefaultPipeline::generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2,const Vector4& plane)
 	{
-		Vector4 pos1(vert1.pos.x/vert1.pos.w, vert1.pos.y/vert1.pos.w, vert1.pos.z/vert1.pos.w,1);
-		Vector4 pos2(vert2.pos.x/vert2.pos.w, vert2.pos.y/vert2.pos.w, vert2.pos.z/vert2.pos.w,1);
-		Vector4 normal(plane.x, plane.y, plane.z,0);
+		Vector3 pos1(vert1.pos.x/vert1.pos.w, vert1.pos.y/vert1.pos.w, vert1.pos.z/vert1.pos.w);
+		Vector3 pos2(vert2.pos.x/vert2.pos.w, vert2.pos.y/vert2.pos.w, vert2.pos.z/vert2.pos.w);
+		Vector3 normal(plane.x, plane.y, plane.z);
 
 		float dist1 = fabs(pos1.dotProduct( normal) + plane.w);
 		float dist2 = fabs(pos2.dotProduct( normal) + plane.w);
 
-		Vector4 result = pos1 - pos2;
-		float length1 = sqrt(result.dotProduct( result));
+		Vector3 result = pos1 - pos2;
+		float length1 = result.length();
 
 		float length2 = dist1 * length1 / (dist1 + dist2) ;
 
-		float scale = length2/length1;
+		float scale = length1/length2;
 
 		Interpolate(newVertex.color,vert1.color,vert2.color,scale);
 		Interpolate(newVertex.specular,vert1.specular,vert2.specular,scale);
 		Interpolate(newVertex.norm,vert1.norm,vert2.norm,scale);
-		Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
+		//Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
+		Interpolate(normal,pos1,pos2,scale);
+		newVertex.pos = normal;
+		newVertex.pos.w = 1;
+		
+	
 		for (unsigned int i = 0 ; i < 8; ++i)
 		{
 			Interpolate(newVertex.texCrood[i],vert1.texCrood[i],vert2.texCrood[i],scale);
@@ -470,12 +481,9 @@ namespace RCP
 
 	bool DefaultPipeline::checkPointInScreen(const Vector4& point)
 	{
-		//临时
-		return true;
-		if ( /*fabs(point.x ) > point.w ||
+		if ( fabs(point.x ) > point.w ||
 			fabs(point.y ) > point.w ||
-			point.z > point.w ||*/
-			point.z <= 0
+			fabs(point.z )  > point.w 
 			)
 			return false;
 		return true;
@@ -540,23 +548,25 @@ namespace RCP
 		//生成新的图元（已经cull了就无所谓了顺序了）
 		if (reserveCount == 2)//2个点在里面
 		{
-			prims[0].type = prim.type;
+			prims[0] = prim;
+
 			prims[0].vertex[0] = prim.vertex[reserveIndex[0]];
 			prims[0].vertex[1] = prim.vertex[reserveIndex[1]];
 
 			generateNewVertex(prims[0].vertex[2],prim.vertex[disusedIndex[0]],
 				prim.vertex[reserveIndex[0]],mPlane[5]);
 
-			prims[1].type = prim.type;
+			prims[1] = prim;
 			prims[1].vertex[0] = prim.vertex[reserveIndex[1]];
-			prims[1].vertex[0] = prims[0].vertex[2];//新点
+			prims[1].vertex[1] = prims[0].vertex[2];//新点
 
-			generateNewVertex(prims[0].vertex[2],prim.vertex[disusedIndex[0]],
+			generateNewVertex(prims[1].vertex[2],prim.vertex[disusedIndex[0]],
 				prim.vertex[reserveIndex[1]],mPlane[5]);
 		}
 		else//两个顶点在外面
 		{
-			prims[0].type = prim.type;
+			prims[0] = prim;
+
 			prims[0].vertex[0] = prim.vertex[reserveIndex[0]];
 
 			generateNewVertex(prims[0].vertex[1],prim.vertex[disusedIndex[0]],

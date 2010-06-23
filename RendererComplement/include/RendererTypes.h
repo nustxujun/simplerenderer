@@ -84,7 +84,7 @@ namespace RCP
 
 	struct RenderState
 	{
-	
+		bool alphaTestEnable;
 	};
 
 	struct TexutureState

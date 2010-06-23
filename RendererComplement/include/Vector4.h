@@ -30,6 +30,17 @@ namespace RCP
 
 			return *this;
 		}
+
+		inline Vector4& operator = ( const Vector3& rkVector )
+		{
+			x = rkVector.x;
+			y = rkVector.y;
+			z = rkVector.z;
+			w = 0.f;
+
+			return *this;
+		}
+
 		inline bool operator == ( const Vector4& rkVector ) const
 		{
 			return ( x == rkVector.x &&

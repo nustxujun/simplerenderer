@@ -15,14 +15,14 @@ namespace RCP
 		mData = new MemoryBuffer(data,size);
 	}
 
-	void VertexBuffer::fill(unsigned int vertexIndex,void* vertexData)
+	void VertexBuffer::fill(unsigned int vertexIndex, const void* vertexData)
 	{
 		unsigned int vertexSize = mDeclaration.getSizeInBytes();
 		mData->seek(vertexIndex * vertexSize);
 		mData->write(vertexData,vertexSize);
 	}
 
-	void VertexBuffer::fill(unsigned int beginIndex,unsigned int vertexCount,void* vertexData)
+	void VertexBuffer::fill(unsigned int beginIndex,unsigned int vertexCount, const void* vertexData)
 	{
 		unsigned int vertexSize = mDeclaration.getSizeInBytes();
 		mData->seek(beginIndex *  vertexSize);
