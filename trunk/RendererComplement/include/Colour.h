@@ -206,7 +206,7 @@ namespace RCP
 			return *this;
 		}
 
-		inline const Colour& clip()
+		inline const Colour& clamp()
 		{
 			a = a> 1?1:a;
 			a = a<0?0:a;

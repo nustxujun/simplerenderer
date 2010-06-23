@@ -34,6 +34,7 @@ namespace RCP
 
 	void IndexBuffer::addIndex(unsigned int count,unsigned int numBytesPerIndex,const void* indexData)
 	{
+		assert(numBytesPerIndex <= 4);
 		unsigned int index ;
 		const char* data = (const char*)indexData;
 		for (unsigned int i = 0; i <  count; ++i)

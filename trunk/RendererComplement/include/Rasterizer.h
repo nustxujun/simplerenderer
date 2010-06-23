@@ -113,7 +113,7 @@ namespace RCP
 		void drawImpl(const Pixel& p);
 
 		size_t getBufferPos(unsigned int x, unsigned int y, unsigned int width, unsigned int colorDepth);
-		bool colorTest(const Pixel& p);
+		bool pixelTest(const Pixel& p);
 		bool scissorTest(const Pixel& p);
 		bool alphaTest(const Pixel& p);
 		bool depthTest(const Pixel& p);
@@ -127,6 +127,8 @@ namespace RCP
 
 		RenderTarget* mColorBuffer;
 		RenderTarget* mZBuffer;
+		Vector4 mScissorRect;
+		float mAlphaRef;
 
 		typedef std::vector<Primitive> PrimitiveVector;
 		PrimitiveVector mPrimitiveVector;

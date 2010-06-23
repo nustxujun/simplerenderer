@@ -47,9 +47,9 @@ namespace RCP
 	public:
 		~VertexBuffer();
 		//ÌîÒ»‚€í”üc
-		void fill(unsigned int vertexIndex,void* vertexData);
+		void fill(unsigned int vertexIndex,const void* vertexData);
 		//Ìî¶à‚€í”üc
-		void fill(unsigned int beginIndex,unsigned int vertexCount,void* vertexData);
+		void fill(unsigned int beginIndex,unsigned int vertexCount,const void* vertexData);
 
 		const unsigned char* getData()const;
 		size_t getDataSizeInBytes()const;

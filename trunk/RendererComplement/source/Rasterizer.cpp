@@ -23,6 +23,8 @@ namespace RCP
 		//mColorBuffer = new RenderTarget(width, height, colourDepth);
 		//z bufferÓ¦float32 ¶÷
 		mZBuffer = new RenderTarget(width,height,4);
+		mScissorRect= Vector4(0,0,(float)width,(float)height);
+		mAlphaRef = 0;
 	}
 
 	void Rasterizer::pushPrimitive(const Primitive& pri)
@@ -280,11 +282,11 @@ namespace RCP
 
 	void Rasterizer::drawImpl(const Pixel& p)
 	{
-		if (!colorTest(p))
+		if (!pixelTest(p))
 			return;
 
 		unsigned int color;
-		color = (p.color + p.specular).clip().get32BitARGB();
+		color = (p.color + p.specular).clamp().get32BitARGB();
 		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mColorBuffer->getColourDepth());
 		mColorBuffer->seek(pos);
 		mColorBuffer->write(&color,sizeof(color));
@@ -305,8 +307,25 @@ namespace RCP
 
 	}
 
-	bool Rasterizer::colorTest(const Pixel& p)
+	bool Rasterizer::scissorTest(const Pixel& p)
 	{
+		if (p.x < mScissorRect.x || p.x > mScissorRect.z ||
+			p.y < mScissorRect.y || p.y > mScissorRect.w)
+			return false;
+		return true;
+	}
+
+	bool Rasterizer::alphaTest(const Pixel& p)
+	{
+		return mAlphaRef < p.color.a;
+	}
+
+	bool Rasterizer::pixelTest(const Pixel& p)
+	{
+		if (!scissorTest(p))
+			return false;
+		if (!alphaTest(p))
+			return false;
 		if (!depthTest(p))
 			return false;
 		return true;
