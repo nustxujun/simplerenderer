@@ -317,7 +317,7 @@ namespace RCP
 
 	bool Rasterizer::alphaTest(const Pixel& p)
 	{
-		return mAlphaRef < p.color.a;
+		return mAlphaRef <= p.color.a;
 	}
 
 	bool Rasterizer::pixelTest(const Pixel& p)

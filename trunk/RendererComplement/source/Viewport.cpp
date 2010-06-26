@@ -24,8 +24,8 @@ namespace RCP
 		assert(pos.z >= -1 && pos.z <= 1);
 		assert(pos.w < 1.0001 && pos.w > 0.9999);
 		
-		float hw = width / 2.f;
-		float hh = height / 2.f;
+		float hw = width * 0.5f;
+		float hh = height * 0.5f;
 		//因为屏幕坐标是
 		/* 0------------------>
 		   |	        x

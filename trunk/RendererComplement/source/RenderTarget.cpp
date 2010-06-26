@@ -8,7 +8,7 @@ namespace RCP
 		mSize = width * height * colourDepth;
 		mPos = mData = new unsigned char[mSize];
 		mEnd = mData + mSize;
-		memset(mData,0xff,mSize);		
+		memset(mData,0,mSize);		
 		setAutoFree(true);
 	}
 
