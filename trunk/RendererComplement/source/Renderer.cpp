@@ -49,7 +49,7 @@ namespace RCP
 		mMaterial = Material::DEFAULT;
 		for (unsigned int i = 0; i < 8 ; ++i)
 			mLight[i].setEnable(false);
-		mViewport = Viewport(0,0, rp.backBufferWidth, rp.backBufferHeight);
+		mViewport = Viewport(0,0, rp.backBufferWidth, rp.backBufferHeight,0.f,1.f);
 
 		mIsInitialized = true;
 	}

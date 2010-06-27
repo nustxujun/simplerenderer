@@ -9,13 +9,14 @@ namespace RCP
 	{
 	public:
 		Viewport();
-		Viewport(unsigned int X, unsigned int Y, unsigned int W, unsigned int H);
+		Viewport(unsigned int X, unsigned int Y, unsigned int W, unsigned int H, float ZMin, float ZMax);
 		~Viewport();
 
 		unsigned int x ;
 		unsigned int y ;
 		unsigned int width;
 		unsigned int height;
+		float zMax,zMin;
 
 		void mapping(Vector4& pos)const ;
 	};
