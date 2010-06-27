@@ -5,12 +5,12 @@ namespace RCP
 {
 	DefaultPipeline::DefaultPipeline()
 	{
-		mPlane[0].x =  1;
-		mPlane[1].x = -1;
-		mPlane[2].y =  1;
-		mPlane[3].y = -1;
-		mPlane[4].z =  1;
-		mPlane[5].z = -1;
+		mPlane[0]= Vector4(1,0,0,-1);
+		mPlane[1]= Vector4(-1,0,0,1);
+		mPlane[2]= Vector4(0,1,0,-1);
+		mPlane[3]= Vector4(0,-1,0,1);
+		mPlane[4]= Vector4(0,0,1,-1);
+		mPlane[5]= Vector4(0,0,-1,1);
 	}
 
 	DefaultPipeline::~DefaultPipeline()
@@ -45,24 +45,23 @@ namespace RCP
 			primitiveAssembly(*i,*verIter);
 		}
 
+		Primitive priResult[5] ;
+
 		PrimitiveVector::iterator priIter, priEndIter = mPrimitiveVector.end();
-		Primitive priResult[2];
 		for (priIter = mPrimitiveVector.begin(); priIter != priEndIter; ++priIter)
 		{
 			//返回true则说明通过，false则剔除
 			 if ((*priIter).type == Primitive::ERROR  || !culling(*priIter) )
 				 continue;
+			 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
 			 cliping(*priIter,priResult);
+
 			 //产生的clip新结果插入
-			 for (unsigned int k = 0; k < 2; ++k)
+			 for ( int k = 0; k < 5; ++k)
 			 {
-				 //这里将进行
-				 //齐次坐标归一（透视除法。。。怎么这么多名字）
-				 //视口映射
-				 afterCliping(priResult[k]);
+				 rasterize(priResult[k]);
 				 priResult[k].type = Primitive::ERROR;
 			 }
-
 			 
 		}
 
@@ -368,7 +367,7 @@ namespace RCP
 		
 	}
 
-	void DefaultPipeline::cliping(const Primitive& prim,Primitive prims[2])
+	void DefaultPipeline::cliping(const Primitive& prim,Primitive prims[5])
 	{
 		switch (prim.type)
 		{
@@ -397,7 +396,7 @@ namespace RCP
 	
 	}
 
-	void DefaultPipeline::afterCliping(Primitive& prim)
+	void DefaultPipeline::rasterize(Primitive& prim)
 	{
 		if (prim.type == Primitive::ERROR)
 			return;
@@ -418,11 +417,6 @@ namespace RCP
 			assert(0);
 		}
 
-		for (unsigned int i= 0; i < num; ++i)
-		{
-			homogeneousDivide(prim.vertex[i].pos);
-			viewportMapping(prim.vertex[i].pos,prim.vp);			
-		}
 		mRasterizer.pushPrimitive(prim);
 
 	}
@@ -446,29 +440,17 @@ namespace RCP
 		result = (vec2 - vec1) * scale + vec1;
 	}
 
-	void DefaultPipeline::generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2,const Vector4& plane)
+	void DefaultPipeline::generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2, float dist1, float dist2)
 	{
-		Vector3 pos1(vert1.pos.x/vert1.pos.w, vert1.pos.y/vert1.pos.w, vert1.pos.z/vert1.pos.w);
-		Vector3 pos2(vert2.pos.x/vert2.pos.w, vert2.pos.y/vert2.pos.w, vert2.pos.z/vert2.pos.w);
-		Vector3 normal(plane.x, plane.y, plane.z);
 
-		float dist1 = fabs(pos1.dotProduct( normal) + plane.w);
-		float dist2 = fabs(pos2.dotProduct( normal) + plane.w);
 
-		Vector3 result = pos1 - pos2;
-		float length1 = result.length();
-
-		float length2 = dist1 * length1 / (dist1 + dist2) ;
-
-		float scale = length1/length2;
+		float scale = (0 - dist1) / (dist2 - dist1);
 
 		Interpolate(newVertex.color,vert1.color,vert2.color,scale);
 		Interpolate(newVertex.specular,vert1.specular,vert2.specular,scale);
 		Interpolate(newVertex.norm,vert1.norm,vert2.norm,scale);
-		//Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
-		Interpolate(normal,pos1,pos2,scale);
-		newVertex.pos = normal;
-		newVertex.pos.w = 1;
+		Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
+
 		
 	
 		for (unsigned int i = 0 ; i < 8; ++i)
@@ -509,73 +491,107 @@ namespace RCP
 		resultPrim.vertex[0] = point1?prim.vertex[0]:prim.vertex[1];
 
 		//暂时只考虑nearPlane的情况
-		generateNewVertex(resultPrim.vertex[1],prim.vertex[0],prim.vertex[1],mPlane[5]);
+		//generateNewVertex(resultPrim.vertex[1],prim.vertex[0],prim.vertex[1],mPlane[5]);
 
 	}
 
-	void DefaultPipeline::clipingTriangle(const Primitive& prim,Primitive prims[2])
+	void DefaultPipeline::clipingTriangle(const Primitive& prim,Primitive prims[5])
 	{
-		int reserveIndex[3];
-		int disusedIndex[3];
 
-		unsigned int reserveCount = 0;
-		unsigned int disusedCount = 0;
+		//2组顶点，一组裁剪前一组裁剪后，交替使用
+		//三角形最多被3个面裁剪，生成6个顶点,特殊情况是，再多包含一个两个面的交点 也就是7个点
+		Vertex vertices[2][7];
+		//2组顶点的数量
+		int numVertices[2];
+		//使用的顶点下标
+		int beforeClip = 0;
+		int afterClip = 1;
 
-		bool points[3] ;
-		points[0] = checkPointInScreen(prim.vertex[0].pos);
-		points[1] = checkPointInScreen(prim.vertex[1].pos);
-		points[2] = checkPointInScreen(prim.vertex[2].pos);
+		float d1,d2;
 
-		if (points[0] && points[1] && points[2])
+		for (int i =0; i < 3; ++i)
 		{
-			prims[0] = prim; 
-			return;
+			vertices[beforeClip][i] = prim.vertex[i];
 		}
-		else if (!points[0] && !points[1] && !points[2])
+		numVertices[beforeClip] = 3;
+
+		int numPlane = 6;
+		for(int plane = 0; plane < numPlane; ++plane)
 		{
-			return;
-		}
+			//全部被裁剪
+			if (numVertices[beforeClip] == 0)
+				return;
 
-		//为顶点分组
-		for (unsigned int i = 0; i < 3 ; ++i)
+			numVertices[afterClip]= 0;
+
+			//先把第一个顶点的dist算出来，后面每向后移一位就把之前的d2给d1以减少计算
+			d1 = vertices[beforeClip][0].pos.dotProduct(mPlane[plane]);
+			
+			for (int i = 0,j= 1;i < numVertices[beforeClip]; ++i,j = (i+1) % numVertices[beforeClip])
+			{
+				d2 = vertices[beforeClip][j].pos.dotProduct(mPlane[plane]);
+
+				if (d1 >= 0.0f)
+				{
+					vertices[afterClip][numVertices[afterClip]] = vertices[beforeClip][i];
+					++numVertices[afterClip];
+
+					if (d2 < 0.0f)
+					{
+						//lerp
+						generateNewVertex( vertices[afterClip][numVertices[afterClip]], 
+							vertices[beforeClip][i], vertices[beforeClip][j], d1,d2);
+						++numVertices[afterClip];
+					}
+					else
+					{
+						//没有被裁剪，下轮推入verteices[afterClip]
+					}
+				}
+				else
+				{
+					if (d2 >= 0.0f)
+					{
+						//lerp
+						generateNewVertex( vertices[afterClip][numVertices[afterClip]], 
+							vertices[beforeClip][i], vertices[beforeClip][j], d1,d2);
+						++numVertices[afterClip];
+					}
+					else
+					{
+						//都被裁剪
+					}
+				}
+
+				d1 = d2;
+			
+			}//verteices
+				
+			//交换组
+			(++beforeClip) &= 1; 
+			(++afterClip) &= 1; 
+
+		
+		}//plane
+
+		assert(numVertices[afterClip] < 7);
+
+		//齐次坐标归一（透视除法） & 视口映射
+		for ( int i =0; i < numVertices[afterClip]; ++i)
 		{
-			if (points[i])
-				reserveIndex[reserveCount++] = i;
-			else
-				disusedIndex[disusedCount++] = i;
+			homogeneousDivide(vertices[afterClip][i].pos);
+			viewportMapping(vertices[afterClip][i].pos,prim.vp);
 		}
 
-		//生成新的图元（已经cull了就无所谓了顺序了）
-		if (reserveCount == 2)//2个点在里面
+		//生成新primitive
+		for (int i = 1,j = 0; i < numVertices[afterClip]; ++i,++j )
 		{
-			prims[0] = prim;
-
-			prims[0].vertex[0] = prim.vertex[reserveIndex[0]];
-			prims[0].vertex[1] = prim.vertex[reserveIndex[1]];
-
-			generateNewVertex(prims[0].vertex[2],prim.vertex[disusedIndex[0]],
-				prim.vertex[reserveIndex[0]],mPlane[5]);
-
-			prims[1] = prim;
-			prims[1].vertex[0] = prim.vertex[reserveIndex[1]];
-			prims[1].vertex[1] = prims[0].vertex[2];//新点
-
-			generateNewVertex(prims[1].vertex[2],prim.vertex[disusedIndex[0]],
-				prim.vertex[reserveIndex[1]],mPlane[5]);
-		}
-		else//两个顶点在外面
-		{
-			prims[0] = prim;
-
-			prims[0].vertex[0] = prim.vertex[reserveIndex[0]];
-
-			generateNewVertex(prims[0].vertex[1],prim.vertex[disusedIndex[0]],
-				prim.vertex[reserveIndex[0]],mPlane[5]);
-
-			generateNewVertex(prims[0].vertex[2],prim.vertex[disusedIndex[1]],
-				prim.vertex[reserveIndex[0]],mPlane[5]);
+			prims[j].vertex[0] = vertices[afterClip][0];
+			prims[j].vertex[1] = vertices[afterClip][i];
+			prims[j].vertex[2] = vertices[afterClip][ (i + 1)% numVertices[afterClip] ];
 
 		}
+
 	}
 
 }
