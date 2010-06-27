@@ -5,11 +5,11 @@ namespace RCP
 {
 	DefaultPipeline::DefaultPipeline()
 	{
-		mPlane[0]= Vector4(1,0,0,-1);
+		mPlane[0]= Vector4(1,0,0,1);
 		mPlane[1]= Vector4(-1,0,0,1);
-		mPlane[2]= Vector4(0,1,0,-1);
+		mPlane[2]= Vector4(0,1,0,1);
 		mPlane[3]= Vector4(0,-1,0,1);
-		mPlane[4]= Vector4(0,0,1,-1);
+		mPlane[4]= Vector4(0,0,1,1);
 		mPlane[5]= Vector4(0,0,-1,1);
 	}
 
@@ -586,6 +586,7 @@ namespace RCP
 		//Éú³ÉÐÂprimitive
 		for (int i = 1,j = 0; i < numVertices[afterClip]; ++i,++j )
 		{
+			prims[j] = prim;
 			prims[j].vertex[0] = vertices[afterClip][0];
 			prims[j].vertex[1] = vertices[afterClip][i];
 			prims[j].vertex[2] = vertices[afterClip][ (i + 1)% numVertices[afterClip] ];
