@@ -49,14 +49,14 @@ namespace RCP
 		//返回true则说明通过，false则剔除
 		bool culling(const Primitive& prim);
 		bool checkPointInScreen(const Vector4& point);
-		void generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2,const Vector4& plane);
+		void generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2,float dist1, float dist2);
 		template<class T>
 		inline void Interpolate(T& result, const T& vec1, const T& vec2, float scale);
-		void cliping(const Primitive& prim,Primitive prims[2]);
+		void cliping(const Primitive& prim,Primitive prims[5]);
 		void clipingLine(const Primitive& prim,Primitive& resultPrim);
-		void clipingTriangle(const Primitive& prim,Primitive prims[2]);
+		void clipingTriangle(const Primitive& prim,Primitive prims[5]);
 		
-		void afterCliping(Primitive& prim);
+		void rasterize(Primitive& prim);
 		void homogeneousDivide(Vector4& pos);
 		void viewportMapping(Vector4& pos,const Viewport* vp);
 		
