@@ -217,15 +217,21 @@ namespace RCP
 					continue;
 				enable = true;
 				
-				lightPos = elem.matWorld[TS_VIEW] * elem.light[index].position;
+				//注意这里灯的坐标和法向量都进行了变换。
+				//因为此时要的到顶点指向摄像机的向量需要摄像机坐标，而这里没有提供逆矩阵
+				//于是将法向量和灯变换到摄像机坐标系。
+				//当然法向量的话 还有一个世界坐标系的变换。
+				lightPos = elem.matWorld[TS_VIEW] *(transMat * elem.light[index].position);
 				L = lightPos - posVec;
 				L.normalise();
 				V = - posVec;
 				V.normalise();
 				H = L + V;
 				H.normalise();
+				
+				//注意这里有个隐藏操作是normVec4.w设为了0，不是1
 				normVec4 = verVec[i].norm;
-				//normal的话只需要旋转方向，注意这里有个隐藏操作是normVec3.w设为了0，不是1
+				//normal的话只需要旋转方向
 				normVec4 = elem.matWorld[TS_VIEW] *  normVec4;
 				normVec3.x = normVec4.x;
 				normVec3.y = normVec4.y;
@@ -574,7 +580,7 @@ namespace RCP
 		
 		}//plane
 
-		assert(numVertices[afterClip] < 7);
+		assert(numVertices[afterClip] < 8);
 
 		//齐次坐标归一（透视除法） & 视口映射
 		for ( int i =0; i < numVertices[afterClip]; ++i)
@@ -584,7 +590,8 @@ namespace RCP
 		}
 
 		//生成新primitive
-		for (int i = 1,j = 0; i < numVertices[afterClip]; ++i,++j )
+		int num = numVertices[afterClip] - 1;
+		for (int i = 1,j = 0; i < num; ++i,++j )
 		{
 			prims[j] = prim;
 			prims[j].vertex[0] = vertices[afterClip][0];
