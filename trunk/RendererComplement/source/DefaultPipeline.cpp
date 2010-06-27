@@ -479,31 +479,89 @@ namespace RCP
 
 	void DefaultPipeline::clipingLine(const Primitive& prim,Primitive& resultPrim)
 	{
-		const Vector4& pos1 = prim.vertex[0].pos;
-		const Vector4& pos2 = prim.vertex[1].pos;
+		assert(prim.type == Primitive::LINE);
+		if (!checkPointInScreen(prim.vertex[0].pos) && 
+			!checkPointInScreen(prim.vertex[1].pos))
+			return;
 
-		bool point1 = checkPointInScreen(pos1);
-		bool point2 = checkPointInScreen(pos2);
+		Vertex vertices[2][2];
+		//使用的顶点下标
+		int beforeClip = 0;
+		int afterClip = 1;
 
-		if (point1 && point2)
+		float d1,d2;
+
+		for (int i =0; i < 2; ++i)
 		{
-			resultPrim = prim; 
-			return;
+			vertices[beforeClip][i] = prim.vertex[i];
 		}
-		else if ( !point1 && !point2)
-			return;
 
-		resultPrim.type = prim.type;
-		resultPrim.vertex[0] = point1?prim.vertex[0]:prim.vertex[1];
 
-		//暂时只考虑nearPlane的情况
-		//generateNewVertex(resultPrim.vertex[1],prim.vertex[0],prim.vertex[1],mPlane[5]);
+		int numPlane = 6;
+		for(int plane = 0; plane < numPlane; ++plane)
+		{
+
+			d1 = vertices[beforeClip][0].pos.dotProduct(mPlane[plane]);
+			d2 = vertices[beforeClip][1].pos.dotProduct(mPlane[plane]);
+
+			if (d1 >= 0.0f)
+			{
+				vertices[afterClip][0] = vertices[beforeClip][0];
+				if (d2 < 0.0f)
+				{
+					//lerp
+					generateNewVertex( vertices[afterClip][1], 
+						vertices[beforeClip][0], vertices[beforeClip][1], d1,d2);
+				}
+				else
+				{
+					vertices[afterClip][1] = vertices[beforeClip][1];
+				}
+			}
+			else
+			{
+				if (d2 >= 0.0f)
+				{
+					vertices[afterClip][1] = vertices[beforeClip][1];
+					//lerp
+					generateNewVertex( vertices[afterClip][0], 
+						vertices[beforeClip][0], vertices[beforeClip][1], d1,d2);
+				}
+				else
+				{
+					return;
+					//都被裁剪
+				}
+			}
+				
+			//交换组
+			(++beforeClip) &= 1; 
+			(++afterClip) &= 1; 
+
+		
+		}//plane
+
+
+		//齐次坐标归一（透视除法） & 视口映射
+		for ( int i =0; i < 2; ++i)
+		{
+			homogeneousDivide(vertices[afterClip][i].pos);
+			viewportMapping(vertices[afterClip][i].pos,prim.vp);
+		}
+
+		//生成新primitive
+
+		resultPrim = prim;
+		resultPrim.vertex[0] = vertices[afterClip][0];
+		resultPrim.vertex[1] = vertices[afterClip][1];
+
+	
 
 	}
 
 	void DefaultPipeline::clipingTriangle(const Primitive& prim,Primitive prims[5])
 	{
-
+		assert(prim.type == Primitive::TRIANGLE);
 		//2组顶点，一组裁剪前一组裁剪后，交替使用
 		//三角形最多被3个面裁剪，生成6个顶点,特殊情况是，再多包含一个两个面的交点 也就是7个点
 		Vertex vertices[2][7];
