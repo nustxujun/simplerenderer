@@ -354,7 +354,6 @@ namespace RCP
 
 	bool DefaultPipeline::culling(const Primitive& prim)
 	{
-		return true;
 		if (prim.type != Primitive::TRIANGLE)
 			return true;
 		
