@@ -357,11 +357,12 @@ namespace RCP
 	Colour Rasterizer::addressTex(const Texture* tex,float u,float v)
 	{
 		assert(tex);
+		assert( u < 1.0f && v < 1.0f);
 
 		//ÏÈ²»¹Ümipmap
 		RenderTarget* rt = tex->getRenderTarget(0);
-		size_t pos = getBufferPos( (unsigned int )(rt->getWidth() * u),
-			(unsigned int )(rt->getHeight() * v), rt->getWidth(),rt->getColourDepth());
+		size_t pos = getBufferPos( (unsigned int )((rt->getWidth()-1) * u),
+			(unsigned int )((rt->getHeight()-1) * v), rt->getWidth(),rt->getColourDepth());
 		int c;
 		rt->seek(pos);
 		rt->read(&c,sizeof(int));
