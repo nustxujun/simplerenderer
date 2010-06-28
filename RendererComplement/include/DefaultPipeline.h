@@ -57,7 +57,7 @@ namespace RCP
 		void clipingTriangle(const Primitive& prim,Primitive prims[5]);
 		
 		void rasterize(Primitive& prim);
-		void homogeneousDivide(Vector4& pos);
+		void homogeneousDivide(Vertex& vert);
 		void viewportMapping(Vector4& pos,const Viewport* vp);
 		
 		void geometryProcessing(const RenderElement& elem,const VertexVector& verVec);

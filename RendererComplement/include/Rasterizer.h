@@ -10,6 +10,7 @@ namespace RCP
 	{
 		Vector4 pos;
 		Vector3 norm;
+		//透视除法后，这里将保存 color/w specular/w texCrood/w;
 		Colour color;
 		Colour specular;
 		Vector2 texCrood[8];
@@ -21,7 +22,7 @@ namespace RCP
 	struct Pixel
 	{
 		unsigned int x,y;
-		float z;
+		float z,invw;
 		Colour color;
 		Colour specular;
 		float u,v;

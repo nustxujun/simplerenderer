@@ -427,9 +427,18 @@ namespace RCP
 
 	}
 
-	void DefaultPipeline::homogeneousDivide(Vector4& pos)
+	void DefaultPipeline::homogeneousDivide(Vertex& vert)
 	{
-		pos /= pos.w;
+		assert ( fabs(vert.pos.w) > 0.01f );
+		float invw = 1.0f/vert.pos.w;
+
+		vert.pos *= invw;
+		vert.pos.w = invw;
+		vert.color *= invw;
+		vert.specular *= invw;
+
+		for (unsigned int i = 0; i < 8; ++i)
+			vert.texCrood[i] *= invw;
 	}
 
 	void DefaultPipeline::viewportMapping(Vector4& pos,const Viewport* vp)
@@ -480,9 +489,6 @@ namespace RCP
 	void DefaultPipeline::clipingLine(const Primitive& prim,Primitive& resultPrim)
 	{
 		assert(prim.type == Primitive::LINE);
-		if (!checkPointInScreen(prim.vertex[0].pos) && 
-			!checkPointInScreen(prim.vertex[1].pos))
-			return;
 
 		Vertex vertices[2][2];
 		//使用的顶点下标
@@ -545,7 +551,7 @@ namespace RCP
 		//齐次坐标归一（透视除法） & 视口映射
 		for ( int i =0; i < 2; ++i)
 		{
-			homogeneousDivide(vertices[afterClip][i].pos);
+			homogeneousDivide(vertices[afterClip][i]);
 			viewportMapping(vertices[afterClip][i].pos,prim.vp);
 		}
 
@@ -643,7 +649,7 @@ namespace RCP
 		//齐次坐标归一（透视除法） & 视口映射
 		for ( int i =0; i < numVertices[afterClip]; ++i)
 		{
-			homogeneousDivide(vertices[afterClip][i].pos);
+			homogeneousDivide(vertices[afterClip][i]);
 			viewportMapping(vertices[afterClip][i].pos,prim.vp);
 		}
 
