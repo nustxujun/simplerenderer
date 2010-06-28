@@ -12,6 +12,9 @@ namespace RCP
 		Resource(ResourceManager* mgr);
 		virtual ~Resource();
 		void Release();
+		void initialize();
+		virtual void initImpl() = 0;
+		bool isInitialized()const;
 	private:
 		ResourceManager* mManager;
 	private:
@@ -19,6 +22,8 @@ namespace RCP
 		Resource();
 		Resource(const Resource& res);
 		void operator = (const Resource& res);
+	private:
+		bool mInitialized;
 	};
 }
 #endif//_Resource_H_

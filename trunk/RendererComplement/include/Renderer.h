@@ -30,7 +30,7 @@ namespace RCP
 	public:
 		VertexBuffer* createVertexBuffer(unsigned int vertexCount, const VertexDeclaration& decl);
 		IndexBuffer* createIndexBuffer();
-		//createTexture();
+		Texture* createTexture(unsigned int width, unsigned int height, unsigned int numMipmap, PixelFormat pf);
 		//createMaterial();
 		//createLight();
 
@@ -65,6 +65,8 @@ namespace RCP
 		VertexBufferManager* mVertexBufferManager; 
 		//索引管理器
 		IndexBufferManager* mIndexBufferManager;
+		//纹理管理器
+		TextureManager* mTextureManager;
 
 		//当前保存量
 		//当前绘制内存空间

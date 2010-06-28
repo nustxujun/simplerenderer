@@ -13,6 +13,9 @@ namespace RCP
 
 	}
 
+	void IndexBuffer::initImpl() 
+	{}
+
 
 	void IndexBuffer::addIndex(unsigned int vertexIndex,unsigned int pos )
 	{

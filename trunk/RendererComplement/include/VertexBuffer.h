@@ -57,6 +57,7 @@ namespace RCP
 		const unsigned int getVertexCount()const;
 	private :
 		VertexBuffer(const VertexDeclaration& decl,unsigned int vertexCount,VertexBufferManager* mgr);
+		void initImpl() ;
 	private:
 		MemoryBuffer* mData;
 		VertexDeclaration mDeclaration;

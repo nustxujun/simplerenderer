@@ -1,6 +1,6 @@
 #include "Rasterizer.h"
 #include "Rendertarget.h"
-
+#include "Texture.h"
 namespace RCP
 {
 	const float EPSLON = 0.1f;
@@ -213,6 +213,8 @@ namespace RCP
 		ymin = ceil(pri.vertex[0].pos.y);
 		ymax = ceil(pri.vertex[2].pos.y);
 
+		assert(xmin <= xmax);
+		assert(ymin <= ymax);
 
 		Vertex point1, point2;
 		Pixel point3;
@@ -256,7 +258,7 @@ namespace RCP
 				interpolate(point3.z, ratio3,point1.pos.z,point2.pos.z);	
 				
 				//临时处理
-				Vector4 colorBlend;
+				Colour colorBlend;
 				for (unsigned int i = 0; i < 8; ++i)
 				{
 					if (pri.tex[i] != NULL)
@@ -268,7 +270,8 @@ namespace RCP
 					}
 				}
 				//這裡也是
-				//point3.color = Vector4(128,128,128,128);
+				if (pri.tex[0] != NULL)
+				point3.color *= colorBlend;
 				drawImpl(point3);
 			}
 		}
@@ -343,10 +346,39 @@ namespace RCP
 		output = (value1 - value0) * ratio  + value0;
 	}
 
-	Vector4 Rasterizer::addressTex(const Texture* tex,float u,float v)
+	Colour Rasterizer::addressTex(const Texture* tex,float u,float v)
 	{
 		assert(tex);
-		return Vector4(255,255,255,255);
+
+		//先不管mipmap
+		RenderTarget* rt = tex->getRenderTarget(0);
+		size_t pos = getBufferPos( (unsigned int )(rt->getWidth() * u),
+			(unsigned int )(rt->getHeight() * v), rt->getWidth(),rt->getColourDepth());
+		int c;
+		rt->seek(pos);
+		rt->read(&c,sizeof(int));
+		Colour color;
+		switch (tex->getPixelFormat())
+		{
+		case PF_A8R8G8B8 :
+		case PF_X8R8G8B8 :
+			color.getFromARGB(c);
+			break;
+		case PF_A8B8G8R8 :
+		case PF_X8B8G8R8 :
+			color.getFromABGR(c);
+			break;
+		case PF_B8G8R8A8 :
+			color.getFromBGRA(c);
+			break;
+		case PF_R8G8B8A8 :
+			color.getFromRGBA(c);
+			break;
+		default:
+			assert(0);
+		}
+
+		return color;
 	}
 
 

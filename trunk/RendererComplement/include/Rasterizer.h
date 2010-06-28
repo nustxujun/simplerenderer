@@ -119,7 +119,7 @@ namespace RCP
 		bool depthTest(const Pixel& p);
 
 
-		Vector4 addressTex(const Texture* tex,float u,float v);
+		Colour addressTex(const Texture* tex,float u,float v);
 
 		void clear();
 

@@ -44,6 +44,7 @@ namespace RCP
 	class ResourceManager;
 	class SharedPtr;
 	class Texture;
+	class TextureManager;
 	class Vector3;
 	class Vector4;
 	class VertexBuffer;

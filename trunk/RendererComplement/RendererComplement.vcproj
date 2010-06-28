@@ -254,6 +254,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\source\Texture.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Texture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\source\TextureManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\TextureManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\source\VertexBuffer.cpp"
 				>
 			</File>

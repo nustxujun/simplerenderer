@@ -10,9 +10,14 @@ namespace RCP
 	VertexBuffer::VertexBuffer(const VertexDeclaration& decl,unsigned int vertexCount,VertexBufferManager* mgr):
 		mDeclaration(decl),	mVertexCount(vertexCount), Resource((ResourceManager*)mgr)
 	{
-		size_t size = decl.getSizeInBytes() * vertexCount;
+	}
+
+	void VertexBuffer::initImpl() 
+	{
+		size_t size = mDeclaration.getSizeInBytes() * mVertexCount;
 		unsigned char* data = new unsigned char[size];
 		mData = new MemoryBuffer(data,size);
+
 	}
 
 	void VertexBuffer::fill(unsigned int vertexIndex, const void* vertexData)

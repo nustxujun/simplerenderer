@@ -16,6 +16,7 @@ namespace RCP
 		unsigned int operator [](unsigned int index)const;
 	private :
 		IndexBuffer(IndexBufferManager* mgr);
+		void initImpl() ;
 	private:
 		typedef std::vector<unsigned int> IndexList;
 		IndexList mIndexList;
