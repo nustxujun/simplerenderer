@@ -250,12 +250,19 @@ namespace RCP
 				point3.x = x;
 
 				ratio3 = (x - point1.pos.x) / (point2.pos.x -  point1.pos.x);
+				//注意这里是 1/w
+				interpolate(point3.invw, ratio3,point1.pos.w,point2.pos.w);	
+
 				//颜色
 				interpolate(point3.color, ratio3,point1.color,point2.color);
+				point3.color /= point3.invw;
+
 				interpolate(point3.specular, ratio3,point1.specular,point2.specular);
+				point3.specular /= point3.invw;
 				
 				//需要z 
 				interpolate(point3.z, ratio3,point1.pos.z,point2.pos.z);	
+				
 				
 				//临时处理
 				Colour colorBlend;
@@ -263,10 +270,11 @@ namespace RCP
 				{
 					if (pri.tex[i] != NULL)
 					{
+						//这里的u v实际是 U/w V/w;
 						interpolate(point3.u,ratio3,point1.texCrood[i].x,point2.texCrood[i].x);
 						interpolate(point3.v,ratio3,point1.texCrood[i].y,point2.texCrood[i].y);
 						//先這裡就不混合了，到時候還要給混合公式
-						colorBlend = addressTex(pri.tex[i],point3.u, point3.v);
+						colorBlend = addressTex(pri.tex[i],point3.u / point3.invw, point3.v/point3.invw);
 					}
 				}
 				//這裡也是

@@ -23,32 +23,27 @@ namespace RCP
 
 	void Texture::initImpl() 
 	{
-		if (mLevels != 0)
+		unsigned int w = mWidth;
+		unsigned int h = mHeight;
+		
+		if (mLevels == 0)
+			mLevels = -1;
+
+		RenderTarget* rt;
+		unsigned int lev = 0;
+		while ( !(w ==0 && h == 0) && lev < mLevels)
 		{
-			RenderTarget* rt;
-			for (unsigned int i = 0; i < mLevels; ++i)
-			{
-				rt = new RenderTarget(mWidth,mHeight,PixelUtil::getNumElemBytes(mPixelFormat));
-				mRenderTargets.push_back(rt);
-			}
+			w = w==0?1:w;
+			h = h==0?1:h;
+
+			rt = new RenderTarget(w,h,PixelUtil::getNumElemBytes(mPixelFormat));
+			mRenderTargets.push_back(rt);
+			w /= 2;
+			h /= 2;
+
+			++lev; 
 		}
-		else
-		{
-			unsigned int w = mWidth;
-			unsigned int h = mHeight;
-			RenderTarget* rt;
-			unsigned levels = 0;
-			for (; w == 1 && h == 1;++levels)
-			{
-				rt = new RenderTarget(w,h,PixelUtil::getNumElemBytes(mPixelFormat));
-				mRenderTargets.push_back(rt);
-				w /= 2;
-				h /= 2;
-				w = w==0?1:w;
-				h = h==0?1:h;
-			}
-			mLevels = levels;
-		}
+		mLevels = lev;
 	}
 
 	RenderTarget* Texture::getRenderTarget(unsigned int level)const

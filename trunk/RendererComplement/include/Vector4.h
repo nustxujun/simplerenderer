@@ -128,6 +128,16 @@ namespace RCP
             return *this;
         }
 
+		inline Vector4& operator *= ( const float fScalar )
+        {
+            x *= fScalar;
+            y *= fScalar;
+            z *= fScalar;
+            w *= fScalar;
+
+            return *this;
+        }
+
 		inline float dotProduct(const Vector4& vec) const
 		{
 			return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
