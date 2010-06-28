@@ -53,6 +53,15 @@ namespace RCP
 			return *this;
 		}
 
+		inline Colour operator *= ( const Colour& color )
+		{
+			r *= color.r;
+			g *= color.g;
+			b *= color.b;
+			a *= color.a;
+			return *this;
+		}
+
 		inline Colour operator - ( const Colour& color ) const
 		{
 			return Colour(

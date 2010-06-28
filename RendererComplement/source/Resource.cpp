@@ -4,7 +4,7 @@
 namespace RCP
 {
 	Resource::Resource(ResourceManager* mgr):
-		mManager(mgr)	
+		mManager(mgr),mInitialized(false)	
 	{
 	}
 
@@ -17,4 +17,14 @@ namespace RCP
 		mManager->destroy(this);
 	}
 
+	void Resource::initialize()
+	{
+		initImpl();
+		mInitialized = true;
+	}
+
+	bool Resource::isInitialized()const
+	{
+		return mInitialized;
+	}
 }

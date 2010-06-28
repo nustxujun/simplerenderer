@@ -5,7 +5,7 @@
 #include "PaintingMethod.h"
 #include "VertexBufferManager.h"
 #include "IndexBufferManager.h"
-
+#include "TextureManager.h"
 
 namespace RCP 
 {
@@ -41,6 +41,7 @@ namespace RCP
 		//各种管理器
 		mVertexBufferManager = new VertexBufferManager();
 		mIndexBufferManager = new IndexBufferManager();
+		mTextureManager = new TextureManager();
 
 		//各种属性
 		mVertexBuffer = NULL;
@@ -140,6 +141,12 @@ namespace RCP
 	{
 		assert(mIsInitialized);
 		return mIndexBufferManager->createIndexBuffer();
+	}
+
+	Texture* Renderer::createTexture(unsigned int width, unsigned int height, unsigned int numMipmap, PixelFormat pf)
+	{
+		assert(mIsInitialized);
+		return mTextureManager->createTexture( width, height, numMipmap, pf);
 	}
 
 	void Renderer::setPaintingMethod(PaintingMethod* pm)

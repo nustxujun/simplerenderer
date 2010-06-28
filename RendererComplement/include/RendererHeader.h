@@ -9,6 +9,7 @@
 #include "PaintingMethod.h"
 #include "Light.h"
 #include "MatrixUtil.h"
+#include "Texture.h"
 
 
 #endif//_RendererHead_H_
