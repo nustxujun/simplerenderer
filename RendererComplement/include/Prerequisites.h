@@ -38,6 +38,7 @@ namespace RCP
 	class MemoryBuffer;
 	class PaintingMethod;
 	class Pipeline;
+	class Renderer;
 	class RenderQueue;
 	class RenderTarget;
 	class Resource;

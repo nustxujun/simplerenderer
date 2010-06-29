@@ -146,6 +146,27 @@ namespace RCP
         VET_COLOUR_ABGR = 11,
     };
 
+	enum TextureAddresingMode
+	{
+		TAM_WRAP,
+		TAM_MIRROR,
+		TAM_CLAMP,
+		TAM_BORDER,
+		TAM_MIRRORONCE,
+	};
+
+	struct TextureState
+	{
+		TextureAddresingMode addresingModeU;
+		TextureAddresingMode addresingModeV;
+
+		TextureState():
+			addresingModeU(TAM_WRAP),
+			addresingModeV(TAM_WRAP)
+
+		{}
+	};
+
 
 
 
