@@ -19,6 +19,11 @@ namespace RCP
 		unsigned int getHeight()const;
 		unsigned int getLevelCount()const;
 
+		const TextureState& getTextureState()const;
+		void setTextureState(const TextureState& state);
+
+		void assignUV(float& u,float& v)const ;
+
 	protected:
 		
 		Texture(unsigned int width, unsigned int height, unsigned int levels, PixelFormat pf, TextureManager* tm);
@@ -32,6 +37,8 @@ namespace RCP
 
 		typedef std::vector<RenderTarget*> RenderTargets;
 		RenderTargets mRenderTargets;
+
+		TextureState mTextureState;
 
 	};
 }

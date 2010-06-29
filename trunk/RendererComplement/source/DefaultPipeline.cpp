@@ -264,11 +264,15 @@ namespace RCP
 			//ÎÆÀí×ø±ê
 			for (unsigned char k = 0; k < 8; ++k )
 			{
-				if (texCroodDataOffset[k] != -1)
+				if (texCroodDataOffset[k] != -1 && elem.texture[k] != NULL)
 				{
 					const TexCrood* croodData = (const TexCrood*) ( data + i * vertexSize + texCroodDataOffset[k]);
+					const TextureState& ts = elem.texture[k]->getTextureState();
+					
 					verVec[i].texCrood[k].x = croodData->u;
 					verVec[i].texCrood[k].y = croodData->v;
+					elem.texture[k]->assignUV(verVec[i].texCrood[k].x,verVec[i].texCrood[k].y);
+					
 				}
 			}
 

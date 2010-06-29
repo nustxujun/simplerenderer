@@ -10,6 +10,7 @@
 #include "Light.h"
 #include "MatrixUtil.h"
 #include "Texture.h"
+#include "TextureUtil.h"
 
 
 #endif//_RendererHead_H_

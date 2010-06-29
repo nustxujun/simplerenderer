@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)source&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)include&quot;;&quot;$(ProjectDir)source&quot;;..\FreeImage\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,6 +61,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="FreeImaged.lib"
+				AdditionalLibraryDirectories="..\FreeImage\lib\debug"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -358,6 +360,14 @@
 				</File>
 				<File
 					RelativePath=".\include\Rasterizer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\source\TextureUtil.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\TextureUtil.h"
 					>
 				</File>
 			</Filter>
