@@ -25,6 +25,8 @@ namespace RCP
 		mZBuffer = new RenderTarget(width,height,4);
 		mScissorRect= Vector4(0,0,(float)width,(float)height);
 		mAlphaRef = 0;
+
+		mPixelShader = NULL;
 	}
 
 	void Rasterizer::pushPrimitive(const Primitive& pri)
@@ -107,18 +109,6 @@ namespace RCP
 				if (pri.tex[i] != NULL)//有纹理的话
 					interpolate(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
 
-
-			//newVertex.pos = resultPri.vertex[0].pos + ( resultPri.vertex[2].pos - resultPri.vertex[0].pos) * ratio;
-			//newVertex.pos.y = resultPri.vertex[1].pos.y;
-			//newVertex.norm = resultPri.vertex[0].norm * resultPri.vertex[0].pos.w + 
-			//	(resultPri.vertex[2].norm - resultPri.vertex[0].norm) * ratio;
-			//newVertex.color = resultPri.vertex[0].color * resultPri.vertex[0].pos.w + 
-			//	(resultPri.vertex[2].color - resultPri.vertex[0].color) * ratio;
-			//for (unsigned int i = 0; i < 8 ; ++i)
-			//	if (pri.tex[i] != NULL)//有纹理的话
-			//		newVertex.texCrood[i] = resultPri.vertex[0].texCrood[i] * resultPri.vertex[0].pos.w + 
-			//			(resultPri.vertex[2].texCrood[i] - resultPri.vertex[0].texCrood[i]) * ratio;
-
 			//分解成两个平底三角形
 			Primitive up,down;
 			up = down = resultPri;
@@ -159,10 +149,7 @@ namespace RCP
 
 	void Rasterizer::flush(RenderTarget* target)
 	{
-		////target大小必須與初始化的時候一樣。，當然，其實小點也無所謂，不過懶得區別了
-		//assert( mColorBuffer->getWidth() == target->getWidth() && 
-		//		mColorBuffer->getHeight() == target->getHeight() &&
-		//		mColorBuffer->getColourDepth() == target->getColourDepth() );
+
 
 		clear();
 		mColorBuffer = target;
@@ -297,7 +284,11 @@ namespace RCP
 			return;
 
 		unsigned int color;
-		color = (p.color + p.specular).clamp().get32BitARGB();
+		if (mPixelShader != NULL)
+			color = mPixelShader->shade(p).get32BitARGB();
+		else
+			color = (p.color + p.specular).clamp().get32BitARGB();
+
 		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mColorBuffer->getColourDepth());
 		mColorBuffer->seek(pos);
 		mColorBuffer->write(&color,sizeof(color));

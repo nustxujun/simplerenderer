@@ -5,12 +5,7 @@ namespace RCP
 {
 	DefaultPipeline::DefaultPipeline()
 	{
-		mPlane[0]= Vector4(1,0,0,1);
-		mPlane[1]= Vector4(-1,0,0,1);
-		mPlane[2]= Vector4(0,1,0,1);
-		mPlane[3]= Vector4(0,-1,0,1);
-		mPlane[4]= Vector4(0,0,1,1);
-		mPlane[5]= Vector4(0,0,-1,1);
+
 	}
 
 	DefaultPipeline::~DefaultPipeline()
@@ -18,15 +13,24 @@ namespace RCP
 
 	void DefaultPipeline::initImpl() 
 	{
+		mPlane[0]= Vector4(1,0,0,1);
+		mPlane[1]= Vector4(-1,0,0,1);
+		mPlane[2]= Vector4(0,1,0,1);
+		mPlane[3]= Vector4(0,-1,0,1);
+		mPlane[4]= Vector4(0,0,1,1);
+		mPlane[5]= Vector4(0,0,-1,1);
+
 		const RendererParameters& rp = getRendererParameters();
 		mRasterizer.initialize(rp.backBufferWidth, rp.backBufferHeight, rp.backBufferPixelFormat);
+
+		mVertexShader = NULL;
 	}
 
 	void DefaultPipeline::execute(const RenderData& renderData,RenderTarget* target)
 	{
 		//預處理
 		//mPositionList.clear();
-		mPrimitiveVector.clear();
+		//mPrimitiveVector.clear();
 
 		const RenderData::RenderElementList& elems = renderData.getRenderElementList();
 		size_t elemSize = elems.size();
@@ -45,25 +49,25 @@ namespace RCP
 			primitiveAssembly(*i,*verIter);
 		}
 
-		Primitive priResult[5] ;
+		//Primitive priResult[5] ;
 
-		PrimitiveVector::iterator priIter, priEndIter = mPrimitiveVector.end();
-		for (priIter = mPrimitiveVector.begin(); priIter != priEndIter; ++priIter)
-		{
-			//返回true则说明通过，false则剔除
-			 if ((*priIter).type == Primitive::ERROR  || !culling(*priIter) )
-				 continue;
-			 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
-			 cliping(*priIter,priResult);
+		//PrimitiveVector::iterator priIter, priEndIter = mPrimitiveVector.end();
+		//for (priIter = mPrimitiveVector.begin(); priIter != priEndIter; ++priIter)
+		//{
+		//	//返回true则说明通过，false则剔除
+		//	 if ((*priIter).type == Primitive::ERROR  || !culling(*priIter) )
+		//		 continue;
+		//	 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
+		//	 cliping(*priIter,priResult);
 
-			 //产生的clip新结果插入
-			 for ( int k = 0; k < 5; ++k)
-			 {
-				 rasterize(priResult[k]);
-				 priResult[k].type = Primitive::ERROR;
-			 }
-			 
-		}
+		//	 //产生的clip新结果插入
+		//	 for ( int k = 0; k < 5; ++k)
+		//	 {
+		//		 rasterize(priResult[k]);
+		//		 priResult[k].type = Primitive::ERROR;
+		//	 }
+		//	 
+		//}
 
 		rasterization(target);
 		notifyCompleted();
@@ -110,13 +114,15 @@ namespace RCP
 		Vector3 posVec;
 		Vector4 posVec4,normVec4;
 		Vector3 H,L,V,lightPos,normVec3;
+		const unsigned char *vertexData;
 		for (size_t i = 0; i < vb->getVertexCount(); ++i)
 		{
+			vertexData = data + i * vertexSize;
+
 			//定位頂點position
-			const Position* posData =(const Position*)( data + i * vertexSize + posDataOffset);
-			posVec4.x = posData->x;
-			posVec4.y = posData->y;
-			posVec4.z = posData->z;
+			mDataCollector.getData(posVec,vertexData + posDataOffset);
+			posVec4 = posVec;
+			//点
 			posVec4.w= 1.0f;
 
 			//-----------------------------------------------------
@@ -127,7 +133,6 @@ namespace RCP
 			//獲取4個權重
 			for (int j = 0; j < 4; ++j)
 			{
-				
 				if (weightDataOffet[j] == -1)//儅該權重不存在
 				{
 					//計算權重
@@ -135,10 +140,77 @@ namespace RCP
 					for (int k = 0; k < j ; ++k )
 						weight[j] = weight[j] - weight[k];
 					break;
-				}
-				const float* weightData = (const float*)( data + i * vertexSize + weightDataOffet[j]);
-				weight[j] = *weightData;
+				}			
+				mDataCollector.getData(weight[j],vertexData + weightDataOffet[j]);
 			}
+
+			//获取颜色(材质ye处理) 
+			diffuse = elem.material.diffuse;
+			specular = elem.material.specular;
+			power = elem.material.power;
+			ambient = elem.material.ambient;
+			if (diffuseDataOffset != -1 && elem.material.isDiffuseVertexColorEnable())
+			{
+				if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 4)
+				{
+					int c;
+					mDataCollector.getData(c,vertexData + diffuseDataOffset);
+					diffuse = Colour().getFromARGB(c) * diffuse ;
+					
+				}
+				else if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 16)
+				{
+					Vector4 c;
+					mDataCollector.getData(c,vertexData + diffuseDataOffset);
+
+					diffuse = diffuse * Colour(c.x,c.y,c.z,c.w);
+				}
+				
+			}
+			if (specularDataOffset != -1 && elem.material.isSpecularVertexColorEnable())
+			{
+				if (verDecl.getElementSizeInBytes(VES_SPECULAR) == 4)
+				{
+					int c;
+					mDataCollector.getData(c,vertexData + specularDataOffset);
+					specular = specular + Colour().getFromARGB(c);
+					
+				}
+				else if (verDecl.getElementSizeInBytes(VES_SPECULAR) == 16)
+				{
+					Vector4 c;
+					mDataCollector.getData(c,vertexData + specularDataOffset);
+					diffuse = diffuse * Colour(c.x,c.y,c.z,c.w);
+				}
+			}
+
+
+			//法线
+			if (normalDataOffset != -1)
+			{
+				mDataCollector.getData(verVec[i].norm,vertexData + normalDataOffset);			
+			}
+
+			//纹理坐标
+			for (unsigned char k = 0; k < 8; ++k )
+			{
+				if (texCroodDataOffset[k] != -1 && elem.texture[k] != NULL)
+				{
+					mDataCollector.getData(verVec[i].texCrood[k],vertexData + texCroodDataOffset[k]);
+					const TextureState& ts = elem.texture[k]->getTextureState();
+					elem.texture[k]->assignUV(verVec[i].texCrood[k].x,verVec[i].texCrood[k].y);					
+				}
+			}
+
+			//以上为数据采集
+			if (mVertexShader != NULL)
+			{
+				mVertexShader->execute(verVec[i]);
+				continue;
+			}
+
+			//以下为数据计算
+
 			//計算混合
 			transMat = elem.matWorld[TS_WORLD] * weight[0] + 
 				elem.matWorld[TS_WORLD2] * weight[1] + 
@@ -159,52 +231,6 @@ namespace RCP
 			verVec[i].pos = posVec4;	
 			
 
-			//获取颜色(材质ye处理) 
-			diffuse = elem.material.diffuse;
-			specular = elem.material.specular;
-			power = elem.material.power;
-			ambient = elem.material.ambient;
-			if (diffuseDataOffset != -1 && elem.material.isDiffuseVertexColorEnable())
-			{
-				if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 4)
-				{
-					const int* colorData =(const int*)( data + i * vertexSize + diffuseDataOffset);
-					diffuse = Colour().getFromARGB(*colorData) * diffuse ;
-					
-				}
-				else if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 16)
-				{
-					const Color* colorData =(const Color*)( data + i * vertexSize + diffuseDataOffset);
-
-					diffuse = diffuse * Colour(colorData->r,colorData->g,colorData->b,colorData->a);
-				}
-				
-			}
-			if (specularDataOffset != -1 && elem.material.isSpecularVertexColorEnable())
-			{
-				if (verDecl.getElementSizeInBytes(VES_SPECULAR) == 4)
-				{
-					const int* colorData =(const int*)( data + i * vertexSize + specularDataOffset);
-					specular = specular + Colour().getFromARGB(*colorData);
-					
-				}
-				else if (verDecl.getElementSizeInBytes(VES_SPECULAR) == 16)
-				{
-					const Color* colorData =(const Color*)( data + i * vertexSize + specularDataOffset);
-
-					diffuse = diffuse + Colour(colorData->r,colorData->g,colorData->b,colorData->a);
-				}
-			}
-
-
-			//法线
-			if (normalDataOffset != -1)
-			{
-				const Position* normalData = (const Position*)( data + i * vertexSize + normalDataOffset);
-				verVec[i].norm.x = normalData->x;
-				verVec[i].norm.y = normalData->y;
-				verVec[i].norm.z = normalData->z;
-			}
 
 			//光照计算
 			diffuseBlend.getFromABGR(0);
@@ -260,23 +286,6 @@ namespace RCP
 			verVec[i].color = diffuse + ambient;
 			verVec[i].specular = specular;
 			
-
-			//纹理坐标
-			for (unsigned char k = 0; k < 8; ++k )
-			{
-				if (texCroodDataOffset[k] != -1 && elem.texture[k] != NULL)
-				{
-					const TexCrood* croodData = (const TexCrood*) ( data + i * vertexSize + texCroodDataOffset[k]);
-					const TextureState& ts = elem.texture[k]->getTextureState();
-					
-					verVec[i].texCrood[k].x = croodData->u;
-					verVec[i].texCrood[k].y = croodData->v;
-					elem.texture[k]->assignUV(verVec[i].texCrood[k].x,verVec[i].texCrood[k].y);
-					
-				}
-			}
-
-
 		}
 	}
 
@@ -331,28 +340,39 @@ namespace RCP
 		//保证剩余顶点数足够形成图元
 		assert(realVertexCount - skipVertexCount >= vertexNumInGeom*elem.primitiveCount );
 
-		if (mPrimitiveVector.capacity() < elem.primitiveCount + mPrimitiveVector.size())
-			mPrimitiveVector.reserve(elem.primitiveCount + mPrimitiveVector.size());
-		Primitive* pri = NULL;
+		Primitive prim ;
+		Primitive priResult[5];
 		for (unsigned int i = 0; i < elem.primitiveCount; ++i)
 		{
-			mPrimitiveVector.push_back(Primitive());
-			pri = &*mPrimitiveVector.rbegin();
-			pri->type = type;
-			pri->vp = &elem.viewport;
-			memcpy(pri->tex, elem.texture,sizeof(Texture*) * 8);
+			prim.type = type;
+			prim.vp = &elem.viewport;
+			memcpy(prim.tex, elem.texture,sizeof(Texture*) * 8);
+			//输入顶点
 			for (unsigned int j = 0; j < vertexNumInGeom; ++j)
 			{
 				if (ib != NULL)
 				{
-					pri->vertex[j] = verVec[(*ib)[skipVertexCount + i*vertexNumInGeom + j]];
+					prim.vertex[j] = verVec[(*ib)[skipVertexCount + i*vertexNumInGeom + j]];
 				}
 				else
 				{
-					pri->vertex[j] = verVec[skipVertexCount + i*vertexNumInGeom + j];
+					prim.vertex[j] = verVec[skipVertexCount + i*vertexNumInGeom + j];
 				}
 			}
-				
+						
+			//返回true则说明通过，false则剔除
+			 if (prim.type == Primitive::ERROR  || !culling(prim) )
+				 continue;
+			 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
+			 cliping(prim,priResult);
+
+			 //产生的clip新结果插入
+			 for ( int k = 0; k < 5; ++k)
+			 {
+				 rasterize(priResult[k]);
+				 priResult[k].type = Primitive::ERROR;
+			 }
+
 		}
 	}
 
