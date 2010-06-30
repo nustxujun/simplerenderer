@@ -83,6 +83,11 @@ namespace RCP
 		mPaitingMethod->paint(mBackBuffer);
 	}
 
+	bool Renderer::isInitialized()
+	{
+		return mIsInitialized;
+	}
+
 	void Renderer::draw(Primitives type,unsigned int beginPrimitiveOffset,unsigned int primitiveCount)
 	{
 		assert(mIsInitialized);

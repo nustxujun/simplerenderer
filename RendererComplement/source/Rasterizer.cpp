@@ -135,25 +135,29 @@ namespace RCP
 
 	void Rasterizer::clear()
 	{
-		if (mZBuffer)
+		assert(mColorBuffer);
+		assert(mZBuffer);
+		
+		float value = 1.f;
+		int color = 0;
+		unsigned int num = mZBuffer->getWidth() * mZBuffer->getHeight();
+		mZBuffer->seek(0);
+		mColorBuffer->seek(0);
+		for (unsigned int i = 0; i < num; ++i)
 		{
-			float value = 1.f;
-			unsigned int num = mZBuffer->getWidth() * mZBuffer->getHeight();
-			mZBuffer->seek(0);
-			for (unsigned int i = 0; i < num; ++i)
-			{
-				mZBuffer->write(&value,sizeof(float));
-			}
+			mColorBuffer->write(&color,sizeof(int));
+			mZBuffer->write(&value,sizeof(float));
 		}
+
 	}
 
 	void Rasterizer::flush(RenderTarget* target)
 	{
 
 
-		clear();
 		mColorBuffer = target;
-
+		clear();
+		
 		PrimitiveVector::iterator i,endi = mPrimitiveVector.end();
 		for (i = mPrimitiveVector.begin(); i != endi; ++i)
 		{

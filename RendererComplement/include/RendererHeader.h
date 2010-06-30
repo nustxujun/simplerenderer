@@ -6,6 +6,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "BackBuffer.h"
+#include "RenderTarget.h"
 #include "PaintingMethod.h"
 #include "Light.h"
 #include "MatrixUtil.h"
