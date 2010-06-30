@@ -22,6 +22,7 @@
 #include "RendererTypes.h"
 #include "Vector3.h"
 #include "Vector4.h"
+#include "Vector2.h"
 #include "PixelUtil.h"
 
 //stable classes

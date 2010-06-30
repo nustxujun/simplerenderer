@@ -146,6 +146,5 @@ namespace RCP
 		float x,y,z,w;
 	};
 
-	typedef Vector4 Vector2;
 }
 #endif//_Vector4_H_

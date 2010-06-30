@@ -327,6 +327,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\Vector2.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Vector3.h"
 					>
 				</File>
@@ -355,14 +359,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\source\Rasterizer.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\Rasterizer.h"
-					>
-				</File>
-				<File
 					RelativePath=".\source\TextureUtil.cpp"
 					>
 				</File>
@@ -381,6 +377,22 @@
 			</File>
 			<File
 				RelativePath=".\include\DefaultPipeline.h"
+				>
+			</File>
+			<File
+				RelativePath=".\source\PipelinePlus.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\PipelinePlus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\source\Rasterizer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Rasterizer.h"
 				>
 			</File>
 		</Filter>

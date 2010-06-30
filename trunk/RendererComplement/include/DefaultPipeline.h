@@ -3,36 +3,23 @@
 #include"Prerequisites.h"
 #include "Pipeline.h"
 #include "Rasterizer.h"
+#include "PipelinePlus.h"
 
 namespace RCP
 {
 	class DefaultPipeline:
 		public Pipeline
 	{
-		struct Position
-		{
-			float x,y,z;
-		};
-
-		struct Color
-		{
-			float r,g,b,a;
-		};
-
-		struct TexCrood
-		{
-			float u,v;
-		};
-
-		struct Pixel
-		{
-			Position pos;
-		};
 
 		typedef std::vector<Vertex> VertexVector;
 		typedef std::list<VertexVector> VertexList;
-		typedef std::vector<Primitive> PrimitiveVector;
-		typedef std::vector<Pixel> PixelVector;
+
+	public:
+		class VertexShader
+		{
+		public:
+			virtual void execute(Vertex& ver) = 0;
+		};
 
 	public:
 		DefaultPipeline();
@@ -40,10 +27,10 @@ namespace RCP
 
 		virtual void initImpl() ;
 		void execute(const RenderData& renderData,RenderTarget* target);
-
+	protected:
 	
-		//void tessellation();
 		void vertexProcessing(const RenderElement& elem,VertexVector& verVec);
+		
 		void primitiveAssembly(const RenderElement& elem,const VertexVector& verVec);
 
 		//返回true则说明通过，false则剔除
@@ -60,25 +47,14 @@ namespace RCP
 		void homogeneousDivide(Vertex& vert);
 		void viewportMapping(Vector4& pos,const Viewport* vp);
 		
-		void geometryProcessing(const RenderElement& elem,const VertexVector& verVec);
-		void pixelProcessing(const RenderData::RenderElementList& elems);
-		void pixelRendering(const RenderData::RenderElementList& elems);
-
 		void rasterization(RenderTarget* target);
 
 	private:
 		Rasterizer mRasterizer;
+		DataCollector mDataCollector;
+		VertexShader* mVertexShader;
 
-
-
-		VertexList mVertexList;
-
-
-		
-		//裁減前的
-		PrimitiveVector mPrimitiveVector;
-		
-	
+		VertexList mVertexList;	
 
 		//裁減空間
 		Vector4 mPlane[6];
