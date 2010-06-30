@@ -27,6 +27,8 @@ namespace RCP
 		void release();
 		//»æÖÆ
 		void renderNow();
+
+		bool isInitialized();
 	public:
 		VertexBuffer* createVertexBuffer(unsigned int vertexCount, const VertexDeclaration& decl);
 		IndexBuffer* createIndexBuffer();
