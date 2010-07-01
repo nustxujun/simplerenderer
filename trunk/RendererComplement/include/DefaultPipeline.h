@@ -22,6 +22,9 @@ namespace RCP
 
 		virtual void initImpl() ;
 		void execute(const RenderData& renderData,RenderTarget* target);
+
+		void setVertexShader(VertexShader* vs);
+		void setPixelShader(PixelShader* ps);
 	protected:
 	
 		void vertexProcessing(const RenderElement& elem,VertexVector& verVec);

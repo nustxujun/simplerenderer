@@ -24,7 +24,8 @@ namespace RCP
 
 	Colour Sampler::sample(float u, float v)const 
 	{
-		assert(texture);
+		if (texture == NULL)
+			return Colour(1.0f);
 		assert( u < 1.0f && v < 1.0f);
 
 		//ÏÈ²»¹Ümipmap

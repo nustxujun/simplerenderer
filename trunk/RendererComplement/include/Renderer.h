@@ -20,7 +20,7 @@ namespace RCP
 		~Renderer();
 
 		//初始化渲染器，启动渲染器最低标准
-		void initialize(RendererParameters rp);
+		void initialize(const RendererParameters& rp);
 		//设置渲染器基本属性
 		void setup(RendererParameters rp);
 		//释放渲染器资源
@@ -33,8 +33,6 @@ namespace RCP
 		VertexBuffer* createVertexBuffer(unsigned int vertexCount, const VertexDeclaration& decl);
 		IndexBuffer* createIndexBuffer();
 		Texture* createTexture(unsigned int width, unsigned int height, unsigned int numMipmap, PixelFormat pf);
-		//createMaterial();
-		//createLight();
 
 		/*
 		para:
@@ -53,6 +51,7 @@ namespace RCP
 		void setPaintingMethod(PaintingMethod* pm);
 		void setLight(unsigned int index,const Light& l);
 		void setViewport(const Viewport& vp);
+		void setPipeline(Pipeline* pl);
 
 	private:
 		bool mIsInitialized;

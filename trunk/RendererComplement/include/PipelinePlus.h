@@ -47,12 +47,12 @@ namespace RCP
 
 	struct Primitive
 	{
-		enum
+		enum PrimitiveType
 		{
-			POINT,
-			LINE,
-			TRIANGLE,
-			ERROR,
+			PT_POINT,
+			PT_LINE,
+			PT_TRIANGLE,
+			PT_ERROR,
 		};
 		unsigned int type;
 
@@ -63,7 +63,7 @@ namespace RCP
 		int triType;
 
 		Primitive():
-			type(ERROR),
+			type(PT_ERROR),
 			triType(0),
 			vp(0)
 		{
@@ -75,7 +75,7 @@ namespace RCP
 			type = prim.type;
 			triType = prim.triType;
 			vp = prim.vp;
-			if (prim.type == ERROR)
+			if (prim.type == PT_ERROR)
 				return *this;
 			for (unsigned short i = 0; i < 3; ++i)
 			{

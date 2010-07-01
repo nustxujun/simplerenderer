@@ -28,9 +28,6 @@ namespace RCP
 
 	void DefaultPipeline::execute(const RenderData& renderData,RenderTarget* target)
 	{
-		//預處理
-		//mPositionList.clear();
-		//mPrimitiveVector.clear();
 
 		const RenderData::RenderElementList& elems = renderData.getRenderElementList();
 		size_t elemSize = elems.size();
@@ -49,25 +46,6 @@ namespace RCP
 			primitiveAssembly(*i,*verIter);
 		}
 
-		//Primitive priResult[5] ;
-
-		//PrimitiveVector::iterator priIter, priEndIter = mPrimitiveVector.end();
-		//for (priIter = mPrimitiveVector.begin(); priIter != priEndIter; ++priIter)
-		//{
-		//	//返回true则说明通过，false则剔除
-		//	 if ((*priIter).type == Primitive::ERROR  || !culling(*priIter) )
-		//		 continue;
-		//	 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
-		//	 cliping(*priIter,priResult);
-
-		//	 //产生的clip新结果插入
-		//	 for ( int k = 0; k < 5; ++k)
-		//	 {
-		//		 rasterize(priResult[k]);
-		//		 priResult[k].type = Primitive::ERROR;
-		//	 }
-		//	 
-		//}
 
 		rasterization(target);
 		notifyCompleted();
@@ -112,7 +90,7 @@ namespace RCP
 		float power;
 		bool enable = false;
 		Vector3 posVec;
-		Vector4 posVec4,normVec4;
+		Vector4 normVec4;
 		Vector3 H,L,V,lightPos,normVec3;
 		const unsigned char *vertexData;
 		for (size_t i = 0; i < vb->getVertexCount(); ++i)
@@ -121,9 +99,11 @@ namespace RCP
 
 			//定位頂點position
 			mDataCollector.getData(posVec,vertexData + posDataOffset);
-			posVec4 = posVec;
+			verVec[i].pos = posVec;
 			//点
-			posVec4.w= 1.0f;
+			verVec[i].pos.w= 1.0f;
+	
+
 
 			//-----------------------------------------------------
 			//這裡注意！！！！
@@ -216,18 +196,15 @@ namespace RCP
 				elem.matWorld[TS_WORLD3] * weight[2] + 
 				elem.matWorld[TS_WORLD4] * weight[3];
 			//矩阵变换
-			posVec4 = elem.matWorld[TS_VIEW] *( transMat * posVec4 );//* elem.matWorld[TS_PROJECTION]  ;
+			verVec[i].pos = elem.matWorld[TS_VIEW] *( transMat * verVec[i].pos );//* elem.matWorld[TS_PROJECTION]  ;
 			
 			//记录下变换前的坐标 进行光照计算
-			posVec.x = posVec4.x;
-			posVec.y = posVec4.y;
-			posVec.z = posVec4.z;
+			posVec.x = verVec[i].pos.x;
+			posVec.y = verVec[i].pos.y;
+			posVec.z = verVec[i].pos.z;
 
 			//继续变换
-			posVec4 = elem.matWorld[TS_PROJECTION] *  posVec4;
-
-			//記錄下頂點的坐标
-			verVec[i].pos = posVec4;	
+			verVec[i].pos = elem.matWorld[TS_PROJECTION] *  verVec[i].pos;	
 			
 
 
@@ -307,27 +284,27 @@ namespace RCP
 		{
 		case PT_POINTLIST:
 			vertexNumInGeom = 1;
-			type = Primitive::POINT;
+			type = Primitive::PT_POINT;
 			skipVertexCount = elem.beginPrimitiveOffset;
 			break;
 		case PT_LINELIST:
 			vertexNumInGeom = 2;
-			type = Primitive::LINE;
+			type = Primitive::PT_LINE;
 			skipVertexCount = elem.beginPrimitiveOffset;
 			break;
 		case PT_LINESTRIP:
 			vertexNumInGeom = 2;
-			type = Primitive::LINE;
+			type = Primitive::PT_LINE;
 			skipVertexCount = elem.beginPrimitiveOffset * 2;
 			break;
 		case PT_TRIANGLELIST:
 		case PT_TRIANGLEFAN:
-			type = Primitive::TRIANGLE;
+			type = Primitive::PT_TRIANGLE;
 			vertexNumInGeom = 3;
 			skipVertexCount = elem.beginPrimitiveOffset ;
 			break;
 		case PT_TRIANGLESTRIP:
-			type = Primitive::TRIANGLE;
+			type = Primitive::PT_TRIANGLE;
 			vertexNumInGeom = 3;
 			skipVertexCount = elem.beginPrimitiveOffset * 3;
 			break;
@@ -366,7 +343,7 @@ namespace RCP
 			}
 						
 			//返回true则说明通过，false则剔除
-			 if (prim.type == Primitive::ERROR  || !culling(prim) )
+			 if (prim.type == Primitive::PT_ERROR  || !culling(prim) )
 				 continue;
 			 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
 			 cliping(prim,priResult);
@@ -375,7 +352,7 @@ namespace RCP
 			 for ( int k = 0; k < 5; ++k)
 			 {
 				 rasterize(priResult[k]);
-				 priResult[k].type = Primitive::ERROR;
+				 priResult[k].type = Primitive::PT_ERROR;
 			 }
 
 		}
@@ -383,7 +360,7 @@ namespace RCP
 
 	bool DefaultPipeline::culling(const Primitive& prim)
 	{
-		if (prim.type != Primitive::TRIANGLE)
+		if (prim.type != Primitive::PT_TRIANGLE)
 			return true;
 		
 
@@ -405,7 +382,7 @@ namespace RCP
 	{
 		switch (prim.type)
 		{
-		case Primitive::POINT:
+		case Primitive::PT_POINT:
 			{
 				const Vector4& pos = prim.vertex[0].pos;
 				//被裁减
@@ -414,12 +391,12 @@ namespace RCP
 				prims[0] = prim;
 				break;
 			}
-		case Primitive::LINE:
+		case Primitive::PT_LINE:
 			{
 				clipingLine(prim,prims[0]);
 				break;
 			}
-		case Primitive::TRIANGLE:
+		case Primitive::PT_TRIANGLE:
 			{
 				clipingTriangle(prim,prims);
 				break;
@@ -432,19 +409,19 @@ namespace RCP
 
 	void DefaultPipeline::rasterize(Primitive& prim)
 	{
-		if (prim.type == Primitive::ERROR)
+		if (prim.type == Primitive::PT_ERROR)
 			return;
 
 		unsigned int num = 0;
 		switch(prim.type)
 		{
-		case Primitive::POINT:
+		case Primitive::PT_POINT:
 			num = 1;
 			break;
-		case Primitive::LINE:
+		case Primitive::PT_LINE:
 			num = 2;
 			break;
-		case Primitive::TRIANGLE:
+		case Primitive::PT_TRIANGLE:
 			num = 3;
 			break;
 		default:
@@ -516,7 +493,7 @@ namespace RCP
 
 	void DefaultPipeline::clipingLine(const Primitive& prim,Primitive& resultPrim)
 	{
-		assert(prim.type == Primitive::LINE);
+		assert(prim.type == Primitive::PT_LINE);
 
 		Vertex vertices[2][2];
 		//使用的顶点下标
@@ -595,7 +572,7 @@ namespace RCP
 
 	void DefaultPipeline::clipingTriangle(const Primitive& prim,Primitive prims[5])
 	{
-		assert(prim.type == Primitive::TRIANGLE);
+		assert(prim.type == Primitive::PT_TRIANGLE);
 		//2组顶点，一组裁剪前一组裁剪后，交替使用
 		//三角形最多被3个面裁剪，生成6个顶点,特殊情况是，再多包含一个两个面的交点 也就是7个点
 		Vertex vertices[2][7];
@@ -692,6 +669,15 @@ namespace RCP
 
 		}
 
+	}
+
+	void DefaultPipeline::setVertexShader(VertexShader* vs)
+	{
+		mVertexShader = vs;
+	}
+	void DefaultPipeline::setPixelShader(PixelShader* ps)
+	{
+		mRasterizer.setPixelShader(ps);
 	}
 
 }
