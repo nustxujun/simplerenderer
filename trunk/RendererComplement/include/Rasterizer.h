@@ -12,10 +12,10 @@ namespace RCP
 	public :
 		Rasterizer();
 		virtual ~Rasterizer();
-		void initialize(unsigned int width, unsigned int height, PixelFormat pf );
+		void initialize(unsigned int width, unsigned int height, PixelFormat pf);
 
 		void pushPrimitive(const Primitive& pri);
-		void flush(RenderTarget* target);
+		void flush(RenderTarget* target,const RenderState& state);
 
 
 		template<class T>
@@ -57,20 +57,22 @@ namespace RCP
 		bool alphaTest(const Pixel& p);
 		bool depthTest(const Pixel& p);
 
-
-
 		void clear();
-
+		
+		template<class T>
+		bool compareOperation(const T& value1, const T& value2, CompareFunc func);
 	protected:
 
 		RenderTarget* mColorBuffer;
 		RenderTarget* mZBuffer;
 		PixelShader* mPixelShader;
 		Vector4 mScissorRect;
-		float mAlphaRef;
+		
 
 		typedef std::vector<Primitive> PrimitiveVector;
 		PrimitiveVector mPrimitiveVector;
+
+		RenderState mRenderState;
 
 
 	};

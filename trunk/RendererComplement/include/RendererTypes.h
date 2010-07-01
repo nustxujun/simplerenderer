@@ -1,6 +1,11 @@
 #ifndef _RendererTypes_H_
 #define _RendererTypes_H_
 
+/*
+	各种类型
+*/
+
+
 namespace RCP
 {
 
@@ -81,16 +86,24 @@ namespace RCP
 		PixelFormat backBufferPixelFormat;
 	};
 
+	enum CompareFunc
+	{
+		CF_NEVER,
+		CF_LESS,
+		CF_LESSEQUAL,
+		CF_EQUAL,
+		CF_GREATER,
+		CF_GREATEREQUAL,
+		CF_NOTEQUAL,
+		CF_ALWAYS,
+	};
 
 	struct RenderState
 	{
-		bool alphaTestEnable;
+		float alphaTestRef;
+		CompareFunc alphaTestFunc;
 	};
 
-	struct TexutureState
-	{
-	
-	};
 	
 	//图元类型
 	enum Primitives

@@ -1,0 +1,2 @@
+Demo_NewWorld
+通过GDI+实现的简单绘制

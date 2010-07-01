@@ -77,7 +77,7 @@ namespace RCP
 		assert(mPaitingMethod);
 		//输入流水线
 		if (mRenderQueue->isRenderDataReady())
-			mPipeline->import(mRenderQueue->postRenderData(),mRenderTarget);
+			mPipeline->import(mRenderQueue->postRenderData(),mRenderTarget,mRenderState);
 
 		//绘制道屏幕
 		mPaitingMethod->paint(mBackBuffer);

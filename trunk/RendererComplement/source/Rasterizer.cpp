@@ -24,7 +24,6 @@ namespace RCP
 		//z bufferÓ¦float32 ¶÷
 		mZBuffer = new RenderTarget(width,height,4);
 		mScissorRect= Vector4(0,0,(float)width,(float)height);
-		mAlphaRef = 0;
 
 		mPixelShader = NULL;
 	}
@@ -152,11 +151,12 @@ namespace RCP
 
 	}
 
-	void Rasterizer::flush(RenderTarget* target)
+	void Rasterizer::flush(RenderTarget* target,const RenderState& state)
 	{
 
 
 		mColorBuffer = target;
+		mRenderState = state;
 		clear();
 		
 		PrimitiveVector::iterator i,endi = mPrimitiveVector.end();
@@ -345,7 +345,7 @@ namespace RCP
 
 	bool Rasterizer::alphaTest(const Pixel& p)
 	{
-		return mAlphaRef <= p.color[0].a;
+		return compareOperation(p.color[0].a, mRenderState.alphaTestRef,mRenderState.alphaTestFunc);
 	}
 
 	bool Rasterizer::pixelTest(const Pixel& p)
@@ -374,6 +374,58 @@ namespace RCP
 	void Rasterizer::setPixelShader(PixelShader* ps)
 	{
 		mPixelShader = ps;
+	}
+
+	template<class T>
+	bool Rasterizer::compareOperation(const T& value1, const T& value2, CompareFunc func)
+	{
+		switch (func)
+		{
+		case CF_NEVER:
+			{
+				return false;
+				break;
+			}
+		case CF_LESS:
+			{
+				return value1 < value2;
+				break;
+			}
+		case CF_LESSEQUAL:
+			{
+				return value1 <= value2;
+				break;
+			}
+		case CF_GREATER:
+			{
+				return value1 > value2;
+				break;
+			}
+		case CF_NOTEQUAL:
+			{
+				return value1 != value2;
+				break;
+			}
+		case CF_EQUAL:
+			{
+				return value1 == value2 ;
+				break;
+			}
+		case CF_GREATEREQUAL:
+			{
+				return value1 >= value2;
+				break;
+			}
+		case CF_ALWAYS:
+			{
+				return true;
+				break;
+			}
+		default :
+			assert(0);
+			return false;
+		
+		}
 	}
 
 }
