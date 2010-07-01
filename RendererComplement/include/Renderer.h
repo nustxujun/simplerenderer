@@ -91,6 +91,8 @@ namespace RCP
 		Viewport mViewport;
 		//ÎÆÀí×´Ì¬
 		Sampler mSampler[8];
+		//äÖÈ¾×´Ì¬
+		RenderState mRenderState;
 
 	};
 }

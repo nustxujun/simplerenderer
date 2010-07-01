@@ -26,16 +26,16 @@ namespace RCP
 		virtual void initImpl() = 0;
 
 		//将数据填入流水线
-		void import(RenderData& data,RenderTarget* target);
+		void import(RenderData& data,RenderTarget* target, const RenderState& rs);
 		//自定义流水线方法
-		virtual void execute(const RenderData& renderData,RenderTarget* target) = 0;
+		virtual void execute(const RenderData& renderData,RenderTarget* target, const RenderState& rs) = 0;
 		//将listener之类的数据拷贝
 		void copyState(const Pipeline& pipeline);
 		//当mRenderDataList有数据时禁止拷贝状态。恩防止多线程出错？
 		//总之通过这个判断
 		bool isWorking();
 
-		const RendererParameters& getRendererParameters();
+		const RendererParameters& getRendererParameters()const ;;
 	protected:
 		//通知接受结果的单位，并删除该RenderElement
 		void notifyCompleted();

@@ -1,6 +1,10 @@
 #ifndef _GDIPainting_H_
 #define _GDIPainting_H_
 
+/*
+	通过GDI+的渲染方式
+*/
+
 #include "RendererHeader.h"
 #include "PaintingMethod.h"
 using namespace RCP;
@@ -21,7 +25,6 @@ public :
 		Graphics graphics( mhdc );
 		
 		Color newColor;
-		Pen newPen(newColor);
 		Bitmap bmp(w,h,PixelFormat32bppARGB);
 		int c;
 		for (int i = 0; i < w; ++i)

@@ -26,7 +26,7 @@ namespace RCP
 		mVertexShader = NULL;
 	}
 
-	void DefaultPipeline::execute(const RenderData& renderData,RenderTarget* target)
+	void DefaultPipeline::execute(const RenderData& renderData,RenderTarget* target, const RenderState& rs)
 	{
 
 		const RenderData::RenderElementList& elems = renderData.getRenderElementList();
@@ -47,15 +47,11 @@ namespace RCP
 		}
 
 
-		rasterization(target);
+		mRasterizer.flush(target,rs);
 		notifyCompleted();
 	}
 
 	
-	void DefaultPipeline::rasterization(RenderTarget* target)
-	{
-		mRasterizer.flush(target);
-	}
 
 	void DefaultPipeline::vertexProcessing(const RenderElement& elem, VertexVector& verVec)
 	{

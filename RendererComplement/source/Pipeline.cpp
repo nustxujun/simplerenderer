@@ -23,13 +23,13 @@ namespace RCP
 	}
 
 
-	void Pipeline::import(RenderData& data,RenderTarget* target)
+	void Pipeline::import(RenderData& data,RenderTarget* target, const RenderState& rs)
 	{
 		//如果还在渲染中。就不进行新的操作
 		if (isWorking())
 			return;
 		mRenderData = &data;
-		execute(data,target);
+		execute(data,target,rs);
 	}
 
 
@@ -43,7 +43,7 @@ namespace RCP
 		return mRenderData != NULL;
 	}
 
-	const RendererParameters& Pipeline::getRendererParameters()
+	const RendererParameters& Pipeline::getRendererParameters()const 
 	{
 		return mRendererParameters;
 	}

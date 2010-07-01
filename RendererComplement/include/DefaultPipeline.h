@@ -21,7 +21,7 @@ namespace RCP
 		virtual ~DefaultPipeline();
 
 		virtual void initImpl() ;
-		void execute(const RenderData& renderData,RenderTarget* target);
+		void execute(const RenderData& renderData,RenderTarget* target, const RenderState& rs);
 
 		void setVertexShader(VertexShader* vs);
 		void setPixelShader(PixelShader* ps);
@@ -44,8 +44,6 @@ namespace RCP
 		void rasterize(Primitive& prim);
 		void homogeneousDivide(Vertex& vert);
 		void viewportMapping(Vector4& pos,const Viewport* vp);
-		
-		void rasterization(RenderTarget* target);
 
 	private:
 		Rasterizer mRasterizer;
