@@ -259,7 +259,7 @@ namespace RCP
 				//specular.clip();
 			}
 			//temp
-			verVec[i].color = diffuse + ambient;
+			verVec[i].color[0] = diffuse + ambient;
 			verVec[i].specular = specular;
 			
 		}
@@ -439,11 +439,14 @@ namespace RCP
 
 		vert.pos *= invw;
 		vert.pos.w = invw;
-		vert.color *= invw;
+		//vert.color *= invw;
 		vert.specular *= invw;
 
 		for (unsigned int i = 0; i < 8; ++i)
+		{
 			vert.texCrood[i] *= invw;
+			vert.color[i] *= invw;
+		}
 	}
 
 	void DefaultPipeline::viewportMapping(Vector4& pos,const Viewport* vp)
@@ -466,7 +469,6 @@ namespace RCP
 
 		float scale = (0 - dist1) / (dist2 - dist1);
 
-		Interpolate(newVertex.color,vert1.color,vert2.color,scale);
 		Interpolate(newVertex.specular,vert1.specular,vert2.specular,scale);
 		Interpolate(newVertex.norm,vert1.norm,vert2.norm,scale);
 		Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
@@ -476,6 +478,8 @@ namespace RCP
 		for (unsigned int i = 0 ; i < 8; ++i)
 		{
 			Interpolate(newVertex.texCrood[i],vert1.texCrood[i],vert2.texCrood[i],scale);
+			Interpolate(newVertex.color[i],vert1.color[i],vert2.color[i],scale);
+
 		}
 
 
