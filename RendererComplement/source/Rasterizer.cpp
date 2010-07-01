@@ -33,15 +33,15 @@ namespace RCP
 	{
 		switch (pri.type)
 		{
-		case Primitive::POINT:
+		case Primitive::PT_POINT:
 			mPrimitiveVector.push_back(pri);
 			return;
 			break;
-		case Primitive::LINE:
+		case Primitive::PT_LINE:
 			mPrimitiveVector.push_back(pri);
 			return;
 			break;
-		case Primitive::TRIANGLE:
+		case Primitive::PT_TRIANGLE:
 			break;
 		default:
 			assert(0);
@@ -163,13 +163,13 @@ namespace RCP
 		{
 			switch(i->type)
 			{
-			case Primitive::POINT:
+			case Primitive::PT_POINT:
 				drawPoint(*i);
 				break;
-			case Primitive::LINE:
+			case Primitive::PT_LINE:
 				drawLine(*i);
 				break;
-			case Primitive::TRIANGLE:
+			case Primitive::PT_TRIANGLE:
 				drawTriangle(*i);
 				break;
 			default:
@@ -210,6 +210,7 @@ namespace RCP
 		Vertex point1, point2;
 		Pixel point3;
 		float ratio1,ratio2,ratio3;
+		float w;
 		for (unsigned int y = ymin; y < ymax; ++y )
 		{
 			point3.y = y;
@@ -243,13 +244,14 @@ namespace RCP
 				ratio3 = (x - point1.pos.x) / (point2.pos.x -  point1.pos.x);
 				//注意这里是 1/w
 				interpolate(point3.invw, ratio3,point1.pos.w,point2.pos.w);	
+				w = 1.0f / point3.invw;
 
 				//颜色
 				interpolate(point3.color, ratio3,point1.color,point2.color);
-				point3.color /= point3.invw;
+				point3.color *= w;
 
 				interpolate(point3.specular, ratio3,point1.specular,point2.specular);
-				point3.specular /= point3.invw;
+				point3.specular *= w;
 				
 				//需要z 
 				interpolate(point3.z, ratio3,point1.pos.z,point2.pos.z);	
@@ -266,8 +268,10 @@ namespace RCP
 						//这里的u v实际是 U/w V/w;
 						interpolate(point3.u,ratio3,point1.texCrood[i].x,point2.texCrood[i].x);
 						interpolate(point3.v,ratio3,point1.texCrood[i].y,point2.texCrood[i].y);
+						point3.u *= w;
+						point3.v *= w;
 						//先這裡就不混合了，到時候還要給混合公式
-						colorBlend = pri.sampler[i].sample(point3.u / point3.invw,point3.v/point3.invw); 
+						colorBlend = pri.sampler[i].sample(point3.u ,point3.v); 
 					}
 				}
 				//這裡也是
@@ -359,6 +363,11 @@ namespace RCP
 	void Rasterizer::interpolate(T& output,float ratio, const T& value0, const T& value1)
 	{
 		output = (value1 - value0) * ratio  + value0;
+	}
+
+	void Rasterizer::setPixelShader(PixelShader* ps)
+	{
+		mPixelShader = ps;
 	}
 
 }

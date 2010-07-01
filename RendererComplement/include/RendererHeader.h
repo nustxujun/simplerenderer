@@ -13,5 +13,4 @@
 #include "Texture.h"
 #include "TextureUtil.h"
 
-
 #endif//_RendererHead_H_

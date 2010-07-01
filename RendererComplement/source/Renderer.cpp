@@ -22,7 +22,7 @@ namespace RCP
 
 
 	//初始化渲染器，启动渲染器最低标准
-	void Renderer::initialize(RendererParameters rp)
+	void Renderer::initialize(const RendererParameters& rp)
 	{
 		//渲染流水线
 		mRenderQueue = new RenderQueue();
@@ -162,7 +162,16 @@ namespace RCP
 
 	void Renderer::setPaintingMethod(PaintingMethod* pm)
 	{
+		assert(pm);
 		mPaitingMethod = pm;
+	}
+
+	void Renderer::setPipeline(Pipeline* pl)
+	{
+		assert(pl);
+		pl->initialize(mPipeline->getRendererParameters());
+		mPipeline = pl;
+
 	}
 
 	void Renderer::setLight(unsigned int index,const Light& l)

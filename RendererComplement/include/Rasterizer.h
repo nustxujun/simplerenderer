@@ -24,6 +24,8 @@ namespace RCP
 		template<class T>
 		void interpolate(T& output,float ratio, const T& value0, const T& value1);
 
+		void setPixelShader(PixelShader* ps);
+
 
 	protected:
 		inline bool fequal(float a, float b,float epslon)
