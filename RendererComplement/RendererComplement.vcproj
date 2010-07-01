@@ -350,6 +350,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\Sampler.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Sampler.h"
+					>
+				</File>
+				<File
 					RelativePath=".\source\TextureUtil.cpp"
 					>
 				</File>

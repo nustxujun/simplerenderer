@@ -44,6 +44,7 @@ namespace RCP
 	class RenderTarget;
 	class Resource;
 	class ResourceManager;
+	class Sampler;
 	class SharedPtr;
 	class Texture;
 	class TextureManager;

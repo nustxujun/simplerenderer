@@ -11,9 +11,9 @@ namespace RCP
 	{}
 
 	void RenderData::insertRenderElement(unsigned int offset ,unsigned int c, Primitives type, VertexBuffer* vb, 
-		const Matrix4X4 world[TS_BASALNUM], Texture* tex[8], IndexBuffer* ib,const Material& mat,const Light light[8],const Viewport& vp)
+		const Matrix4X4 world[TS_BASALNUM],const Sampler spl[8], IndexBuffer* ib,const Material& mat,const Light light[8],const Viewport& vp)
 	{
-		mRenderElementList.push_back(RenderElement(offset,c,type,vb,world,tex,ib,mat,light,vp));
+		mRenderElementList.push_back(RenderElement(offset,c,type,vb,world,spl,ib,mat,light,vp));
 	}
 
 	void RenderData::junk()

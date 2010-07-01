@@ -106,7 +106,7 @@ namespace RCP
 			interpolate(newVertex.color,ratio,resultPri.vertex[0].color,resultPri.vertex[2].color);
 			interpolate(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
 			for (unsigned int i = 0; i < 8 ; ++i)
-				if (pri.tex[i] != NULL)//有纹理的话
+				if (pri.sampler[i].texture != NULL)//有纹理的话
 					interpolate(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
 
 			//分解成两个平底三角形
@@ -227,7 +227,7 @@ namespace RCP
 			interpolate(point2.specular,ratio2,pri.vertex[1 - offset].specular,pri.vertex[2].specular);
 
 			for (unsigned int i = 0; i < 8; ++i)
-				if (pri.tex[i] != NULL)
+				if (pri.sampler[i].texture != NULL)
 				{
 					interpolate(point1.texCrood[i],ratio1,pri.vertex[0].texCrood[i],pri.vertex[2 - offset].texCrood[i]);
 					interpolate(point2.texCrood[i],ratio2,pri.vertex[1 - offset].texCrood[i],pri.vertex[2].texCrood[i]);
@@ -259,18 +259,32 @@ namespace RCP
 				Colour colorBlend;
 				for (unsigned int i = 0; i < 8; ++i)
 				{
-					if (pri.tex[i] != NULL)
+					if (pri.sampler[i].texture != NULL)
 					{
+						if (mPixelShader)
+							mPixelShader->sampler[i] = pri.sampler[i];
 						//这里的u v实际是 U/w V/w;
 						interpolate(point3.u,ratio3,point1.texCrood[i].x,point2.texCrood[i].x);
 						interpolate(point3.v,ratio3,point1.texCrood[i].y,point2.texCrood[i].y);
 						//先這裡就不混合了，到時候還要給混合公式
-						colorBlend = addressTex(pri.tex[i],point3.u / point3.invw, point3.v/point3.invw);
+						colorBlend = pri.sampler[i].sample(point3.u / point3.invw,point3.v/point3.invw); 
 					}
 				}
 				//這裡也是
-				if (pri.tex[0] != NULL)
+				if (pri.sampler[0].texture != NULL)
 				point3.color *= colorBlend;
+
+				if (mPixelShader != NULL)
+				{
+					point3.color = mPixelShader->shade(point3);
+				}
+				else//加高光运算
+				{
+					if (pri.sampler[0].texture != NULL)
+						point3.color *= colorBlend;
+					point3.color = (point3.color + point3.specular).clamp();
+				}
+
 				drawImpl(point3);
 			}
 		}
@@ -288,10 +302,8 @@ namespace RCP
 			return;
 
 		unsigned int color;
-		if (mPixelShader != NULL)
-			color = mPixelShader->shade(p).get32BitARGB();
-		else
-			color = (p.color + p.specular).clamp().get32BitARGB();
+
+		color = p.color.get32BitARGB();
 
 		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mColorBuffer->getColourDepth());
 		mColorBuffer->seek(pos);
@@ -348,43 +360,5 @@ namespace RCP
 	{
 		output = (value1 - value0) * ratio  + value0;
 	}
-
-	Colour Rasterizer::addressTex(const Texture* tex,float u,float v)
-	{
-		assert(tex);
-		assert( u < 1.0f && v < 1.0f);
-
-		//先不管mipmap
-		RenderTarget* rt = tex->getRenderTarget(0);
-		size_t pos = getBufferPos( (unsigned int )((rt->getWidth()-1) * u),
-			(unsigned int )((rt->getHeight()-1) * v), rt->getWidth(),rt->getColourDepth());
-		int c;
-		rt->seek(pos);
-		rt->read(&c,sizeof(int));
-		Colour color;
-		switch (tex->getPixelFormat())
-		{
-		case PF_A8R8G8B8 :
-		case PF_X8R8G8B8 :
-			color.getFromARGB(c);
-			break;
-		case PF_A8B8G8R8 :
-		case PF_X8B8G8R8 :
-			color.getFromABGR(c);
-			break;
-		case PF_B8G8R8A8 :
-			color.getFromBGRA(c);
-			break;
-		case PF_R8G8B8A8 :
-			color.getFromRGBA(c);
-			break;
-		default:
-			assert(0);
-		}
-
-		return color;
-	}
-
-
 
 }

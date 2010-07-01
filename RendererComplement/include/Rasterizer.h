@@ -8,12 +8,7 @@ namespace RCP
 {
 	class Rasterizer
 	{
-	public:
-		class PixelShader
-		{
-		public:
-			virtual Colour shade(const Pixel& pixel) = 0;
-		};
+
 	public :
 		Rasterizer();
 		virtual ~Rasterizer();
@@ -61,7 +56,6 @@ namespace RCP
 		bool depthTest(const Pixel& p);
 
 
-		Colour addressTex(const Texture* tex,float u,float v);
 
 		void clear();
 

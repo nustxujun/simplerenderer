@@ -96,7 +96,7 @@ namespace RCP
 		Matrix4X4 mat[TS_BASALNUM];
 		memcpy(mat,mMatrices,sizeof (Matrix4X4)*TS_BASALNUM);
 		mRenderQueue->createRenderElement(beginPrimitiveOffset,
-			primitiveCount,type,mVertexBuffer,mat,mTexture,mLight,mIndexBuffer,mMaterial,mViewport);
+			primitiveCount,type,mVertexBuffer,mat,mSampler,mLight,mIndexBuffer,mMaterial,mViewport);
 
 		//恢复到初始，防止被再用
 		mVertexBuffer = NULL;
@@ -121,7 +121,13 @@ namespace RCP
 	{
 		assert(index < 8);
 		assert(tex);
-		mTexture[index] = tex;
+		mSampler[index].texture = tex;
+	}
+
+	void Renderer::SetTextureState(unsigned int index, const TextureState& ts)
+	{
+		assert(index < 8);
+		mSampler[index].setTextureState(ts);
 	}
 
 	void Renderer::setMaterial(Material mat)
