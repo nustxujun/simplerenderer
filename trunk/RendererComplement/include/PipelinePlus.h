@@ -3,6 +3,7 @@
 
 #include"Prerequisites.h"
 #include "Colour.h"
+#include "Sampler.h"
 
 namespace RCP
 {
@@ -56,7 +57,7 @@ namespace RCP
 		unsigned int type;
 
 		Vertex vertex[3];
-		Texture* tex[8];
+		Sampler sampler[8];
 		const Viewport* vp;
 		//是正三角1，还是倒三角-1，还是没分0
 		int triType;
@@ -66,7 +67,7 @@ namespace RCP
 			triType(0),
 			vp(0)
 		{
-			memset(tex,0,sizeof(Texture*) * 8);
+			
 		}
 
 		const Primitive& operator = (const Primitive& prim)
@@ -81,10 +82,26 @@ namespace RCP
 				vertex[i] = prim.vertex[i];
 			}
 
-			memcpy(tex,prim.tex,sizeof(Texture*) * 8);
+			for (short i = 0; i < 8;++i)
+				sampler[i] = prim.sampler[i];
 			return *this;
 		}
 
 	};
+
+	class VertexShader
+	{
+	public:
+		virtual void execute(Vertex& ver) = 0;
+	};
+
+	class PixelShader
+	{
+	public:
+		virtual Colour shade(const Pixel& pixel) = 0;
+		
+		Sampler sampler[8];
+	};
+
 }
 #endif//_PipelinePlus_H_

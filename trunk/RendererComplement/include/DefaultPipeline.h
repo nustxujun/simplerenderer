@@ -15,11 +15,6 @@ namespace RCP
 		typedef std::list<VertexVector> VertexList;
 
 	public:
-		class VertexShader
-		{
-		public:
-			virtual void execute(Vertex& ver) = 0;
-		};
 
 	public:
 		DefaultPipeline();

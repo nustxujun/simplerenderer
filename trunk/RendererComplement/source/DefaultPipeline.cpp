@@ -194,11 +194,10 @@ namespace RCP
 			//纹理坐标
 			for (unsigned char k = 0; k < 8; ++k )
 			{
-				if (texCroodDataOffset[k] != -1 && elem.texture[k] != NULL)
+				if (texCroodDataOffset[k] != -1 && elem.sampler[k].texture != NULL)
 				{
 					mDataCollector.getData(verVec[i].texCrood[k],vertexData + texCroodDataOffset[k]);
-					const TextureState& ts = elem.texture[k]->getTextureState();
-					elem.texture[k]->assignUV(verVec[i].texCrood[k].x,verVec[i].texCrood[k].y);					
+					elem.sampler[k].assignUV(verVec[i].texCrood[k].x,verVec[i].texCrood[k].y);					
 				}
 			}
 
@@ -346,7 +345,13 @@ namespace RCP
 		{
 			prim.type = type;
 			prim.vp = &elem.viewport;
-			memcpy(prim.tex, elem.texture,sizeof(Texture*) * 8);
+			
+			for (short j = 0; j < 8; ++j)
+			{
+				prim.sampler[j] = elem.sampler[j];
+			}
+			
+			
 			//输入顶点
 			for (unsigned int j = 0; j < vertexNumInGeom; ++j)
 			{

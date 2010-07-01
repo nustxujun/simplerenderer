@@ -75,81 +75,71 @@ namespace RCP
 		return mLevels;
 	}
 
-	const TextureState& Texture::getTextureState()const
-	{
-		return mTextureState;
-	}
+	//void Texture::assignUV(float& u,float& v)const 
+	//{
+	//	TextureAddresingMode mode[2];
+	//	mode[0] = mTextureState.addresingModeU;
+	//	mode[1] = mTextureState.addresingModeV;
 
-	void Texture::setTextureState(const TextureState& state)
-	{
-		mTextureState = state;
-	}
-
-	void Texture::assignUV(float& u,float& v)const 
-	{
-		TextureAddresingMode mode[2];
-		mode[0] = mTextureState.addresingModeU;
-		mode[1] = mTextureState.addresingModeV;
-
-		float value[2];
-		value[0] = u;	
-		value[1] = v;
-		int vn;
-		float d;
-		for (int i = 0; i < 2; ++i)
-		{
-			if (value[i] < 1.0f && value[i] >= 0.0f)
-				continue;
-			vn = (int)value[i];
-			d = value[i] - vn;
-			if (d < 0)
-				d = 1.0f + d;
-			vn %= 2;
-			switch (mode[i])
-			{
-			case TAM_WRAP:
-				{
-					
-					value[i] = d;
-					break;
-				}
-			case TAM_MIRROR:
-				{
-					if (vn == 0)
-						value[i] = 1 - d;
-					else
-						value[i] =d;
-					break;
-				}
-			case TAM_CLAMP:
-				{
-					if (value[i] > 1.0f)
-						value[i] = 1;
-					if (value[i] < 0.f)
-						value[i] = 0;
-					break;
-				}
-			case TAM_BORDER:
-				{
-					if (value[i] > 1.0f || value[i] < 0.f)
-						value[i] = 0;
-					
-					break;
-				}
-			case TAM_MIRRORONCE:
-				{
-					if (value[i] > 1.0f || value[i] < 0.f)
-						value[i] = 1 - d;
-					
-					break;
-				}
-			}
-		}
+	//	float value[2];
+	//	value[0] = u;	
+	//	value[1] = v;
+	//	int vn;
+	//	float d;
+	//	for (int i = 0; i < 2; ++i)
+	//	{
+	//		if (value[i] < 1.0f && value[i] >= 0.0f)
+	//			continue;
+	//		vn = (int)value[i];
+	//		d = value[i] - vn;
+	//		if (d < 0)
+	//			d = 1.0f + d;
+	//		vn %= 2;
+	//		switch (mode[i])
+	//		{
+	//		case TAM_WRAP:
+	//			{
+	//				
+	//				value[i] = d;
+	//				break;
+	//			}
+	//		case TAM_MIRROR:
+	//			{
+	//				if (vn == 0)
+	//					value[i] = 1 - d;
+	//				else
+	//					value[i] =d;
+	//				break;
+	//			}
+	//		case TAM_CLAMP:
+	//			{
+	//				if (value[i] > 1.0f)
+	//					value[i] = 1;
+	//				if (value[i] < 0.f)
+	//					value[i] = 0;
+	//				break;
+	//			}
+	//		case TAM_BORDER:
+	//			{
+	//				if (value[i] > 1.0f || value[i] < 0.f)
+	//					value[i] = 0;
+	//				
+	//				break;
+	//			}
+	//		case TAM_MIRRORONCE:
+	//			{
+	//				if (value[i] > 1.0f || value[i] < 0.f)
+	//					value[i] = 1 - d;
+	//				
+	//				break;
+	//			}
+	//		}
+	//	}
 
 
-		u = value[0];
-		v = value[1];
-	}
+	//	u = value[0];
+	//	v = value[1];
+	//}
 
 
 }

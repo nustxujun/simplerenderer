@@ -7,7 +7,7 @@
 #include "Material.h"
 #include "Light.h"
 #include "Viewport.h"
-
+#include "Sampler.h"
 
 
 namespace RCP
@@ -47,6 +47,7 @@ namespace RCP
 		void setVertexBuffer(VertexBuffer* vb);
 		void setIndexBuffer(IndexBuffer* ib);
 		void setTexture(unsigned int index,Texture* tex);
+		void SetTextureState(unsigned int index, const TextureState& ts);
 		void setMaterial(Material mat);
 		void setMatrix(TransformStateType type,const Matrix4X4& mat);
 		void setPaintingMethod(PaintingMethod* pm);
@@ -89,6 +90,9 @@ namespace RCP
 		Light mLight[8];
 		//ÊÓ¿Ú
 		Viewport mViewport;
+		//ÎÆÀí×´Ì¬
+		Sampler mSampler[8];
+
 	};
 }
 

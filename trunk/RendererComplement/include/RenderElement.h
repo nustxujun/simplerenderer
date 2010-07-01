@@ -6,6 +6,7 @@
 #include "RendererTypes.h"
 #include "Material.h"
 #include "Light.h"
+#include "Sampler.h"
 #include "Viewport.h"
 namespace RCP
 {
@@ -16,7 +17,7 @@ namespace RCP
 		IndexBuffer* indexBuffer;
 		unsigned int beginPrimitiveOffset;
 		unsigned int primitiveCount;
-		Texture* texture[8];
+		Sampler sampler[8];
 		Material material;
 		Matrix4X4 matWorld[TS_BASALNUM];
 		Primitives ptType;
@@ -24,7 +25,7 @@ namespace RCP
 		Viewport viewport;
 
 		RenderElement(unsigned int offset ,unsigned int c, Primitives type, VertexBuffer* vb, const Matrix4X4 world[TS_BASALNUM],
-			Texture* tex[4],IndexBuffer* ib,const Material& mat,const Light l[8],const Viewport& vp):
+			const Sampler spl[8],IndexBuffer* ib,const Material& mat,const Light l[8],const Viewport& vp):
 			beginPrimitiveOffset(offset),
 			primitiveCount(c),
 			vertexBuffer(vb),
@@ -33,10 +34,13 @@ namespace RCP
 			ptType(type),
 			viewport(vp)
 		{
-			memcpy(texture,tex,sizeof(Texture*)*8);
+			
 			memcpy(matWorld,world,sizeof(Matrix4X4)*TS_BASALNUM);	
 			for (unsigned int i = 0; i < 8 ; ++i)
+			{
 				light[i] = l[i];
+				sampler[i] = spl[i];
+			}
 		}
 
 
