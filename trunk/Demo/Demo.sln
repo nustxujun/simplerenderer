@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo_NewWorld", "Demo_NewWorld\Demo_NewWorld.vcproj", "{8C05419A-92C0-4DAF-AEDF-892F2C6878C5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2FD5B030-365E-431A-8061-747A08B88A45} = {2FD5B030-365E-431A-8061-747A08B88A45}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendererComplement", "..\RendererComplement\RendererComplement.vcproj", "{2FD5B030-365E-431A-8061-747A08B88A45}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C05419A-92C0-4DAF-AEDF-892F2C6878C5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8C05419A-92C0-4DAF-AEDF-892F2C6878C5}.Debug|Win32.Build.0 = Debug|Win32
+		{8C05419A-92C0-4DAF-AEDF-892F2C6878C5}.Release|Win32.ActiveCfg = Release|Win32
+		{8C05419A-92C0-4DAF-AEDF-892F2C6878C5}.Release|Win32.Build.0 = Release|Win32
+		{2FD5B030-365E-431A-8061-747A08B88A45}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2FD5B030-365E-431A-8061-747A08B88A45}.Debug|Win32.Build.0 = Debug|Win32
+		{2FD5B030-365E-431A-8061-747A08B88A45}.Release|Win32.ActiveCfg = Release|Win32
+		{2FD5B030-365E-431A-8061-747A08B88A45}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
