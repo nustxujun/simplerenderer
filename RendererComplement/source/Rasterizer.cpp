@@ -103,12 +103,13 @@ namespace RCP
 			interpolate(newVertex.pos,ratio,resultPri.vertex[0].pos,resultPri.vertex[2].pos);
 			newVertex.pos.y = resultPri.vertex[1].pos.y;
 			interpolate(newVertex.norm,ratio,resultPri.vertex[0].norm,resultPri.vertex[2].norm);
-			interpolate(newVertex.color,ratio,resultPri.vertex[0].color,resultPri.vertex[2].color);
 			interpolate(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
 			for (unsigned int i = 0; i < 8 ; ++i)
+			{
+				interpolate(newVertex.color[i],ratio,resultPri.vertex[0].color[i],resultPri.vertex[2].color[i]);
 				if (pri.sampler[i].texture != NULL)//有纹理的话
 					interpolate(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
-
+			}
 			//分解成两个平底三角形
 			Primitive up,down;
 			up = down = resultPri;
@@ -220,19 +221,23 @@ namespace RCP
 
 			interpolate(point1.pos,ratio1,pri.vertex[0].pos,pri.vertex[2 - offset].pos);
 			interpolate(point2.pos,ratio2,pri.vertex[1 - offset].pos,pri.vertex[2].pos);
-			interpolate(point1.color,ratio1,pri.vertex[0].color,pri.vertex[2 - offset].color);
-			interpolate(point2.color,ratio2,pri.vertex[1 - offset].color,pri.vertex[2].color);
+			
 			interpolate(point1.norm,ratio1,pri.vertex[0].norm,pri.vertex[2 - offset].norm);
 			interpolate(point2.norm,ratio2,pri.vertex[1 - offset].norm,pri.vertex[2].norm);
 			interpolate(point1.specular,ratio1,pri.vertex[0].specular,pri.vertex[2 - offset].specular);
 			interpolate(point2.specular,ratio2,pri.vertex[1 - offset].specular,pri.vertex[2].specular);
 
 			for (unsigned int i = 0; i < 8; ++i)
+			{
 				if (pri.sampler[i].texture != NULL)
 				{
 					interpolate(point1.texCrood[i],ratio1,pri.vertex[0].texCrood[i],pri.vertex[2 - offset].texCrood[i]);
 					interpolate(point2.texCrood[i],ratio2,pri.vertex[1 - offset].texCrood[i],pri.vertex[2].texCrood[i]);
+				
 				}
+				interpolate(point1.color[i],ratio1,pri.vertex[0].color[i],pri.vertex[2 - offset].color[i]);
+				interpolate(point2.color[i],ratio2,pri.vertex[1 - offset].color[i],pri.vertex[2].color[i]);
+			}
 
 
 			xmin = ceil(point1.pos.x);
@@ -246,9 +251,7 @@ namespace RCP
 				interpolate(point3.invw, ratio3,point1.pos.w,point2.pos.w);	
 				w = 1.0f / point3.invw;
 
-				//颜色
-				interpolate(point3.color, ratio3,point1.color,point2.color);
-				point3.color *= w;
+
 
 				interpolate(point3.specular, ratio3,point1.specular,point2.specular);
 				point3.specular *= w;
@@ -261,6 +264,9 @@ namespace RCP
 				Colour colorBlend;
 				for (unsigned int i = 0; i < 8; ++i)
 				{
+									//颜色
+					interpolate(point3.color[i], ratio3,point1.color[i],point2.color[i]);
+					point3.color[i] *= w;
 					if (pri.sampler[i].texture != NULL)
 					{
 						if (mPixelShader)
@@ -276,17 +282,17 @@ namespace RCP
 				}
 				//這裡也是
 				if (pri.sampler[0].texture != NULL)
-				point3.color *= colorBlend;
+				point3.color[0] *= colorBlend;
 
 				if (mPixelShader != NULL)
 				{
-					point3.color = mPixelShader->shade(point3);
+					point3.color[0] = mPixelShader->shade(point3);
 				}
 				else//加高光运算
 				{
 					if (pri.sampler[0].texture != NULL)
-						point3.color *= colorBlend;
-					point3.color = (point3.color + point3.specular).clamp();
+						point3.color[0] *= colorBlend;
+					point3.color[0] = (point3.color[0] + point3.specular).clamp();
 				}
 
 				drawImpl(point3);
@@ -307,7 +313,7 @@ namespace RCP
 
 		unsigned int color;
 
-		color = p.color.get32BitARGB();
+		color = p.color[0].get32BitARGB();
 
 		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mColorBuffer->getColourDepth());
 		mColorBuffer->seek(pos);
@@ -339,7 +345,7 @@ namespace RCP
 
 	bool Rasterizer::alphaTest(const Pixel& p)
 	{
-		return mAlphaRef <= p.color.a;
+		return mAlphaRef <= p.color[0].a;
 	}
 
 	bool Rasterizer::pixelTest(const Pixel& p)
