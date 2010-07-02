@@ -6,6 +6,7 @@
 #include "VertexBufferManager.h"
 #include "IndexBufferManager.h"
 #include "TextureManager.h"
+#include "FrameBuffer.h"
 
 namespace RCP 
 {
@@ -34,6 +35,12 @@ namespace RCP
 		mBackBuffer = new BackBuffer();
 		mBackBuffer->initialize(rp.backBufferWidth,rp.backBufferHeight,rp.backBufferPixelFormat);
 		mRenderTarget = mBackBuffer->getRenderTarget();
+		mAssistantBuffer[0] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
+		mAssistantBuffer[1] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
+		mFrameBuffer = new FrameBuffer(rp.backBufferWidth,rp.backBufferHeight);
+		mFrameBuffer->setBuffer(BT_COLOUR,mRenderTarget);
+		mFrameBuffer->setBuffer(BT_DEPTH,mAssistantBuffer[0]);
+		mFrameBuffer->setBuffer(BT_STENCIL,mAssistantBuffer[1]);
 
 		//绘制方式
 		mPaitingMethod = NULL;
@@ -89,8 +96,9 @@ namespace RCP
 		assert(mIsInitialized);
 		assert(mPaitingMethod);
 		//输入流水线
+		mFrameBuffer->clear(BT_DEPTH,1.0f);
 		if (mRenderQueue->isRenderDataReady())
-			mPipeline->import(mRenderQueue->postRenderData(),mRenderTarget,mRenderState);
+			mPipeline->import(mRenderQueue->postRenderData(),mFrameBuffer,mRenderState);
 
 		//绘制道屏幕
 		mPaitingMethod->paint(mBackBuffer);

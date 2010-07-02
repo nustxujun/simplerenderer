@@ -94,6 +94,10 @@ namespace RCP
 		Sampler mSampler[8];
 		//äÖÈ¾×´Ì¬
 		RenderState mRenderState;
+		//frameBuffer
+		FrameBuffer* mFrameBuffer;
+		//assistantBuffer,ÔÝÊ±ÊÇz + stencil
+		RenderTarget* mAssistantBuffer[2];
 
 	};
 }

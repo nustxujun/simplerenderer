@@ -15,7 +15,7 @@ namespace RCP
 		void initialize(unsigned int width, unsigned int height, PixelFormat pf);
 
 		void pushPrimitive(const Primitive& pri);
-		void flush(RenderTarget* target,const RenderState& state);
+		void flush(FrameBuffer* fb,const RenderState& state);
 
 
 		template<class T>
@@ -51,7 +51,7 @@ namespace RCP
 		void drawTriangle(const Primitive& pri);
 		void drawImpl(const Pixel& p);
 
-		size_t getBufferPos(unsigned int x, unsigned int y, unsigned int width, unsigned int colorDepth);
+
 		bool pixelTest(const Pixel& p);
 		bool scissorTest(const Pixel& p);
 		bool stencilTest(const Pixel& p,bool zTest);
@@ -67,9 +67,7 @@ namespace RCP
 		bool compareOperation(const T& value1, const T& value2, CompareFunc func);
 	protected:
 
-		RenderTarget* mColorBuffer;
-		RenderTarget* mZBuffer;
-		RenderTarget* mStencilBuffer;
+		FrameBuffer* mCurrentFrameBuffer;
 		PixelShader* mPixelShader;
 		Vector4 mScissorRect;
 		

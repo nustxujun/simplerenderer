@@ -1,31 +1,23 @@
 #include "Rasterizer.h"
 #include "Rendertarget.h"
 #include "Texture.h"
+#include "FrameBuffer.h"
 namespace RCP
 {
 	const float EPSLON = 0.1f;
 
 	Rasterizer::Rasterizer():
-		mColorBuffer(NULL)
+		mCurrentFrameBuffer(NULL)
 	{
 	
 	}
 
 	Rasterizer::~Rasterizer()
 	{
-		SAFE_DELETE(mColorBuffer);
-		SAFE_DELETE(mZBuffer);
 	}
 
 	void Rasterizer::initialize(unsigned int width, unsigned int height, PixelFormat pf)
 	{
-		//unsigned int colourDepth = PixelUtil::getNumElemBytes(pf);
-		//mColorBuffer = new RenderTarget(width, height, colourDepth);
-		//z buffer应float32 恩
-		mZBuffer = new RenderTarget(width,height,4);
-		mStencilBuffer = new RenderTarget(width,height,4);
-		mScissorRect= Vector4(0,0,(float)width,(float)height);
-
 		mPixelShader = NULL;
 	}
 
@@ -134,50 +126,11 @@ namespace RCP
 		}
 	}
 
-	void Rasterizer::clear(const Colour& color)
-	{
-		assert(mColorBuffer);
-		mColorBuffer->seek(0);
-
-		unsigned int num = mZBuffer->getWidth() * mZBuffer->getHeight();
-		unsigned int c = color.get32BitARGB();
-		for (unsigned int i = 0; i < num; ++i)
-		{
-			mColorBuffer->write(&c,sizeof(int));
-		}
-
-	}
-
-	void Rasterizer::clear(float z)
-	{
-		assert(mZBuffer);
-		mZBuffer->seek(0);
-
-		unsigned int num = mZBuffer->getWidth() * mZBuffer->getHeight();
-		for (unsigned int i = 0; i < num; ++i)
-		{
-			mColorBuffer->write(&z,sizeof(float));
-		}
-
-	}
-
-	void Rasterizer::clearStencil(unsigned int stencil)
-	{
-		assert(mZBuffer);
-		mStencilBuffer->seek(0);
-
-		unsigned int num = mStencilBuffer->getWidth() * mStencilBuffer->getHeight();
-		for (unsigned int i = 0; i < num; ++i)
-		{
-			mStencilBuffer->write(&stencil,sizeof(unsigned int));
-		}
-	}
-
-	void Rasterizer::flush(RenderTarget* target,const RenderState& state)
+	void Rasterizer::flush(FrameBuffer* fb,const RenderState& state)
 	{
 
 
-		mColorBuffer = target;
+		mCurrentFrameBuffer = fb;
 		mRenderState = state;
 		
 		PrimitiveVector::iterator i,endi = mPrimitiveVector.end();
@@ -201,7 +154,7 @@ namespace RCP
 			//copyToTarget(target);
 			//clear();
 		}
-		mColorBuffer = NULL;
+		mCurrentFrameBuffer = NULL;
 		mPrimitiveVector.clear();
 
 	}
@@ -322,42 +275,26 @@ namespace RCP
 		
 	}
 
-	size_t Rasterizer::getBufferPos(unsigned int x, unsigned int y, unsigned int width, unsigned int colorDepth)
-	{
-		return (x + y * width) * colorDepth;
-	}
-
 	void Rasterizer::drawImpl(const Pixel& p)
 	{
 		if (!pixelTest(p))
 			return;
 
 		unsigned int color;
-
 		color = p.color[0].get32BitARGB();
-
-		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mColorBuffer->getColourDepth());
-		mColorBuffer->seek(pos);
-		mColorBuffer->write(&color,sizeof(color));
-		//zbuffer
-		pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mZBuffer->getColourDepth());
-
+		mCurrentFrameBuffer->setValue(BT_COLOUR,p.x,p.y,color);
 	}
 
 	bool Rasterizer::depthTest(const Pixel& p)
 	{
 		if (!mRenderState.zTest)
 			return true;
-		float z = 0;
-		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mZBuffer->getColourDepth());
-		mZBuffer->seek(pos);
-		mZBuffer->read(&z,sizeof (z));
+		float z ;
+		mCurrentFrameBuffer->getValue(z,BT_DEPTH,p.x,p.y);
 
 		if (mRenderState.zWrite)
 		{
-			mZBuffer->seek(pos);
-			//其实已经确定好是float.....还要查询有点多余
-			mZBuffer->write(&p.z,4);
+			mCurrentFrameBuffer->setValue(BT_DEPTH,p.x,p.y,p.z);
 		}
 		return p.z < z;
 
@@ -410,11 +347,8 @@ namespace RCP
 
 	bool Rasterizer::stencilTest(const Pixel& p,bool zTest)
 	{
-		unsigned int cur;
-		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mZBuffer->getColourDepth());
-		mStencilBuffer->seek(pos);
-		mStencilBuffer->read(&cur,sizeof (cur));
-		mStencilBuffer->seek(pos);
+		unsigned int cur ;
+		mCurrentFrameBuffer->getValue(cur,BT_STENCIL,p.x,p.y);
 
 		bool result = compareOperation (cur & mRenderState.stencilMask ,
 			mRenderState.stencilRef & mRenderState.stencilMask,mRenderState.stencilTestFunc);
@@ -425,13 +359,13 @@ namespace RCP
 			else
 				stencilOperation(cur,mRenderState.stencilRef, mRenderState.stencilZFail);
 
-			mStencilBuffer->write(&cur,sizeof (cur));
+			mCurrentFrameBuffer->setValue(BT_STENCIL,p.x,p.y,cur);
 			return true;
 		}
 		else
 		{
 			stencilOperation(cur,mRenderState.stencilRef, mRenderState.stencilFail);
-			mStencilBuffer->write(&cur,sizeof (cur));
+			mCurrentFrameBuffer->setValue(BT_STENCIL,p.x,p.y,cur);
 			return false;
 		}
 
@@ -439,10 +373,10 @@ namespace RCP
 
 	bool Rasterizer::pixelTest(const Pixel& p)
 	{
-		if (!scissorTest(p))
-			return false;
-		//if (!alphaTest(p))
+		//if (!scissorTest(p))
 		//	return false;
+		if (!alphaTest(p))
+			return false;
 		if (!depthTest(p))
 		{
 			stencilTest(p,false);
