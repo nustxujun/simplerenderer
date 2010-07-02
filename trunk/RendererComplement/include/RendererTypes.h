@@ -98,10 +98,37 @@ namespace RCP
 		CF_ALWAYS,
 	};
 
+	enum StencilOperation
+	{
+		SO_KEEP,
+		SO_ZERO,
+		SO_REPLACE,
+		SO_INCRSAT ,
+		SO_DECRSAT ,
+		SOP_INVERT ,
+		SO_INCR ,
+		SO_DECR ,
+
+	};
+
 	struct RenderState
 	{
+		//z test
+		bool zWrite;
+		bool zTest;
+
+		//alpha test
 		float alphaTestRef;
 		CompareFunc alphaTestFunc;
+		
+		//stencil test
+		CompareFunc stencilTestFunc;
+		unsigned int stencilRef;
+		unsigned int stencilMask;
+		unsigned int stencilWriteMask;
+		StencilOperation stencilFail;
+		StencilOperation stencilPass;
+		StencilOperation stencilZFail;
 	};
 
 	

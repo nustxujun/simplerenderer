@@ -23,6 +23,7 @@ namespace RCP
 		//mColorBuffer = new RenderTarget(width, height, colourDepth);
 		//z buffer应float32 恩
 		mZBuffer = new RenderTarget(width,height,4);
+		mStencilBuffer = new RenderTarget(width,height,4);
 		mScissorRect= Vector4(0,0,(float)width,(float)height);
 
 		mPixelShader = NULL;
@@ -133,22 +134,43 @@ namespace RCP
 		}
 	}
 
-	void Rasterizer::clear()
+	void Rasterizer::clear(const Colour& color)
 	{
 		assert(mColorBuffer);
-		assert(mZBuffer);
-		
-		float value = 1.f;
-		int color = 0;
-		unsigned int num = mZBuffer->getWidth() * mZBuffer->getHeight();
-		mZBuffer->seek(0);
 		mColorBuffer->seek(0);
+
+		unsigned int num = mZBuffer->getWidth() * mZBuffer->getHeight();
+		unsigned int c = color.get32BitARGB();
 		for (unsigned int i = 0; i < num; ++i)
 		{
-			mColorBuffer->write(&color,sizeof(int));
-			mZBuffer->write(&value,sizeof(float));
+			mColorBuffer->write(&c,sizeof(int));
 		}
 
+	}
+
+	void Rasterizer::clear(float z)
+	{
+		assert(mZBuffer);
+		mZBuffer->seek(0);
+
+		unsigned int num = mZBuffer->getWidth() * mZBuffer->getHeight();
+		for (unsigned int i = 0; i < num; ++i)
+		{
+			mColorBuffer->write(&z,sizeof(float));
+		}
+
+	}
+
+	void Rasterizer::clearStencil(unsigned int stencil)
+	{
+		assert(mZBuffer);
+		mStencilBuffer->seek(0);
+
+		unsigned int num = mStencilBuffer->getWidth() * mStencilBuffer->getHeight();
+		for (unsigned int i = 0; i < num; ++i)
+		{
+			mStencilBuffer->write(&stencil,sizeof(unsigned int));
+		}
 	}
 
 	void Rasterizer::flush(RenderTarget* target,const RenderState& state)
@@ -157,7 +179,6 @@ namespace RCP
 
 		mColorBuffer = target;
 		mRenderState = state;
-		clear();
 		
 		PrimitiveVector::iterator i,endi = mPrimitiveVector.end();
 		for (i = mPrimitiveVector.begin(); i != endi; ++i)
@@ -320,17 +341,24 @@ namespace RCP
 		mColorBuffer->write(&color,sizeof(color));
 		//zbuffer
 		pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mZBuffer->getColourDepth());
-		mZBuffer->seek(pos);
-		//其实已经确定好是float.....还要查询有点多余
-		mZBuffer->write(&p.z,mZBuffer->getColourDepth());
+
 	}
 
 	bool Rasterizer::depthTest(const Pixel& p)
 	{
+		if (!mRenderState.zTest)
+			return true;
 		float z = 0;
 		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mZBuffer->getColourDepth());
 		mZBuffer->seek(pos);
 		mZBuffer->read(&z,sizeof (z));
+
+		if (mRenderState.zWrite)
+		{
+			mZBuffer->seek(pos);
+			//其实已经确定好是float.....还要查询有点多余
+			mZBuffer->write(&p.z,4);
+		}
 		return p.z < z;
 
 	}
@@ -348,14 +376,82 @@ namespace RCP
 		return compareOperation(p.color[0].a, mRenderState.alphaTestRef,mRenderState.alphaTestFunc);
 	}
 
+	void Rasterizer::stencilOperation(unsigned int& value,unsigned  int ref, StencilOperation op)
+	{
+		switch (op)
+		{
+		case SO_KEEP:
+			break;
+		case SO_ZERO:
+			value = 0;
+			break;
+		case SO_REPLACE:
+			value = ref;
+			break;
+		case SO_INCRSAT :
+			value = (value < mRenderState.stencilMask)?value +1:mRenderState.stencilMask;
+			break;
+		case SO_DECRSAT :
+			value = (value > 0)?value -1:0;
+			break;
+		case SOP_INVERT :
+			value = ~value;
+			break;
+		case SO_INCR :
+			value = (value < mRenderState.stencilMask)?value +1:0;
+			break;
+		case SO_DECR :
+			value = (value > 0)?value -1:mRenderState.stencilMask;
+			break;
+		}
+
+		value &= mRenderState.stencilWriteMask;
+	}
+
+	bool Rasterizer::stencilTest(const Pixel& p,bool zTest)
+	{
+		unsigned int cur;
+		size_t pos = getBufferPos(p.x,p.y, mColorBuffer->getWidth(), mZBuffer->getColourDepth());
+		mStencilBuffer->seek(pos);
+		mStencilBuffer->read(&cur,sizeof (cur));
+		mStencilBuffer->seek(pos);
+
+		bool result = compareOperation (cur & mRenderState.stencilMask ,
+			mRenderState.stencilRef & mRenderState.stencilMask,mRenderState.stencilTestFunc);
+		if (result)
+		{
+			if (zTest)
+				stencilOperation(cur,mRenderState.stencilRef, mRenderState.stencilPass);
+			else
+				stencilOperation(cur,mRenderState.stencilRef, mRenderState.stencilZFail);
+
+			mStencilBuffer->write(&cur,sizeof (cur));
+			return true;
+		}
+		else
+		{
+			stencilOperation(cur,mRenderState.stencilRef, mRenderState.stencilFail);
+			mStencilBuffer->write(&cur,sizeof (cur));
+			return false;
+		}
+
+	}
+
 	bool Rasterizer::pixelTest(const Pixel& p)
 	{
 		if (!scissorTest(p))
 			return false;
-		if (!alphaTest(p))
-			return false;
+		//if (!alphaTest(p))
+		//	return false;
 		if (!depthTest(p))
+		{
+			stencilTest(p,false);
 			return false;
+		}
+
+		if(!stencilTest(p,true))
+			return false;
+
 		return true;
 	}
 

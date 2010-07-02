@@ -54,10 +54,14 @@ namespace RCP
 		size_t getBufferPos(unsigned int x, unsigned int y, unsigned int width, unsigned int colorDepth);
 		bool pixelTest(const Pixel& p);
 		bool scissorTest(const Pixel& p);
+		bool stencilTest(const Pixel& p,bool zTest);
+		void stencilOperation(unsigned int& value,unsigned  int ref, StencilOperation op);
 		bool alphaTest(const Pixel& p);
 		bool depthTest(const Pixel& p);
 
-		void clear();
+		void clear(const Colour& color);
+		void clear(float z);
+		void clearStencil(unsigned int stencil);
 		
 		template<class T>
 		bool compareOperation(const T& value1, const T& value2, CompareFunc func);
@@ -65,6 +69,7 @@ namespace RCP
 
 		RenderTarget* mColorBuffer;
 		RenderTarget* mZBuffer;
+		RenderTarget* mStencilBuffer;
 		PixelShader* mPixelShader;
 		Vector4 mScissorRect;
 		

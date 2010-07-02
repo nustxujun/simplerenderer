@@ -54,6 +54,18 @@ namespace RCP
 		mIsInitialized = true;
 		mRenderState.alphaTestFunc = CF_ALWAYS;
 		mRenderState.alphaTestRef  = 0;
+		mRenderState.zWrite = true;
+		mRenderState.zTest = true;
+		mRenderState.stencilTestFunc = CF_ALWAYS;
+		mRenderState.stencilRef = 0;
+		mRenderState.stencilMask = -1;
+		mRenderState.stencilWriteMask = -1;
+		mRenderState.stencilFail = SO_KEEP;
+		mRenderState.stencilPass = SO_KEEP;
+		mRenderState.stencilZFail = SO_KEEP;
+
+
+
 	}
 
 	//设置渲染器基本属性
