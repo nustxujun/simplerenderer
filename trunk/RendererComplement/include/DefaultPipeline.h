@@ -21,7 +21,7 @@ namespace RCP
 		virtual ~DefaultPipeline();
 
 		virtual void initImpl() ;
-		void execute(const RenderData& renderData,RenderTarget* target, const RenderState& rs);
+		void execute(const RenderData& renderData,FrameBuffer* fb, const RenderState& rs);
 
 		void setVertexShader(VertexShader* vs);
 		void setPixelShader(PixelShader* ps);

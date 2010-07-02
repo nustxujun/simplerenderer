@@ -175,6 +175,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\source\FrameBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\FrameBuffer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\source\Pipeline.cpp"
 				>
 			</File>

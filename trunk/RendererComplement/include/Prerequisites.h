@@ -31,6 +31,7 @@ namespace RCP
 {
 	class BackBuffer;
 	class Colour;
+	class FrameBuffer;
 	class IndexBuffer;
 	class IndexBufferManager;
 	class Light;
