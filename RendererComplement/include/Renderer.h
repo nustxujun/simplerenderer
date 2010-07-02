@@ -52,6 +52,7 @@ namespace RCP
 		void setLight(unsigned int index,const Light& l);
 		void setViewport(const Viewport& vp);
 		void setPipeline(Pipeline* pl);
+		void setRenderState(const RenderState& rs);
 
 	private:
 		bool mIsInitialized;
