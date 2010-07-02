@@ -35,7 +35,13 @@ namespace RCP
 		//总之通过这个判断
 		bool isWorking();
 
-		const RendererParameters& getRendererParameters()const ;;
+		const RendererParameters& getRendererParameters()const ;
+
+		template<class T>
+		void clear(const T& t)
+		{
+			
+		}
 	protected:
 		//通知接受结果的单位，并删除该RenderElement
 		void notifyCompleted();
