@@ -51,8 +51,9 @@ namespace RCP
 		for (unsigned int i = 0; i < 8 ; ++i)
 			mLight[i].setEnable(false);
 		mViewport = Viewport(0,0, rp.backBufferWidth, rp.backBufferHeight,0.f,1.f);
-
 		mIsInitialized = true;
+		mRenderState.alphaTestFunc = CF_ALWAYS;
+		mRenderState.alphaTestRef  = 0;
 	}
 
 	//设置渲染器基本属性
@@ -178,6 +179,11 @@ namespace RCP
 	{
 		assert(index < 8);
 		mLight[index] = l;
+	}
+
+	void Renderer::setRenderState(const RenderState& rs)
+	{
+		mRenderState = rs;
 	}
 
 }
