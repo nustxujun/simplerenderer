@@ -26,7 +26,7 @@ namespace RCP
 		mVertexShader = NULL;
 	}
 
-	void DefaultPipeline::execute(const RenderData& renderData,FrameBuffer* fb, const RenderState& rs)
+	void DefaultPipeline::execute(const RenderData& renderData)
 	{
 		FILE* fp;
 		fp = fopen("timer.txt","a");
@@ -48,12 +48,8 @@ namespace RCP
 				verIter->resize(i->vertexBuffer->getVertexCount());//這裡就直接初始化了，下面就不再push_back了
 			vertexProcessing(*i,*verIter);
 			primitiveAssembly(*i,*verIter);
+			mRasterizer.flush(i->frameBuffer,i->renderState);
 		}
-		fprintf(fp,"%ld\n",t.getTime());
-		t.reset();
-		mRasterizer.flush(fb,rs);
-		fprintf(fp,"%ld\n\n",t.getTime());
-		fclose(fp);
 		notifyCompleted();
 
 	}

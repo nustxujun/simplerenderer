@@ -23,13 +23,13 @@ namespace RCP
 	}
 
 
-	void Pipeline::import(RenderData& data,FrameBuffer* fb, const RenderState& rs)
+	void Pipeline::import(RenderData& data)
 	{
 		//如果还在渲染中。就不进行新的操作
 		if (isWorking())
 			return;
 		mRenderData = &data;
-		execute(data,fb,rs);
+		execute(data);
 	}
 
 
