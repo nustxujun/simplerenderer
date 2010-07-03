@@ -114,8 +114,8 @@ namespace RCP
 	struct RenderState
 	{
 		//z test
-		bool zWrite;
-		bool zTest;
+		bool zWriteEnable;
+		bool zTestEnable;
 
 		//alpha test
 		float alphaTestRef;
@@ -206,6 +206,17 @@ namespace RCP
 
 		{}
 	};
+
+	//use in framebfuffer
+	enum BufferTpye
+	{
+		BT_COLOUR,
+		BT_DEPTH,
+		BT_STENCIL,
+
+		BT_COUNT
+	};
+
 
 
 

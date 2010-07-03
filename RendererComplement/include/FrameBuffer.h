@@ -6,14 +6,6 @@
 
 namespace RCP
 {
-	enum BufferTpye
-	{
-		BT_COLOUR,
-		BT_DEPTH,
-		BT_STENCIL,
-
-		BT_COUNT
-	};
 
 	class FrameBuffer
 	{
@@ -26,7 +18,7 @@ namespace RCP
 		RenderTarget* operator [](unsigned int index);
 
 		template<class T>
-		void clear(BufferTpye type, const T& t)
+		inline void clear(BufferTpye type, const T& t)
 		{
 			assert(type < BT_COUNT);
 			RenderTarget* rt = mBuffers[type];
@@ -43,7 +35,7 @@ namespace RCP
 		}
 
 		template<class T>
-		void setValue(BufferTpye type,unsigned int x, unsigned int y,const T& value)
+		inline void setValue(BufferTpye type,unsigned int x, unsigned int y,const T& value)
 		{
 			assert(type < BT_COUNT);
 			RenderTarget* rt = mBuffers[type];
@@ -58,7 +50,7 @@ namespace RCP
 		}
 
 		template<class T>
-		void getValue(T& t ,BufferTpye type,unsigned int x, unsigned int y)
+		inline void getValue(T& t ,BufferTpye type,unsigned int x, unsigned int y)
 		{
 			assert(type < BT_COUNT);
 			RenderTarget* rt = mBuffers[type];

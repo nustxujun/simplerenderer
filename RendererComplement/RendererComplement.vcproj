@@ -306,9 +306,17 @@
 				RelativePath=".\include\SharedPtr.h"
 				>
 			</File>
+			<File
+				RelativePath=".\include\Timer.h"
+				>
+			</File>
 			<Filter
 				Name="Math"
 				>
+				<File
+					RelativePath=".\include\FastAlgorithm.h"
+					>
+				</File>
 				<File
 					RelativePath=".\source\Matrix4X4.cpp"
 					>
