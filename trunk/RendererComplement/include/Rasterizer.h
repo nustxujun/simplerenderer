@@ -4,6 +4,7 @@
 #include "Prerequisites.h"
 #include "Colour.h"
 #include "PipelinePlus.h"
+#include "FrameBuffer.h"
 namespace RCP
 {
 	class Rasterizer
@@ -15,7 +16,7 @@ namespace RCP
 		void initialize(unsigned int width, unsigned int height, PixelFormat pf);
 
 		void pushPrimitive(const Primitive& pri);
-		void flush(FrameBuffer* fb,const RenderState& state);
+		void flush(const FrameBuffer& fb,const RenderState& state);
 
 
 		template<class T>
@@ -75,7 +76,7 @@ namespace RCP
 		bool compareOperation(const T& value1, const T& value2, CompareFunc func);
 	protected:
 
-		FrameBuffer* mCurrentFrameBuffer;
+		FrameBuffer mCurrentFrameBuffer;
 		PixelShader* mPixelShader;
 		Vector4 mScissorRect;
 		

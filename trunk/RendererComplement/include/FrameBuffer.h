@@ -10,6 +10,10 @@ namespace RCP
 	class FrameBuffer
 	{
 	public :
+		//注意这里如果使用默认构造，将会出现无法setBuffer的情况（长宽不对）
+		//所以正常创建请传长宽值
+		//默认构造只有在只进行拷贝的时候使用
+		FrameBuffer();
 		FrameBuffer(unsigned int w,unsigned int h);
 		~FrameBuffer();
 
@@ -17,21 +21,28 @@ namespace RCP
 
 		RenderTarget* operator [](unsigned int index);
 
+
+		/*
+			为了配合Renderer的统一渲染(渲染状态都保存到当renderNow再开始draw)
+			clear操作也作为状态延时到实际写入之前进行。
+			因此需要注意的当外部调用setValue getvalue的时候
+			如果光栅化和renderer的drawPrimitive是异步的，可能会使framebuffer提前clear;
+			因此禁止外部直接调用setValue getvalue，只能在光栅化的时候使用。
+			同样禁止向外部提供frameBuffer;
+		*/
+
 		template<class T>
-		inline void clear(BufferTpye type, const T& t)
+		void clear(BufferTpye type, const T& t)
 		{
 			assert(type < BT_COUNT);
-			RenderTarget* rt = mBuffers[type];
 
-			if (rt == NULL)
-				return;
-			assert(rt->getColourDepth() == sizeof (t));
-			size_t size = rt->getWidth() * rt->getHeight();
-			rt->seek(0);
-			for (size_t i = 0; i < size; ++i)
-			{
-				rt->write(&t,sizeof(T));
-			}
+			mClearValue[type].first = sizeof (T);
+			mClearValue[type].second = new unsigned char[mClearValue[type].first];
+			memcpy(mClearValue[type].second,&t,mClearValue[type].first);
+
+			mIsDirty = true;
+
+
 		}
 
 		template<class T>
@@ -42,6 +53,10 @@ namespace RCP
 
 			if (rt == NULL)
 				return;
+
+			if (mIsDirty)
+				clearImpl();
+
 			unsigned colorDepth = rt->getColourDepth();
 			assert(colorDepth == sizeof (value));
 			size_t pos = getBufferPos(x,y,rt->getWidth(),colorDepth);
@@ -60,6 +75,9 @@ namespace RCP
 				memset(&t,0,sizeof(T));
 				return;
 			}
+			if (mIsDirty)
+				clearImpl();
+
 			unsigned colorDepth = rt->getColourDepth();
 			assert(colorDepth == sizeof (T));
 			size_t pos = getBufferPos(x,y,rt->getWidth(),colorDepth);
@@ -73,11 +91,17 @@ namespace RCP
 		{
 			return (x + y * width) * colorDepth;
 		}
+
+		void clearImpl();
 	private:
 		RenderTarget* mBuffers[BT_COUNT];
 
 		unsigned int mWidth;
 		unsigned int mHeight;
+
+		bool mIsDirty;
+
+		std::pair<int,unsigned char*> mClearValue[BT_COUNT];
 	};
 }
 #endif//_FrameBuffer_H_

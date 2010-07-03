@@ -103,7 +103,7 @@ namespace RCP
 		assert(mPaitingMethod);
 		//输入流水线
 		if (mRenderQueue->isRenderDataReady())
-			mPipeline->import(mRenderQueue->postRenderData(),mFrameBuffer,mRenderState);
+			mPipeline->import(mRenderQueue->postRenderData());
 
 		//绘制道屏幕
 		mPaitingMethod->paint(mBackBuffer);
@@ -121,8 +121,8 @@ namespace RCP
 		assert(primitiveCount);
 		Matrix4X4 mat[TS_BASALNUM];
 		memcpy(mat,mMatrices,sizeof (Matrix4X4)*TS_BASALNUM);
-		mRenderQueue->createRenderElement(beginPrimitiveOffset,
-			primitiveCount,type,mVertexBuffer,mat,mSampler,mLight,mIndexBuffer,mMaterial,mViewport);
+		mRenderQueue->createRenderElement(beginPrimitiveOffset,primitiveCount,type,mVertexBuffer,
+			mat,mSampler,mLight,mIndexBuffer,mMaterial,mViewport,mRenderState,*mFrameBuffer);
 
 		//恢复到初始，防止被再用
 		mVertexBuffer = NULL;

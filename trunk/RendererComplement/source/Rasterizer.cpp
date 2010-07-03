@@ -6,8 +6,7 @@ namespace RCP
 {
 	const float EPSLON = 0.1f;
 
-	Rasterizer::Rasterizer():
-		mCurrentFrameBuffer(NULL)
+	Rasterizer::Rasterizer()
 	{
 	
 	}
@@ -126,7 +125,7 @@ namespace RCP
 		}
 	}
 
-	void Rasterizer::flush(FrameBuffer* fb,const RenderState& state)
+	void Rasterizer::flush(const FrameBuffer& fb,const RenderState& state)
 	{
 
 
@@ -154,7 +153,7 @@ namespace RCP
 			//copyToTarget(target);
 			//clear();
 		}
-		mCurrentFrameBuffer = NULL;
+	
 		mPrimitiveVector.clear();
 
 	}
@@ -286,7 +285,7 @@ namespace RCP
 
 		unsigned int color;
 		color = p.color[0].get32BitARGB();
-		mCurrentFrameBuffer->setValue(BT_COLOUR,p.x,p.y,color);
+		mCurrentFrameBuffer.setValue(BT_COLOUR,p.x,p.y,color);
 	}
 
 	bool Rasterizer::depthTest(const Pixel& p)
@@ -294,12 +293,12 @@ namespace RCP
 		if (!mRenderState.zTestEnable)
 			return true;
 		float z ;
-		mCurrentFrameBuffer->getValue(z,BT_DEPTH,p.x,p.y);
+		mCurrentFrameBuffer.getValue(z,BT_DEPTH,p.x,p.y);
 		bool result = p.z <= z;
 
 		if (result && mRenderState.zWriteEnable)
 		{
-			mCurrentFrameBuffer->setValue(BT_DEPTH,p.x,p.y,p.z);
+			mCurrentFrameBuffer.setValue(BT_DEPTH,p.x,p.y,p.z);
 		}
 		return result;
 
@@ -353,7 +352,7 @@ namespace RCP
 	bool Rasterizer::stencilTest(const Pixel& p,bool zTest)
 	{
 		unsigned int cur ;
-		mCurrentFrameBuffer->getValue(cur,BT_STENCIL,p.x,p.y);
+		mCurrentFrameBuffer.getValue(cur,BT_STENCIL,p.x,p.y);
 
 		bool result = compareOperation (cur & mRenderState.stencilMask ,
 			mRenderState.stencilRef & mRenderState.stencilMask,mRenderState.stencilTestFunc);
@@ -364,13 +363,13 @@ namespace RCP
 			else
 				stencilOperation(cur,mRenderState.stencilRef, mRenderState.stencilZFail);
 
-			mCurrentFrameBuffer->setValue(BT_STENCIL,p.x,p.y,cur);
+			mCurrentFrameBuffer.setValue(BT_STENCIL,p.x,p.y,cur);
 			return true;
 		}
 		else
 		{
 			stencilOperation(cur,mRenderState.stencilRef, mRenderState.stencilFail);
-			mCurrentFrameBuffer->setValue(BT_STENCIL,p.x,p.y,cur);
+			mCurrentFrameBuffer.setValue(BT_STENCIL,p.x,p.y,cur);
 			return false;
 		}
 
