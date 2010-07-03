@@ -238,9 +238,13 @@ namespace RCP
 				Colour colorBlend;
 				for (unsigned int i = 0; i < 8; ++i)
 				{
-									//颜色
-					interpolate(point3.color[i], ratio3,point1.color[i],point2.color[i]);
-					point3.color[i] *= w;
+					//只有当有mPixelShader的时候才执行后面的
+					if (mPixelShader || (!mPixelShader && i == 0))
+					{
+						//颜色
+						interpolate(point3.color[i], ratio3,point1.color[i],point2.color[i]);
+						point3.color[i] *= w;
+					}
 					if (pri.sampler[i].texture != NULL)
 					{
 						if (mPixelShader)
@@ -287,16 +291,17 @@ namespace RCP
 
 	bool Rasterizer::depthTest(const Pixel& p)
 	{
-		if (!mRenderState.zTest)
+		if (!mRenderState.zTestEnable)
 			return true;
 		float z ;
 		mCurrentFrameBuffer->getValue(z,BT_DEPTH,p.x,p.y);
+		bool result = p.z <= z;
 
-		if (mRenderState.zWrite)
+		if (result && mRenderState.zWriteEnable)
 		{
 			mCurrentFrameBuffer->setValue(BT_DEPTH,p.x,p.y,p.z);
 		}
-		return p.z < z;
+		return result;
 
 	}
 
@@ -373,11 +378,12 @@ namespace RCP
 
 	bool Rasterizer::pixelTest(const Pixel& p)
 	{
+		
 		//if (!scissorTest(p))
 		//	return false;
 		if (!alphaTest(p))
 			return false;
-		if (!depthTest(p))
+		if (mRenderState.zTestEnable && !depthTest(p))
 		{
 			stencilTest(p,false);
 			return false;
@@ -389,17 +395,7 @@ namespace RCP
 		return true;
 	}
 
-	template<class T>
-	void Rasterizer::interpolate(T& output,float input0, float input1, float inputx, const T& value0, const T& value1)
-	{
-		interpolate(output,(inputx - input0) / (input1 - input0),value0,value1);
-	}
 
-	template<class T>
-	void Rasterizer::interpolate(T& output,float ratio, const T& value0, const T& value1)
-	{
-		output = (value1 - value0) * ratio  + value0;
-	}
 
 	void Rasterizer::setPixelShader(PixelShader* ps)
 	{

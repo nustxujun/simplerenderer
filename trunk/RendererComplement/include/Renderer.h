@@ -53,6 +53,9 @@ namespace RCP
 		void setViewport(const Viewport& vp);
 		void setPipeline(Pipeline* pl);
 		void setRenderState(const RenderState& rs);
+		void clearDepth(float d);
+		void clearStencil(unsigned int s);
+		void clearColour(const Colour& c);
 
 	private:
 		bool mIsInitialized;

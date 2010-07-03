@@ -19,6 +19,7 @@
 #include <math.h>
 
 //basal headers EX
+#include "FastAlgorithm.h"
 #include "RendererTypes.h"
 #include "Vector3.h"
 #include "Vector4.h"

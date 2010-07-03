@@ -38,6 +38,7 @@ namespace RCP
 		mAssistantBuffer[0] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
 		mAssistantBuffer[1] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
 		mFrameBuffer = new FrameBuffer(rp.backBufferWidth,rp.backBufferHeight);
+		//设置好FrameBuffer
 		mFrameBuffer->setBuffer(BT_COLOUR,mRenderTarget);
 		mFrameBuffer->setBuffer(BT_DEPTH,mAssistantBuffer[0]);
 		mFrameBuffer->setBuffer(BT_STENCIL,mAssistantBuffer[1]);
@@ -61,8 +62,8 @@ namespace RCP
 		mIsInitialized = true;
 		mRenderState.alphaTestFunc = CF_ALWAYS;
 		mRenderState.alphaTestRef  = 0;
-		mRenderState.zWrite = true;
-		mRenderState.zTest = true;
+		mRenderState.zWriteEnable = true;
+		mRenderState.zTestEnable = false;
 		mRenderState.stencilTestFunc = CF_ALWAYS;
 		mRenderState.stencilRef = 0;
 		mRenderState.stencilMask = -1;
@@ -88,6 +89,11 @@ namespace RCP
 		SAFE_DELETE(mRenderQueue);
 		SAFE_DELETE(mDefaultPipeline);
 		SAFE_DELETE(mBackBuffer);
+		SAFE_DELETE(mVertexBufferManager);
+		SAFE_DELETE(mIndexBufferManager);
+		SAFE_DELETE(mTextureManager);
+		for (int i = 0; i < 2; ++i)
+			SAFE_DELETE(mAssistantBuffer[i]);
 
 	}
 
@@ -96,7 +102,6 @@ namespace RCP
 		assert(mIsInitialized);
 		assert(mPaitingMethod);
 		//输入流水线
-		mFrameBuffer->clear(BT_DEPTH,1.0f);
 		if (mRenderQueue->isRenderDataReady())
 			mPipeline->import(mRenderQueue->postRenderData(),mFrameBuffer,mRenderState);
 
@@ -122,7 +127,7 @@ namespace RCP
 		//恢复到初始，防止被再用
 		mVertexBuffer = NULL;
 		mIndexBuffer = NULL;
-		mMaterial = Material::DEFAULT;
+		//mMaterial = Material::DEFAULT;
 
 	}
 
@@ -205,5 +210,21 @@ namespace RCP
 	{
 		mRenderState = rs;
 	}
+
+	void Renderer::clearDepth(float d)
+	{
+		mFrameBuffer->clear(BT_DEPTH,d);
+	}
+
+	void Renderer::clearStencil(unsigned int s)
+	{
+		mFrameBuffer->clear(BT_STENCIL,s);
+	}
+
+	void Renderer::clearColour(const Colour& c)
+	{
+		mFrameBuffer->clear(BT_COLOUR,c.get32BitARGB());
+	}
+
 
 }

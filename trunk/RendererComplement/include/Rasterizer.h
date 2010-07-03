@@ -19,10 +19,16 @@ namespace RCP
 
 
 		template<class T>
-		void interpolate(T& output,float input0, float input1, float inputx, const T& value0, const T& value1);
+		inline void interpolate(T& output,float input0, float input1, float inputx, const T& value0, const T& value1)
+		{
+			interpolate(output,(inputx - input0) / (input1 - input0),value0,value1);
+		}
 
 		template<class T>
-		void interpolate(T& output,float ratio, const T& value0, const T& value1);
+		inline void interpolate(T& output,float ratio, const T& value0, const T& value1)
+		{
+			output = (value1 - value0) * ratio  + value0;
+		}
 
 		void setPixelShader(PixelShader* ps);
 
@@ -37,14 +43,16 @@ namespace RCP
 				return false;
 		}
 
-		inline unsigned int ceil(float a)
+		inline unsigned int ceil(float val)
 		{
-			int i = (int)a;
-			if (a > i +0.0001)
-				return i + 1;
+			int i = (int)val;
+			if (val > i + 0.001f)
+				return i +1;
 			else
 				return i;
 		}
+
+
 
 		void drawPoint(const Primitive& pri);
 		void drawLine(const Primitive& pri);

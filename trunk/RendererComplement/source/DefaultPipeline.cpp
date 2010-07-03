@@ -1,6 +1,6 @@
 #include "DefaultPipeline.h"
 #include "RendererHeader.h"
-
+#include "Timer.h"
 namespace RCP
 {
 	DefaultPipeline::DefaultPipeline()
@@ -28,7 +28,11 @@ namespace RCP
 
 	void DefaultPipeline::execute(const RenderData& renderData,FrameBuffer* fb, const RenderState& rs)
 	{
-
+		FILE* fp;
+		fp = fopen("timer.txt","a");
+		Timer t;
+		t.reset();
+		
 		const RenderData::RenderElementList& elems = renderData.getRenderElementList();
 		size_t elemSize = elems.size();
 		if (mVertexList.size() < elemSize)
@@ -45,10 +49,13 @@ namespace RCP
 			vertexProcessing(*i,*verIter);
 			primitiveAssembly(*i,*verIter);
 		}
-
-
+		fprintf(fp,"%ld\n",t.getTime());
+		t.reset();
 		mRasterizer.flush(fb,rs);
+		fprintf(fp,"%ld\n\n",t.getTime());
+		fclose(fp);
 		notifyCompleted();
+
 	}
 
 	
@@ -461,24 +468,16 @@ namespace RCP
 
 	void DefaultPipeline::generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2, float dist1, float dist2)
 	{
-
-
 		float scale = (0 - dist1) / (dist2 - dist1);
-
 		Interpolate(newVertex.specular,vert1.specular,vert2.specular,scale);
 		Interpolate(newVertex.norm,vert1.norm,vert2.norm,scale);
 		Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
-
-		
-	
 		for (unsigned int i = 0 ; i < 8; ++i)
 		{
 			Interpolate(newVertex.texCrood[i],vert1.texCrood[i],vert2.texCrood[i],scale);
 			Interpolate(newVertex.color[i],vert1.color[i],vert2.color[i],scale);
 
 		}
-
-
 	}
 
 	bool DefaultPipeline::checkPointInScreen(const Vector4& point)
@@ -584,6 +583,17 @@ namespace RCP
 
 		float d1,d2;
 
+		if (checkPointInScreen(prim.vertex[0].pos) && 
+			checkPointInScreen(prim.vertex[0].pos) && 
+			checkPointInScreen(prim.vertex[0].pos))
+		{
+			for (int i =0; i < 3; ++i)
+				vertices[afterClip][i] = prim.vertex[i];
+			numVertices[afterClip] = 3;
+			//用了goto，真是抱歉，不想看到长长的if {} else {}
+			goto result;
+		}
+
 		for (int i =0; i < 3; ++i)
 		{
 			vertices[beforeClip][i] = prim.vertex[i];
@@ -649,6 +659,8 @@ namespace RCP
 		
 		}//plane
 
+//如果所有点都在屏幕内直接跳转到这里
+result:
 		assert(numVertices[afterClip] < 8);
 
 		//齐次坐标归一（透视除法） & 视口映射
