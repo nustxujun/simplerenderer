@@ -276,16 +276,101 @@ namespace RCP
 				drawImpl(point3);
 			}
 		}
-		
 	}
+
+	Colour Rasterizer::getFactor(BlendMode bm,const Colour& srcColour, const Colour& destColour)
+	{
+		switch (bm)
+		{
+		case BM_ZERO:
+			{
+				return Colour(0,0,0,0);
+				break;
+			}
+		case BM_ONE:
+			{
+				return Colour(1,1,1,1);
+				break;
+			}
+		case BM_SRCCOLOR:
+			{
+				return srcColour;
+				break;
+			}
+		case BM_INVSRCCOLOR:
+			{
+				return Colour(1,1,1,1) - srcColour;
+				break;
+			}
+		case BM_SRCALPHA:
+			{
+				return Colour(srcColour.a,srcColour.a,srcColour.a,srcColour.a);
+				break;
+			}
+		case BM_INVSRCALPHA:
+			{
+				float i = 1 - srcColour.a;
+				return Colour(i,i,i,i);
+				break;
+			}
+		case BM_DESTALPHA:
+			{
+				return Colour(destColour.a,destColour.a,destColour.a,destColour.a);
+				break;
+			}
+		case BM_INVDESTALPHA:
+			{
+				float i = 1 - destColour.a;
+				return Colour(i,i,i,i);
+				break;
+			}
+		case BM_DESTCOLOR:
+			{
+				return destColour;
+				break;
+			}
+		case BM_INVDESTCOLOR :
+			{
+				return Colour(1,1,1,1) - destColour;
+				break;
+			}
+		case BM_SRCALPHASAT :
+			{
+				float f = std::min<float>(srcColour.a,1 - destColour.a);
+				return Colour(f,f,f,1);
+				break;
+			}
+		default:
+			assert(0);
+		return 0;
+		}
+	}
+
+	Colour Rasterizer::alphaBlend(const Colour& srcColour, const Colour& destColour)
+	{
+		if (!mRenderState.alphaBlendEnable)
+			return srcColour;
+
+		Colour srcFactor = getFactor(mRenderState.srcBlend, srcColour, destColour);
+		Colour destFactor = getFactor(mRenderState.destBlend,srcColour, destColour);
+		return srcFactor * srcColour + destFactor * destColour;
+	}
+
 
 	void Rasterizer::drawImpl(const Pixel& p)
 	{
 		if (!pixelTest(p))
 			return;
 
+		Colour destColour;
 		unsigned int color;
-		color = p.color[0].get32BitARGB();
+		mCurrentFrameBuffer.getValue(color,BT_COLOUR,p.x,p.y);
+		destColour.getFromARGB(color);
+		
+		color = alphaBlend( p.color[0],destColour).get32BitARGB();
+
+		
+		//color = p.color[0].get32BitARGB();
 		mCurrentFrameBuffer.setValue(BT_COLOUR,p.x,p.y,color);
 	}
 

@@ -71,7 +71,9 @@ namespace RCP
 		mRenderState.stencilFail = SO_KEEP;
 		mRenderState.stencilPass = SO_KEEP;
 		mRenderState.stencilZFail = SO_KEEP;
-
+		mRenderState.alphaBlendEnable = false;
+		mRenderState.srcBlend = BM_SRCALPHA;
+		mRenderState.destBlend = BM_INVSRCALPHA;
 
 
 	}
