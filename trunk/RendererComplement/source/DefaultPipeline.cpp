@@ -580,8 +580,8 @@ namespace RCP
 		float d1,d2;
 
 		if (checkPointInScreen(prim.vertex[0].pos) && 
-			checkPointInScreen(prim.vertex[0].pos) && 
-			checkPointInScreen(prim.vertex[0].pos))
+			checkPointInScreen(prim.vertex[1].pos) && 
+			checkPointInScreen(prim.vertex[2].pos))
 		{
 			for (int i =0; i < 3; ++i)
 				vertices[afterClip][i] = prim.vertex[i];

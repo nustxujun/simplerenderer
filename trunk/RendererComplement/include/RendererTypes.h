@@ -129,6 +129,11 @@ namespace RCP
 		StencilOperation stencilFail;
 		StencilOperation stencilPass;
 		StencilOperation stencilZFail;
+
+		//alpha blend
+		bool alphaBlendEnable;
+
+
 	};
 
 	

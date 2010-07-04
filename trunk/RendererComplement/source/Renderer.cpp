@@ -63,7 +63,7 @@ namespace RCP
 		mRenderState.alphaTestFunc = CF_ALWAYS;
 		mRenderState.alphaTestRef  = 0;
 		mRenderState.zWriteEnable = true;
-		mRenderState.zTestEnable = false;
+		mRenderState.zTestEnable = true;
 		mRenderState.stencilTestFunc = CF_ALWAYS;
 		mRenderState.stencilRef = 0;
 		mRenderState.stencilMask = -1;

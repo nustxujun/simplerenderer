@@ -1,4 +1,4 @@
-#include "Rasterizer.h"
+#include "Rasterizer_V2.h"
 #include "Rendertarget.h"
 #include "Texture.h"
 #include "FrameBuffer.h"
@@ -6,21 +6,21 @@ namespace RCP
 {
 	const float EPSLON = 0.1f;
 
-	Rasterizer::Rasterizer()
+	Rasterizer_V2::Rasterizer_V2()
 	{
 	
 	}
 
-	Rasterizer::~Rasterizer()
+	Rasterizer_V2::~Rasterizer_V2()
 	{
 	}
 
-	void Rasterizer::initialize(unsigned int width, unsigned int height, PixelFormat pf)
+	void Rasterizer_V2::initialize(unsigned int width, unsigned int height, PixelFormat pf)
 	{
 		mPixelShader = NULL;
 	}
 
-	void Rasterizer::pushPrimitive(const Primitive& pri)
+	void Rasterizer_V2::pushPrimitive(const Primitive& pri)
 	{
 		switch (pri.type)
 		{
@@ -62,71 +62,73 @@ namespace RCP
 		for (unsigned int i = 0; i < 3; ++i)
 			resultPri.vertex[i] = pri.vertex[yOrder[i]]; 
 
-		//平底
-		if (fequal(resultPri.vertex[2].pos.y, resultPri.vertex[1].pos.y,EPSLON))
-		{
-			if (resultPri.vertex[1].pos.x > resultPri.vertex[2].pos.x)
-			{
-				resultPri.vertex[1] = pri.vertex[yOrder[2]];
-				resultPri.vertex[2] = pri.vertex[yOrder[1]];
-			}
-			resultPri.triType = 1;
-			mPrimitiveVector.push_back(resultPri);
-		}
-		//平頂
-		else if (fequal(resultPri.vertex[0].pos.y, resultPri.vertex[1].pos.y,EPSLON))
-		{
-			if (resultPri.vertex[0].pos.x > resultPri.vertex[1].pos.x)
-			{
-				resultPri.vertex[0] = pri.vertex[yOrder[1]];
-				resultPri.vertex[1] = pri.vertex[yOrder[0]];
-			}
-			resultPri.triType = -1;
-			mPrimitiveVector.push_back(resultPri);
-		}
-		//普通
-		else
-		{
-			//计算新顶点
-			Vertex newVertex;
-			float ratio =( resultPri.vertex[1].pos.y - resultPri.vertex[0].pos.y ) / ( resultPri.vertex[2].pos.y - resultPri.vertex[0].pos.y );
-			
-			interpolate(newVertex.pos,ratio,resultPri.vertex[0].pos,resultPri.vertex[2].pos);
-			newVertex.pos.y = resultPri.vertex[1].pos.y;
-			interpolate(newVertex.norm,ratio,resultPri.vertex[0].norm,resultPri.vertex[2].norm);
-			interpolate(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
-			for (unsigned int i = 0; i < 8 ; ++i)
-			{
-				if (mPixelShader || (!mPixelShader && i == 0))
-					interpolate(newVertex.color[i],ratio,resultPri.vertex[0].color[i],resultPri.vertex[2].color[i]);
-				if (pri.sampler[i].texture != NULL)//有纹理的话
-					interpolate(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
-			}
-			//分解成两个平底三角形
-			Primitive up,down;
-			up = down = resultPri;
-			up.vertex[2] = newVertex;
-			up.triType = 1;
-			down.vertex[0] = down.vertex[1];
-			down.vertex[1] = newVertex;
-			down.triType = -1;
-			bool swap = resultPri.vertex[1].pos.x > newVertex.pos.x;
-			//左右排序
-			if (swap)
-			{
-				up.vertex[1] = newVertex;
-				up.vertex[2] = resultPri.vertex[1];
+		mPrimitiveVector.push_back(resultPri);
 
-				down.vertex[0] = newVertex;
-				down.vertex[1] = resultPri.vertex[1];
-			}
+		////平底
+		//if (fequal(resultPri.vertex[2].pos.y, resultPri.vertex[1].pos.y,EPSLON))
+		//{
+		//	if (resultPri.vertex[1].pos.x > resultPri.vertex[2].pos.x)
+		//	{
+		//		resultPri.vertex[1] = pri.vertex[yOrder[2]];
+		//		resultPri.vertex[2] = pri.vertex[yOrder[1]];
+		//	}
+		//	resultPri.triType = 1;
+		//	mPrimitiveVector.push_back(resultPri);
+		//}
+		////平頂
+		//else if (fequal(resultPri.vertex[0].pos.y, resultPri.vertex[1].pos.y,EPSLON))
+		//{
+		//	if (resultPri.vertex[0].pos.x > resultPri.vertex[1].pos.x)
+		//	{
+		//		resultPri.vertex[0] = pri.vertex[yOrder[1]];
+		//		resultPri.vertex[1] = pri.vertex[yOrder[0]];
+		//	}
+		//	resultPri.triType = -1;
+		//	mPrimitiveVector.push_back(resultPri);
+		//}
+		////普通
+		//else
+		//{
+		//	//计算新顶点
+		//	Vertex newVertex;
+		//	float ratio =( resultPri.vertex[1].pos.y - resultPri.vertex[0].pos.y ) / ( resultPri.vertex[2].pos.y - resultPri.vertex[0].pos.y );
+		//	
+		//	interpolate(newVertex.pos,ratio,resultPri.vertex[0].pos,resultPri.vertex[2].pos);
+		//	newVertex.pos.y = resultPri.vertex[1].pos.y;
+		//	interpolate(newVertex.norm,ratio,resultPri.vertex[0].norm,resultPri.vertex[2].norm);
+		//	interpolate(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
+		//	for (unsigned int i = 0; i < 8 ; ++i)
+		//	{
+		//		if (mPixelShader || (!mPixelShader && i == 0))
+		//			interpolate(newVertex.color[i],ratio,resultPri.vertex[0].color[i],resultPri.vertex[2].color[i]);
+		//		if (pri.sampler[i].texture != NULL)//有纹理的话
+		//			interpolate(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
+		//	}
+		//	//分解成两个平底三角形
+		//	Primitive up,down;
+		//	up = down = resultPri;
+		//	up.vertex[2] = newVertex;
+		//	up.triType = 1;
+		//	down.vertex[0] = down.vertex[1];
+		//	down.vertex[1] = newVertex;
+		//	down.triType = -1;
+		//	bool swap = resultPri.vertex[1].pos.x > newVertex.pos.x;
+		//	//左右排序
+		//	if (swap)
+		//	{
+		//		up.vertex[1] = newVertex;
+		//		up.vertex[2] = resultPri.vertex[1];
 
-			mPrimitiveVector.push_back(up);
-			mPrimitiveVector.push_back(down);
-		}
+		//		down.vertex[0] = newVertex;
+		//		down.vertex[1] = resultPri.vertex[1];
+		//	}
+
+		//	mPrimitiveVector.push_back(up);
+		//	mPrimitiveVector.push_back(down);
+		//}
 	}
 
-	void Rasterizer::flush(const FrameBuffer& fb,const RenderState& state)
+	void Rasterizer_V2::flush(const FrameBuffer& fb,const RenderState& state)
 	{
 
 
@@ -159,17 +161,17 @@ namespace RCP
 
 	}
 
-	void Rasterizer::drawPoint(const Primitive& pri)
+	void Rasterizer_V2::drawPoint(const Primitive& pri)
 	{
 
 	}
 
-	void Rasterizer::drawLine(const Primitive& pri)
+	void Rasterizer_V2::drawLine(const Primitive& pri)
 	{
 
 	}
 
-	void Rasterizer::drawTriangle(const Primitive& pri)
+	void Rasterizer_V2::drawTriangle(const Primitive& pri)
 	{
 		assert(pri.triType != 0);
 		unsigned int offset = ( pri.triType + 1 )/2;
@@ -279,7 +281,7 @@ namespace RCP
 		
 	}
 
-	void Rasterizer::drawImpl(const Pixel& p)
+	void Rasterizer_V2::drawImpl(const Pixel& p)
 	{
 		if (!pixelTest(p))
 			return;
@@ -289,7 +291,7 @@ namespace RCP
 		mCurrentFrameBuffer.setValue(BT_COLOUR,p.x,p.y,color);
 	}
 
-	bool Rasterizer::depthTest(const Pixel& p)
+	bool Rasterizer_V2::depthTest(const Pixel& p)
 	{
 		if (!mRenderState.zTestEnable)
 			return true;
@@ -305,7 +307,7 @@ namespace RCP
 
 	}
 
-	bool Rasterizer::scissorTest(const Pixel& p)
+	bool Rasterizer_V2::scissorTest(const Pixel& p)
 	{
 		if (p.x < mScissorRect.x || p.x > mScissorRect.z ||
 			p.y < mScissorRect.y || p.y > mScissorRect.w)
@@ -313,12 +315,12 @@ namespace RCP
 		return true;
 	}
 
-	bool Rasterizer::alphaTest(const Pixel& p)
+	bool Rasterizer_V2::alphaTest(const Pixel& p)
 	{
 		return compareOperation(p.color[0].a, mRenderState.alphaTestRef,mRenderState.alphaTestFunc);
 	}
 
-	void Rasterizer::stencilOperation(unsigned int& value,unsigned  int ref, StencilOperation op)
+	void Rasterizer_V2::stencilOperation(unsigned int& value,unsigned  int ref, StencilOperation op)
 	{
 		switch (op)
 		{
@@ -350,7 +352,7 @@ namespace RCP
 		value &= mRenderState.stencilWriteMask;
 	}
 
-	bool Rasterizer::stencilTest(const Pixel& p,bool zTest)
+	bool Rasterizer_V2::stencilTest(const Pixel& p,bool zTest)
 	{
 		unsigned int cur ;
 		mCurrentFrameBuffer.getValue(cur,BT_STENCIL,p.x,p.y);
@@ -376,7 +378,7 @@ namespace RCP
 
 	}
 
-	bool Rasterizer::pixelTest(const Pixel& p)
+	bool Rasterizer_V2::pixelTest(const Pixel& p)
 	{
 		
 		//if (!scissorTest(p))
@@ -397,13 +399,13 @@ namespace RCP
 
 
 
-	void Rasterizer::setPixelShader(PixelShader* ps)
+	void Rasterizer_V2::setPixelShader(PixelShader* ps)
 	{
 		mPixelShader = ps;
 	}
 
 	template<class T>
-	bool Rasterizer::compareOperation(const T& value1, const T& value2, CompareFunc func)
+	bool Rasterizer_V2::compareOperation(const T& value1, const T& value2, CompareFunc func)
 	{
 		switch (func)
 		{
