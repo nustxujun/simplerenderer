@@ -111,6 +111,27 @@ namespace RCP
 
 	};
 
+	enum BlendMode
+	{
+		BM_ZERO = 1,
+		BM_ONE = 2,
+		BM_SRCCOLOR = 3,
+		BM_INVSRCCOLOR = 4,
+		BM_SRCALPHA = 5,
+		BM_INVSRCALPHA = 6,
+		BM_DESTALPHA = 7,
+		BM_INVDESTALPHA = 8,
+		BM_DESTCOLOR = 9,
+		BM_INVDESTCOLOR = 10,
+		BM_SRCALPHASAT = 11,
+		//不知道怎么用所以不用了
+		//BM_BOTHSRCALPHA = 12,
+		//BM_BOTHINVSRCALPHA = 13,
+		//BM_BLENDFACTOR = 14,
+		//BM_INVBLENDFACTOR = 15,
+	
+	};
+
 	struct RenderState
 	{
 		//z test
@@ -132,8 +153,8 @@ namespace RCP
 
 		//alpha blend
 		bool alphaBlendEnable;
-
-
+		BlendMode srcBlend;
+		BlendMode destBlend;
 	};
 
 	

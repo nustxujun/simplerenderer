@@ -68,6 +68,9 @@ namespace RCP
 		bool alphaTest(const Pixel& p);
 		bool depthTest(const Pixel& p);
 
+		Colour alphaBlend(const Colour& srcColour, const Colour& destColour);
+		Colour getFactor(BlendMode bm,const Colour& srcColour, const Colour& destColour);
+
 		void clear(const Colour& color);
 		void clear(float z);
 		void clearStencil(unsigned int stencil);
