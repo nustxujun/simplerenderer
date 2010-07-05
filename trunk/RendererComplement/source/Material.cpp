@@ -2,7 +2,7 @@
 
 namespace RCP
 {
-	const Material Material::DEFAULT(Colour(1.f,1.f,1.f,0.f),Colour(0.f),Colour(0.f),Colour(0.f),0.0f);
+	const Material Material::DEFAULT(Colour(1.f,1.f,1.f,1.f),Colour(0.f),Colour(0.f),Colour(0.f),0.0f);
 
 	Material::Material():
 		mUsingDiffuseVertexColor(true),
