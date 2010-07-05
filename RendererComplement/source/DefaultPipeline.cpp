@@ -249,9 +249,16 @@ namespace RCP
 			//如果使用了灯光。
 			if (enable)
 			{
+				float a;
+				a = diffuse.a;
 				diffuse = diffuse * diffuseBlend;
+				diffuse.a = a;
+				a = ambient.a;
 				ambient = ambient * ambientBlend;
+				ambient.a = a;
+				a = specular.a;
 				specular = specular * specularBlend;
+				specular.a = a;
 
 				//diffuse.clip();
 				//ambient.clip();
