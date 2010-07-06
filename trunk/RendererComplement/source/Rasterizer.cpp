@@ -6,7 +6,8 @@ namespace RCP
 {
 	const float EPSLON = 0.1f;
 
-	Rasterizer::Rasterizer()
+	Rasterizer::Rasterizer():
+		mPixelShader(NULL)
 	{
 	
 	}
@@ -17,7 +18,7 @@ namespace RCP
 
 	void Rasterizer::initialize(unsigned int width, unsigned int height, PixelFormat pf)
 	{
-		mPixelShader = NULL;
+		
 	}
 
 	void Rasterizer::pushPrimitive(const Primitive& pri)

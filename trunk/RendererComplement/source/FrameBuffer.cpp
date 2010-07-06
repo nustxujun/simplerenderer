@@ -7,6 +7,25 @@ namespace RCP
 		mIsDirty(false)
 	{}
 
+	FrameBuffer::FrameBuffer(const FrameBuffer& fb)
+	{
+		memcpy(mBuffers,fb.mBuffers,sizeof(mBuffers));
+
+		mWidth = fb.mWidth;
+		mHeight = fb.mHeight;
+		
+		mIsDirty = fb.mIsDirty;
+
+		for (int i = 0; i < BT_COUNT; ++i)
+		{
+			mClearValue[i].first = fb.mClearValue[i].first;
+			if (fb.mClearValue[i].first == 0)
+				continue;
+			mClearValue[i].second = new unsigned char[mClearValue[i].first];
+			memcpy(mClearValue[i].second, fb.mClearValue[i].second,mClearValue[i].first);
+		}	
+	}
+
 	FrameBuffer::FrameBuffer(unsigned int w,unsigned int h):
 		mWidth(w),mHeight(h),mIsDirty(false)
 	{
@@ -41,7 +60,10 @@ namespace RCP
 			RenderTarget* rt = mBuffers[index];
 
 			if (rt == NULL)
-				return;
+			{
+				mClearValue[index].first = 0;
+				SAFE_DELETE(mClearValue[index].second);
+			}
 			assert(rt->getColourDepth() == mClearValue[index].first);
 
 			size_t size = rt->getWidth() * rt->getHeight();
@@ -57,6 +79,42 @@ namespace RCP
 
 		mIsDirty = false;
 	}
+
+	void FrameBuffer::reset()
+	{
+		mIsDirty = true;
+		for (int i = 0; i < BT_COUNT; ++i)
+		{
+			mClearValue[i].first = 0;
+			SAFE_DELETE(mClearValue[i].second);
+		}
+	}
+
+
+	void FrameBuffer::operator =(const FrameBuffer& fb)
+	{
+		memcpy(mBuffers,fb.mBuffers,sizeof(mBuffers));
+
+		mWidth = fb.mWidth;
+		mHeight = fb.mHeight;
+		
+		mIsDirty = fb.mIsDirty;
+
+		for (int i = 0; i < BT_COUNT; ++i)
+		{
+			if (mClearValue[i].first != 0)
+			{
+				mClearValue[i].first = 0;
+				SAFE_DELETE(mClearValue[i].second);
+			}
+			mClearValue[i].first = fb.mClearValue[i].first;
+			if (fb.mClearValue[i].first == 0)
+				continue;
+			mClearValue[i].second = new unsigned char[mClearValue[i].first];
+			memcpy(mClearValue[i].second, fb.mClearValue[i].second,mClearValue[i].first);
+		}
+	}
+
 
 
 

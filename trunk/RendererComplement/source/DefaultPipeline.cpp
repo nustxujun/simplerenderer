@@ -3,7 +3,8 @@
 #include "Timer.h"
 namespace RCP
 {
-	DefaultPipeline::DefaultPipeline()
+	DefaultPipeline::DefaultPipeline():
+		mVertexShader(NULL)
 	{
 
 	}
@@ -23,7 +24,7 @@ namespace RCP
 		const RendererParameters& rp = getRendererParameters();
 		mRasterizer.initialize(rp.backBufferWidth, rp.backBufferHeight, rp.backBufferPixelFormat);
 
-		mVertexShader = NULL;
+	
 	}
 
 	void DefaultPipeline::execute(const RenderData& renderData)
@@ -604,8 +605,15 @@ namespace RCP
 		numVertices[beforeClip] = 3;
 
 		int numPlane = 6;
+		beforeClip = 1;
+		afterClip = 0;
 		for(int plane = 0; plane < numPlane; ++plane)
 		{
+
+			//交換組
+			(++beforeClip) &= 1;
+			(++afterClip) &= 1;
+
 			//全部被裁剪
 			if (numVertices[beforeClip] == 0)
 				return;
@@ -653,18 +661,16 @@ namespace RCP
 
 				d1 = d2;
 			
-			}//verteices
-				
-			//交换组
-			(++beforeClip) &= 1; 
-			(++afterClip) &= 1; 
-
-		
+			}//verteices				
 		}//plane
 
 //如果所有点都在屏幕内直接跳转到这里
 result:
 		assert(numVertices[afterClip] < 8);
+		
+
+		if (numVertices[afterClip] < 3)
+			return;
 
 		//齐次坐标归一（透视除法） & 视口映射
 		for ( int i =0; i < numVertices[afterClip]; ++i)

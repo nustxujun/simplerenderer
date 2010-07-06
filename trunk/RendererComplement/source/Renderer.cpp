@@ -129,7 +129,9 @@ namespace RCP
 		//恢复到初始，防止被再用
 		mVertexBuffer = NULL;
 		mIndexBuffer = NULL;
-		//mMaterial = Material::DEFAULT;
+		mMaterial = Material::DEFAULT;
+		//去掉清除標識
+		mFrameBuffer->reset();
 
 	}
 
