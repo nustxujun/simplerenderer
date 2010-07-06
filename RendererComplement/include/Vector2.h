@@ -9,7 +9,8 @@ namespace RCP
 		float x, y;
 
     public:
-        inline Vector2()
+		inline Vector2():
+			x( 0 ), y( 0 )
         {
         }
 

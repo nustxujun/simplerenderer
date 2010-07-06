@@ -15,6 +15,7 @@ namespace RCP
 		//默认构造只有在只进行拷贝的时候使用
 		FrameBuffer();
 		FrameBuffer(unsigned int w,unsigned int h);
+		FrameBuffer(const FrameBuffer& fb);
 		~FrameBuffer();
 
 		void setBuffer(BufferTpye type,RenderTarget* rt);
@@ -41,9 +42,9 @@ namespace RCP
 			memcpy(mClearValue[type].second,&t,mClearValue[type].first);
 
 			mIsDirty = true;
-
-
 		}
+
+		void reset();
 
 		template<class T>
 		inline void setValue(BufferTpye type,unsigned int x, unsigned int y,const T& value)
@@ -84,6 +85,8 @@ namespace RCP
 			rt->seek(pos);
 			rt->read(&t,sizeof (T));
 		}
+
+		void operator = (const FrameBuffer& fb);
 	private:
 
 
