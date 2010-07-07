@@ -49,6 +49,7 @@ namespace RCP
 				verIter->resize(i->vertexBuffer->getVertexCount());//這裡就直接初始化了，下面就不再push_back了
 			vertexProcessing(*i,*verIter);
 			primitiveAssembly(*i,*verIter);
+			setOtherState(i->propertys);
 			mRasterizer.flush(i->frameBuffer,i->renderState);
 		}
 		notifyCompleted();
@@ -699,6 +700,21 @@ result:
 	void DefaultPipeline::setPixelShader(PixelShader* ps)
 	{
 		mRasterizer.setPixelShader(ps);
+	}
+
+	void DefaultPipeline::setOtherState(const std::map<std::string,Any>& p)
+	{
+		std::map<std::string,Any>::const_iterator i,endi = p.end();
+		i = p.find("VertexShader");
+		if (i != endi)
+		{
+			setVertexShader(any_cast<VertexShader*>(i->second));
+		}
+		i = p.find("PixelShader");
+		if (i != endi)
+		{
+			setPixelShader(any_cast<PixelShader*>(i->second));
+		}
 	}
 
 }

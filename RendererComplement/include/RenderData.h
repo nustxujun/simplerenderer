@@ -24,7 +24,7 @@ namespace RCP
 
 		const RenderElementList& getRenderElementList() const;
 		void insertRenderElement(unsigned int offset ,unsigned int c, Primitives type,VertexBuffer* vb, const Matrix4X4 world[TS_BASALNUM],
-			const Sampler spl[8], IndexBuffer* ib,const Material& mat,const Light light[8],const Viewport& vp, const RenderState& rs,const FrameBuffer& fb);
+			const Sampler spl[8], IndexBuffer* ib,const Material& mat,const Light light[8],const Viewport& vp, const RenderState& rs,const FrameBuffer& fb,const std::map<std::string ,Any>& ps);
 	private:
 		
 		RenderElementList mRenderElementList;

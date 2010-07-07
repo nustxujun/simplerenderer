@@ -124,7 +124,7 @@ namespace RCP
 		Matrix4X4 mat[TS_BASALNUM];
 		memcpy(mat,mMatrices,sizeof (Matrix4X4)*TS_BASALNUM);
 		mRenderQueue->createRenderElement(beginPrimitiveOffset,primitiveCount,type,mVertexBuffer,
-			mat,mSampler,mLight,mIndexBuffer,mMaterial,mViewport,mRenderState,*mFrameBuffer);
+			mat,mSampler,mLight,mIndexBuffer,mMaterial,mViewport,mRenderState,*mFrameBuffer,mPropertys);
 
 		//恢复到初始，防止被再用
 		mVertexBuffer = NULL;
@@ -228,6 +228,11 @@ namespace RCP
 	void Renderer::clearColour(const Colour& c)
 	{
 		mFrameBuffer->clear(BT_COLOUR,c.get32BitARGB());
+	}
+
+	void Renderer::setProperty(const std::string& funcName,const Any& attribute)
+	{
+		mPropertys[funcName] = attribute;
 	}
 
 
