@@ -19,6 +19,7 @@
 #include <math.h>
 
 //basal headers EX
+#include "Any.h"
 #include "FastAlgorithm.h"
 #include "RendererTypes.h"
 #include "Vector3.h"
@@ -30,6 +31,7 @@
 
 namespace RCP
 {
+	class Any;
 	class BackBuffer;
 	class Colour;
 	class FrameBuffer;

@@ -26,10 +26,11 @@ namespace RCP
 		Viewport viewport;
 		RenderState renderState;
 		FrameBuffer frameBuffer;
+		std::map<std::string ,Any> propertys;
 		
 
 		RenderElement(unsigned int offset ,unsigned int c, Primitives type, VertexBuffer* vb, const Matrix4X4 world[TS_BASALNUM],
-			const Sampler spl[8],IndexBuffer* ib,const Material& mat,const Light l[8],const Viewport& vp, const RenderState& rs,const FrameBuffer& fb):
+			const Sampler spl[8],IndexBuffer* ib,const Material& mat,const Light l[8],const Viewport& vp, const RenderState& rs,const FrameBuffer& fb,const std::map<std::string ,Any>& ps):
 			beginPrimitiveOffset(offset),
 			primitiveCount(c),
 			vertexBuffer(vb),
@@ -38,7 +39,8 @@ namespace RCP
 			ptType(type),
 			viewport(vp),
 			renderState(rs),
-			frameBuffer(fb)
+			frameBuffer(fb),
+			propertys(ps)
 		{
 			
 			memcpy(matWorld,world,sizeof(Matrix4X4)*TS_BASALNUM);	

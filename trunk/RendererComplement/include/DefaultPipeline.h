@@ -23,8 +23,6 @@ namespace RCP
 		virtual void initImpl() ;
 		void execute(const RenderData& renderData);
 
-		void setVertexShader(VertexShader* vs);
-		void setPixelShader(PixelShader* ps);
 	protected:
 	
 		void vertexProcessing(const RenderElement& elem,VertexVector& verVec);
@@ -44,6 +42,11 @@ namespace RCP
 		void rasterize(Primitive& prim);
 		void homogeneousDivide(Vertex& vert);
 		void viewportMapping(Vector4& pos,const Viewport* vp);
+
+
+		void setOtherState(const std::map<std::string,Any>& p);
+		void setVertexShader(VertexShader* vs);
+		void setPixelShader(PixelShader* ps);
 
 	private:
 		Rasterizer mRasterizer;

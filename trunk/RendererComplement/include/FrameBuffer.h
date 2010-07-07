@@ -37,10 +37,7 @@ namespace RCP
 		{
 			assert(type < BT_COUNT);
 
-			mClearValue[type].first = sizeof (T);
-			mClearValue[type].second = new unsigned char[mClearValue[type].first];
-			memcpy(mClearValue[type].second,&t,mClearValue[type].first);
-
+			mClearValue[type] = t;
 			mIsDirty = true;
 		}
 
@@ -104,7 +101,7 @@ namespace RCP
 
 		bool mIsDirty;
 
-		std::pair<int,unsigned char*> mClearValue[BT_COUNT];
+		Any mClearValue[BT_COUNT];
 	};
 }
 #endif//_FrameBuffer_H_

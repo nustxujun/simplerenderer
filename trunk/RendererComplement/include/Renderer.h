@@ -56,6 +56,7 @@ namespace RCP
 		void clearDepth(float d);
 		void clearStencil(unsigned int s);
 		void clearColour(const Colour& c);
+		void setProperty(const std::string& funcName,const Any& attribute);
 
 	private:
 		bool mIsInitialized;
@@ -101,6 +102,10 @@ namespace RCP
 		FrameBuffer* mFrameBuffer;
 		//assistantBuffer,暂时是z + stencil
 		RenderTarget* mAssistantBuffer[2];
+		//其他属性状态
+		typedef std::map<std::string , Any> Propertys;
+		Propertys mPropertys;
+
 
 	};
 }

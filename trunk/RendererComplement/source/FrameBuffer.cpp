@@ -18,11 +18,7 @@ namespace RCP
 
 		for (int i = 0; i < BT_COUNT; ++i)
 		{
-			mClearValue[i].first = fb.mClearValue[i].first;
-			if (fb.mClearValue[i].first == 0)
-				continue;
-			mClearValue[i].second = new unsigned char[mClearValue[i].first];
-			memcpy(mClearValue[i].second, fb.mClearValue[i].second,mClearValue[i].first);
+			mClearValue[i] = fb.mClearValue[i];
 		}	
 	}
 
@@ -53,7 +49,7 @@ namespace RCP
 	{
 		for (int index = 0; index < BT_COUNT; ++index)
 		{
-			if (mClearValue[index].first == 0)
+			if (mClearValue[index].isEmpty())
 				continue;
 			
 
@@ -61,20 +57,21 @@ namespace RCP
 
 			if (rt == NULL)
 			{
-				mClearValue[index].first = 0;
-				SAFE_DELETE(mClearValue[index].second);
+				mClearValue[index].setEmpty();
+				return ;
 			}
-			assert(rt->getColourDepth() == mClearValue[index].first);
+			
+			assert(rt->getColourDepth() == mClearValue[index].getSize());
 
 			size_t size = rt->getWidth() * rt->getHeight();
 			rt->seek(0);
+
 			for (size_t i = 0; i < size; ++i)
 			{
-				rt->write(mClearValue[index].second,mClearValue[index].first);
+				rt->write(mClearValue[index].getContentPtr(),mClearValue[index].getSize());
 			}
 			
-			mClearValue[index].first = 0;
-			SAFE_DELETE(mClearValue[index].second);
+			mClearValue[index].setEmpty();
 		}
 
 		mIsDirty = false;
@@ -85,8 +82,7 @@ namespace RCP
 		mIsDirty = true;
 		for (int i = 0; i < BT_COUNT; ++i)
 		{
-			mClearValue[i].first = 0;
-			SAFE_DELETE(mClearValue[i].second);
+			mClearValue[i].setEmpty();
 		}
 	}
 
@@ -102,16 +98,7 @@ namespace RCP
 
 		for (int i = 0; i < BT_COUNT; ++i)
 		{
-			if (mClearValue[i].first != 0)
-			{
-				mClearValue[i].first = 0;
-				SAFE_DELETE(mClearValue[i].second);
-			}
-			mClearValue[i].first = fb.mClearValue[i].first;
-			if (fb.mClearValue[i].first == 0)
-				continue;
-			mClearValue[i].second = new unsigned char[mClearValue[i].first];
-			memcpy(mClearValue[i].second, fb.mClearValue[i].second,mClearValue[i].first);
+			mClearValue[i] = fb.mClearValue[i];
 		}
 	}
 

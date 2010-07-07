@@ -53,6 +53,10 @@ namespace RCP
 				return i;
 		}
 
+		inline unsigned int floor(float val)
+		{
+			return (unsigned int )val;
+		}
 
 
 		void drawPoint(const Primitive& pri);
