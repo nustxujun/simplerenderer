@@ -16,6 +16,7 @@ namespace RCP
 			virtual Content* clone() const = 0;
 			virtual size_t getSize()const = 0; 
 			virtual void* getContentPtr() = 0;
+			virtual const type_info& getType() = 0;
 		};
 
 		template<typename Type>
@@ -24,7 +25,8 @@ namespace RCP
 		public:
 			RealContent(const Type& value):
 				mValue(value)
-			{}
+			{
+			}
 
 			virtual RealContent* clone() const 
 			{
@@ -41,6 +43,10 @@ namespace RCP
 				return &mValue;
 			}
 
+			const type_info& getType()
+			{
+				return typeid(Type);
+			}
 
 			Type mValue;
 		};
@@ -116,7 +122,7 @@ namespace RCP
 	T* any_cast(Any* any)
 	{
 		assert(any);
-		const type_info& info = typeid(static_cast<Any::RealContent<T>*>(any->mContent)->mValue);
+		const type_info& info = any->mContent->getType();
 		if (info == typeid(T))
 			return &static_cast<Any::RealContent<T>*>(any->mContent)->mValue;
 		else
