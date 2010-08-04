@@ -44,12 +44,12 @@ namespace RCP
 		VertexList::iterator verIter = mVertexList.begin();
 		for (i = elems.begin(); i != endi; ++i,++verIter)
 		{
-			//verIter->clear();
+			//设置自定义渲染状态
+			setOtherState(i->propertys);
 			if (i->vertexBuffer->getVertexCount() > verIter->size())
 				verIter->resize(i->vertexBuffer->getVertexCount());//這裡就直接初始化了，下面就不再push_back了
 			vertexProcessing(*i,*verIter);
 			primitiveAssembly(*i,*verIter);
-			setOtherState(i->propertys);
 			mRasterizer.flush(i->frameBuffer,i->renderState);
 		}
 		notifyCompleted();
