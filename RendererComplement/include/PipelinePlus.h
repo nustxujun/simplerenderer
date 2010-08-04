@@ -34,6 +34,47 @@ namespace RCP
 		Vertex()
 		{}
 
+		Vertex operator - (const Vertex& vert)const
+		{
+			Vertex result;
+			result.pos = pos - vert.pos;
+			result.norm = norm - vert.norm;
+			result.specular = specular - vert.specular;
+			for (int i = 0; i < 8; ++i)
+			{
+				result.color[i] = color[i] - vert.color[i];
+				result.texCrood[i] = texCrood[i] - vert.texCrood[i];
+			}
+			return result;
+		}
+
+		void operator *= (float f)
+		{
+			pos *= f;
+			norm *= f;
+			specular *= f;
+			for (int i = 0; i < 8; ++i)
+			{
+				color[i] *= f;
+				texCrood[i] *= f;
+			}
+		}
+
+		Vertex operator + (const Vertex& vert)const
+		{
+			Vertex result;
+			result.pos = pos + vert.pos;
+			result.norm = norm + vert.norm;
+			result.specular = specular + vert.specular;
+			for (int i = 0; i < 8; ++i)
+			{
+				result.color[i] = color[i] + vert.color[i];
+				result.texCrood[i] = texCrood[i] + vert.texCrood[i];
+			}
+			return result;
+		}
+
+
 	};
 
 	struct Pixel
