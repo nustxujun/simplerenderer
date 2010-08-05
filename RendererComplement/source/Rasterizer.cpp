@@ -202,20 +202,25 @@ namespace RCP
 		d2 *= inwheight;
 
 
+
+
 		Vertex point1, point2,point3,d3;
 		Pixel point;
 		float ratio1,ratio2,ratio3;
 		float w;
+
+		point1 = d1;
+		point2 = d2;
+		point1 *= ymin - pri.vertex[0].pos.y;
+		point1 += pri.vertex[0];
+		point2 *= ymin - pri.vertex[1-offset].pos.y;
+		point2 += pri.vertex[1-offset];
+
 		for (unsigned int y = ymin; y < ymax; ++y )
 		{
 	
-
-			point1 = d1;
-			point2 = d2;
-			point1 *= y - pri.vertex[0].pos.y;
-			point1 = point1 + pri.vertex[0];
-			point2 *= y - pri.vertex[1-offset].pos.y;
-			point2 = point2 + pri.vertex[1-offset];
+			point1 += d1;
+			point2 += d2;
 
 			xmin = ceil(point1.pos.x);
 			xmax = ceil(point2.pos.x);
@@ -223,13 +228,15 @@ namespace RCP
 			d3 = point2 - point1;
 			inwheight = 1.0f / d3.pos.x;
 			d3 *= inwheight;
+
+			point3 = d3;
+			point3 *= xmin - 1 - point1.pos.x;
+			point3 += point1;
 			
 			for (unsigned int x = xmin; x < xmax; ++x)
 			{
+				point3 += d3;
 				
-				point3 = d3;
-				point3 *= x - point1.pos.x;
-				point3 = point3 + point1;
 
 				w = 1.0f /point3.pos.w;
 
@@ -237,22 +244,22 @@ namespace RCP
 				point.y = y;
 				point.invw = point3.pos.w;
 				point.z = point3.pos.z;
-				point3 *= w;
-				point.specular = point3.specular;
+				//point3 *= w;
+				point.specular = point3.specular * w;
 
 
 				//临时处理
 				Colour colorBlend;
 				for (unsigned int i = 0; i < 8; ++i)
 				{
-					point.color[i] = point3.color[i];
+					point.color[i] = point3.color[i] * w;
 					if (pri.sampler[i].texture != NULL)
 					{
 						if (mPixelShader)
 							mPixelShader->sampler[i] = pri.sampler[i];
 						
-						point.u = point3.texCrood[i].x;
-						point.v = point3.texCrood[i].y;
+						point.u = point3.texCrood[i].x * w;
+						point.v = point3.texCrood[i].y * w;
 						//先這裡就不混合了，到時候還要給混合公式
 						colorBlend = pri.sampler[i].sample(point.u ,point.v); 
 					}
