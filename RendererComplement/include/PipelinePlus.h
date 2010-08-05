@@ -60,18 +60,19 @@ namespace RCP
 			}
 		}
 
-		Vertex operator + (const Vertex& vert)const
+		const Vertex& operator += (const Vertex& vert)
 		{
-			Vertex result;
-			result.pos = pos + vert.pos;
-			result.norm = norm + vert.norm;
-			result.specular = specular + vert.specular;
+			pos += vert.pos;
+			norm += vert.norm;
+			specular += vert.specular;
 			for (int i = 0; i < 8; ++i)
 			{
-				result.color[i] = color[i] + vert.color[i];
-				result.texCrood[i] = texCrood[i] + vert.texCrood[i];
+				
+				color[i] += vert.color[i];
+				
+				texCrood[i] += vert.texCrood[i];
 			}
-			return result;
+			return *this;
 		}
 
 
