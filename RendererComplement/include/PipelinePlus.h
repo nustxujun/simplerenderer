@@ -60,6 +60,20 @@ namespace RCP
 			}
 		}
 
+		Vertex operator * (float f)const
+		{
+			Vertex result;
+			result.pos = pos * f;
+			result.norm = norm * f;
+			result.specular = specular * f;
+			for (int i = 0; i < 8; ++i)
+			{
+				result.color[i] = color[i] * f;
+				result.texCrood[i] = texCrood[i] * f;
+			}
+			return result;
+		}
+
 		const Vertex& operator += (const Vertex& vert)
 		{
 			pos += vert.pos;
@@ -74,6 +88,8 @@ namespace RCP
 			}
 			return *this;
 		}
+
+
 
 
 	};
@@ -135,12 +151,42 @@ namespace RCP
 	{
 	public:
 		virtual void execute(Vertex& ver) = 0;
+
+		Colour convert(const Vector4& vec)
+		{
+			Colour c;
+			c.r = vec.x;
+			c.g = vec.y;
+			c.b = vec.z;
+			c.a = vec.w;
+			return c;
+		}
+
+		Colour convert(const Vector3& vec)
+		{
+			Colour c;
+			c.r = vec.x;
+			c.g = vec.y;
+			c.b = vec.z;
+			c.a = 0.0f;
+			return c;
+		}
 	};
 
 	class PixelShader
 	{
 	public:
 		virtual Colour shade(const Pixel& pixel) = 0;
+		
+		Vector4 convert(const Colour& color)
+		{
+			Vector4 v;
+			v.x = color.r;
+			v.y = color.g;
+			v.z = color.b;
+			v.w = color.a;
+			return v;
+		}
 		
 		Sampler sampler[8];
 	};
