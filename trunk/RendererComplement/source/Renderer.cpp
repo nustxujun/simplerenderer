@@ -154,7 +154,7 @@ namespace RCP
 		mSampler[index].texture = tex;
 	}
 
-	void Renderer::SetTextureState(unsigned int index, const TextureState& ts)
+	void Renderer::setTextureState(unsigned int index, const TextureState& ts)
 	{
 		assert(index < 8);
 		mSampler[index].setTextureState(ts);
@@ -233,6 +233,16 @@ namespace RCP
 	void Renderer::setProperty(const std::string& funcName,const Any& attribute)
 	{
 		mPropertys[funcName] = attribute;
+	}
+
+	void Renderer::setRenderTarget(unsigned int index,RenderTarget* rt)
+	{
+		mFrameBuffer->setBuffer(BT_COLOUR, rt);
+	}
+
+	RenderTarget* Renderer::getRenderTarget(unsigned int index )
+	{
+		return mFrameBuffer->getBuffer(BT_COLOUR);
 	}
 
 

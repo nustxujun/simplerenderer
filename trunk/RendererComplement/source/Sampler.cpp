@@ -26,8 +26,8 @@ namespace RCP
 	{
 		if (texture == NULL)
 			return Colour(1.0f);
-		assert( u < 1.0f && v < 1.0f);
 
+		assignUV(u,v);
 		//ÏÈ²»¹Ümipmap
 		unsigned int x,y;
 		RenderTarget* rt = texture->getRenderTarget(0);
@@ -131,7 +131,7 @@ namespace RCP
 
 	void Sampler::setTextureState(const TextureState& state)
 	{
-
+		mTextureState = state;
 	}
 
 }

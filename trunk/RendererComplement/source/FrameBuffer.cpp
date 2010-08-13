@@ -39,10 +39,10 @@ namespace RCP
 		mBuffers[type] = rt;
 	}
 
-	RenderTarget* FrameBuffer::operator [](unsigned int index)
+	RenderTarget* FrameBuffer::getBuffer(BufferTpye type)
 	{
-		assert(index < BT_COUNT);
-		return mBuffers[index];
+		assert(type < BT_COUNT);
+		return mBuffers[type];
 	}
 
 	void FrameBuffer::clearImpl()
