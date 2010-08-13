@@ -21,6 +21,12 @@ namespace RCP
 		{
 		}
 
+		inline Vector4( const Vector3& vec3)
+			: x( vec3.x ), y( vec3.y), z( vec3.z ), w( 0.0f )
+		{
+		}
+
+
 		inline Vector4& operator = ( const Vector4& rkVector )
 		{
 			x = rkVector.x;

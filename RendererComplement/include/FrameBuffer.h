@@ -19,8 +19,7 @@ namespace RCP
 		~FrameBuffer();
 
 		void setBuffer(BufferTpye type,RenderTarget* rt);
-
-		RenderTarget* operator [](unsigned int index);
+		RenderTarget* getBuffer(BufferTpye type);
 
 
 		/*

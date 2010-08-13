@@ -45,7 +45,7 @@ namespace RCP
 		void setVertexBuffer(VertexBuffer* vb);
 		void setIndexBuffer(IndexBuffer* ib);
 		void setTexture(unsigned int index,Texture* tex);
-		void SetTextureState(unsigned int index, const TextureState& ts);
+		void setTextureState(unsigned int index, const TextureState& ts);
 		void setMaterial(Material mat);
 		void setMatrix(TransformStateType type,const Matrix4X4& mat);
 		void setPaintingMethod(PaintingMethod* pm);
@@ -57,6 +57,9 @@ namespace RCP
 		void clearStencil(unsigned int s);
 		void clearColour(const Colour& c);
 		void setProperty(const std::string& funcName,const Any& attribute);
+		//index默认0，等到完善MRT的时候再实现
+		void setRenderTarget(unsigned int index,RenderTarget* rt);
+		RenderTarget* getRenderTarget(unsigned int index = 0);
 
 	private:
 		bool mIsInitialized;

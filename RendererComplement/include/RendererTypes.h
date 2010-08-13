@@ -221,10 +221,68 @@ namespace RCP
 		TAM_MIRRORONCE,
 	};
 
+	enum TextureOperation
+	{
+		TO_DISABLE = 1,
+		TO_SELECTARG1 = 2,
+		TO_SELECTARG2 = 3,
+		TO_MODULATE = 4,
+		TO_MODULATE2X = 5,
+		TO_MODULATE4X = 6,
+		TO_ADD = 7,
+		TO_ADDSIGNED = 8,
+		TO_ADDSIGNED2X = 9,
+		TO_SUBTRACT = 10,
+		TO_ADDSMOOTH = 11,
+		TO_BLENDDIFFUSEALPHA = 12,
+		TO_BLENDTEXTUREALPHA = 13,
+		TO_BLENDFACTORALPHA = 14,
+		TO_BLENDTEXTUREALPHAPM = 15,
+		TO_BLENDCURRENTALPHA = 16,
+		TO_PREMODULATE = 17,
+		TO_MODULATEALPHA_ADDCOLOR = 18,
+		TO_MODULATECOLOR_ADDALPHA = 19,
+		TO_MODULATEINVALPHA_ADDCOLOR = 20,
+		TO_MODULATEINVCOLOR_ADDALPHA = 21,
+		TO_BUMPENVMAP = 22,
+		TO_BUMPENVMAPLUMINANCE = 23,
+		TO_DOTPRODUCT3 = 24,
+		TO_MULTIPLYADD = 25,
+		TO_LERP = 26,
+	};
+
+	enum TextureArgumentConstant
+	{
+		TAC_CONSTANT,
+		TAC_CURRENT, 
+		TAC_DIFFUSE, 
+		TAC_SELECTMASK ,
+		TAC_SPECULAR, 
+		//这个。。。。反正可编程管线不需要。。我也懒得支持了
+		TAC_TEMP ,
+		TAC_TEXTURE ,
+		TAC_TFACTOR ,
+
+	};
+
 	struct TextureState
 	{
 		TextureAddresingMode addresingModeU;
 		TextureAddresingMode addresingModeV;
+		TextureOperation colourOperation;
+		TextureArgumentConstant colourArgument1;
+		TextureArgumentConstant colourArgument2;
+		TextureOperation alphaOperation;
+		TextureArgumentConstant alphaArgument1;
+		TextureArgumentConstant alphaArgument2;
+		float bumpMappingMatrix[4];
+		float bumpMapLuminanceScale;
+		float bumpMapLuminanceOffset;
+		//在做TO_MULTIPLYADD或TO_LERP用到的第3参数
+		TextureArgumentConstant colourArgument3;
+		TextureArgumentConstant alphaArgument3;
+		//输出结果的地方，要么是TAC_CURRENT要么是TAC_TEMP
+		TextureArgumentConstant resultArgument;
 
 		TextureState():
 			addresingModeU(TAM_WRAP),
