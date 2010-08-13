@@ -21,7 +21,7 @@ namespace RCP
 		}
 
 		inline Colour( float f)
-			: r( f ), g( f ), b( f ), a( 1.0f )
+			: r( f ), g( f ), b( f ), a( f )
 		{
 		}
 
@@ -87,6 +87,15 @@ namespace RCP
                 b * fScalar,
                 a * fScalar);
         }
+
+		inline Colour operator *= ( const float fScalar  )
+		{
+			r *= fScalar;
+			g *= fScalar;
+			b *= fScalar;
+			a *= fScalar;
+			return *this;
+		}
 
         inline Colour operator / ( const float fScalar ) const
         {
