@@ -29,7 +29,7 @@ namespace RCP
 	template <class T>
 	bool equal(const T& in1, const T& in2)
 	{
-		if((T)(std::abs(in1 - in2)) <= stdnumeric_limits<T>::epsilon()) return true;
+		if((T)(std::abs(in1 - in2)) <= std::numeric_limits<T>::epsilon()) return true;
 		return false;
 	}
 
