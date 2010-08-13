@@ -4,6 +4,7 @@
 #include"Prerequisites.h"
 #include "Colour.h"
 #include "Sampler.h"
+#include "Array.h"
 
 namespace RCP
 {
@@ -28,13 +29,13 @@ namespace RCP
 		Vector4 pos;
 		Vector3 norm;
 		//透视除法后，这里将保存 color/w specular/w texCrood/w;
-		Colour color[8];
+		Array<Colour,8> color;
 		Colour specular;
-		Vector2 texCrood[8];
+		Array<Vector2,8> texCrood;
 		Vertex()
 		{}
 
-		Vertex operator - (const Vertex& vert)const
+		inline Vertex operator - (const Vertex& vert)const
 		{
 			Vertex result;
 			result.pos = pos - vert.pos;
@@ -42,25 +43,29 @@ namespace RCP
 			result.specular = specular - vert.specular;
 			for (int i = 0; i < 8; ++i)
 			{
-				result.color[i] = color[i] - vert.color[i];
-				result.texCrood[i] = texCrood[i] - vert.texCrood[i];
+				if (color.isUsed(i) || vert.color.isUsed(i))
+					result.color[i] = color[i] - vert.color[i];
+				if (texCrood.isUsed(i) || vert.texCrood.isUsed(i))
+					result.texCrood[i] = texCrood[i] - vert.texCrood[i];
 			}
 			return result;
 		}
 
-		void operator *= (float f)
+		inline void operator *= (float f)
 		{
 			pos *= f;
 			norm *= f;
 			specular *= f;
 			for (int i = 0; i < 8; ++i)
 			{
-				color[i] *= f;
-				texCrood[i] *= f;
+				if (color.isUsed(i))
+					color[i] *= f;
+				if (texCrood.isUsed(i))
+					texCrood[i] *= f;
 			}
 		}
 
-		Vertex operator * (float f)const
+		inline Vertex operator * (float f)const
 		{
 			Vertex result;
 			result.pos = pos * f;
@@ -68,13 +73,15 @@ namespace RCP
 			result.specular = specular * f;
 			for (int i = 0; i < 8; ++i)
 			{
-				result.color[i] = color[i] * f;
-				result.texCrood[i] = texCrood[i] * f;
+				if (color.isUsed(i))
+					result.color[i] = color[i] * f;
+				if (texCrood.isUsed(i))
+					result.texCrood[i] = texCrood[i] * f;
 			}
 			return result;
 		}
 
-		const Vertex& operator += (const Vertex& vert)
+		inline const Vertex& operator += (const Vertex& vert)
 		{
 			pos += vert.pos;
 			norm += vert.norm;
@@ -82,9 +89,10 @@ namespace RCP
 			for (int i = 0; i < 8; ++i)
 			{
 				
-				color[i] += vert.color[i];
-				
-				texCrood[i] += vert.texCrood[i];
+				if (color.isUsed(i) || vert.color.isUsed(i))
+					color[i] += vert.color[i];
+				if (texCrood.isUsed(i) || vert.texCrood.isUsed(i))
+					texCrood[i] += vert.texCrood[i];
 			}
 			return *this;
 		}

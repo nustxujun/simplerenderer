@@ -387,6 +387,10 @@
 			Name="Extendsion"
 			>
 			<File
+				RelativePath=".\include\Array.h"
+				>
+			</File>
+			<File
 				RelativePath=".\source\DefaultPipeline.cpp"
 				>
 			</File>
@@ -408,14 +412,6 @@
 			</File>
 			<File
 				RelativePath=".\include\Rasterizer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\source\Rasterizer_V2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\Rasterizer_V2.h"
 				>
 			</File>
 		</Filter>
