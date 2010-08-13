@@ -17,6 +17,7 @@
 #include <list>
 #include <set>
 #include <math.h>
+#include <limits>
 
 //basal headers EX
 #include "Any.h"

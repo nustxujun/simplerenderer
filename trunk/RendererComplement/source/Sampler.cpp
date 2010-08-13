@@ -15,14 +15,13 @@ namespace RCP
 
 	}
 
-
-	Colour Sampler::sample(const Vector2& coord)const
+	float Sampler::collod(const Vector2& ddx, const Vector2& ddy, float lodbias)
 	{
-		return sample(coord.x,coord.y);
-
+		float result = std::max<float>(ddx.dotProduct(ddx),ddy.dotProduct(ddy));
+		result = log2(std::max<float>(result,0.000001f) + lodbias);
 	}
 
-	Colour Sampler::sample(float u, float v)const 
+	Colour Sampler::sample(float u, float v,const Vector2& ddx,const Vector2& ddy, float lodbias)const 
 	{
 		if (texture == NULL)
 			return Colour(1.0f);

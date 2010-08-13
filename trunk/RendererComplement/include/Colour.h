@@ -224,7 +224,7 @@ namespace RCP
 			return *this;
 		}
 
-		inline const Colour& clamp()
+		inline const Colour& saturate()
 		{
 			a = a> 1?1:a;
 			a = a<0?0:a;

@@ -4,6 +4,8 @@
 #include <windows.h>
 #pragma comment(lib,"winmm.lib")
 
+
+
 namespace RCP
 {
 	class Timer
@@ -27,5 +29,8 @@ namespace RCP
 	private:
 		unsigned long time;
 	};
+
+	static Timer timer;
+#define getWasteTime(func,fileName) { FILE* f;f = fopen(fileName,"a"); timer.reset(); func;fprintf(f,"%ld\n",timer.getTime());fclose(f); }
 }
 #endif//_Timer_H_

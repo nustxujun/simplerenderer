@@ -7,9 +7,9 @@ namespace RCP
 	const float EPSLON = 0.1f;
 
 	Rasterizer::Rasterizer():
-		mPixelShader(NULL)
+	mPixelShader(NULL)
 	{
-	
+
 	}
 
 	Rasterizer::~Rasterizer()
@@ -18,7 +18,7 @@ namespace RCP
 
 	void Rasterizer::initialize(unsigned int width, unsigned int height, PixelFormat pf)
 	{
-		
+
 	}
 
 	void Rasterizer::pushPrimitive(const Primitive& pri)
@@ -91,17 +91,17 @@ namespace RCP
 			//计算新顶点
 			Vertex newVertex;
 			float ratio =( resultPri.vertex[1].pos.y - resultPri.vertex[0].pos.y ) / ( resultPri.vertex[2].pos.y - resultPri.vertex[0].pos.y );
-			
-			interpolate(newVertex.pos,ratio,resultPri.vertex[0].pos,resultPri.vertex[2].pos);
+
+			lerp(newVertex.pos,ratio,resultPri.vertex[0].pos,resultPri.vertex[2].pos);
 			newVertex.pos.y = resultPri.vertex[1].pos.y;
-			interpolate(newVertex.norm,ratio,resultPri.vertex[0].norm,resultPri.vertex[2].norm);
-			interpolate(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
+			lerp(newVertex.norm,ratio,resultPri.vertex[0].norm,resultPri.vertex[2].norm);
+			lerp(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
 			for (unsigned int i = 0; i < 8 ; ++i)
 			{
 				if (mPixelShader || (!mPixelShader && i == 0))
-					interpolate(newVertex.color[i],ratio,resultPri.vertex[0].color[i],resultPri.vertex[2].color[i]);
+					lerp(newVertex.color[i],ratio,resultPri.vertex[0].color[i],resultPri.vertex[2].color[i]);
 				if (pri.sampler[i].texture != NULL)//有纹理的话
-					interpolate(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
+					lerp(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
 			}
 			//分解成两个平底三角形
 			Primitive up,down;
@@ -133,7 +133,7 @@ namespace RCP
 
 		mCurrentFrameBuffer = fb;
 		mRenderState = state;
-		
+
 		PrimitiveVector::iterator i,endi = mPrimitiveVector.end();
 		for (i = mPrimitiveVector.begin(); i != endi; ++i)
 		{
@@ -155,7 +155,7 @@ namespace RCP
 			//copyToTarget(target);
 			//clear();
 		}
-	
+
 		mPrimitiveVector.clear();
 
 	}
@@ -186,8 +186,8 @@ namespace RCP
 		Vertex diff1(pri.vertex[1] - pri.vertex[0]);
 		Vertex diff2(pri.vertex[2] - pri.vertex[0]);
 		float area = diff2.pos.x * diff1.pos.y - diff1.pos.x * diff2.pos.y;
-		//if (area == 0.0f)
-			//return;
+		if (equal(area,0.0f))
+			return;
 		float invarea = 1.0f / area;
 
 		Vertex ddx((diff2 * diff1.pos.y - diff1 * diff2.pos.y )*invarea);
@@ -197,13 +197,8 @@ namespace RCP
 		float dx1 = pri.vertex[2-offset].pos.x - pri.vertex[0].pos.x;
 		dx1 = dx1 / (pri.vertex[2-offset].pos.y - pri.vertex[0].pos.y);
 
-
-
 		float dx2 = pri.vertex[2].pos.x - pri.vertex[1-offset].pos.x;
 		dx2 = dx2 / (pri.vertex[2].pos.y - pri.vertex[1-offset].pos.y);
-
-
-
 
 
 		Vertex point1, point2,point3,d3;
@@ -218,7 +213,7 @@ namespace RCP
 
 		for (unsigned int y = ymin; y < ymax; ++y )
 		{
-	
+
 
 			point3 = pri.vertex[0];
 			point3 +=  ddy * (y - pri.vertex[0].pos.y);
@@ -243,7 +238,8 @@ namespace RCP
 				Colour colorBlend;
 				for (unsigned int i = 0; i < 8; ++i)
 				{
-					point.color[i] = point3.color[i] * w;
+					if (point3.color.isUsed(i))
+						point.color[i] = point3.color[i] * w;
 					if (pri.sampler[i].texture != NULL)
 					{
 						if (mPixelShader)
@@ -252,7 +248,7 @@ namespace RCP
 						point.u = point3.texCrood[i].x * w;
 						point.v = point3.texCrood[i].y * w;
 						//先這裡就不混合了，到時候還要給混合公式
-						colorBlend = pri.sampler[i].sample(point.u ,point.v); 
+						colorBlend = pri.sampler[i].sample(point.u ,point.v,ddx.texCrood[i],ddy.texCrood[i]); 
 					}
 				}
 				//這裡也是
@@ -267,11 +263,10 @@ namespace RCP
 				{
 					if (pri.sampler[0].texture != NULL)
 						point.color[0] *= colorBlend;
-					point.color[0] = (point.color[0] + point.specular).clamp();
+					point.color[0] = (point.color[0] + point.specular).saturate();
 				}
 
 				drawImpl(point);
-
 				point3 += ddx  ;
 			}
 
@@ -282,100 +277,6 @@ namespace RCP
 			
 		}
 
-		//Vertex point1, point2;
-		//Pixel point3;
-		//float ratio1,ratio2,ratio3;
-		//float w;
-		//for (unsigned int y = ymin; y < ymax; ++y )
-		//{
-		//	point3.y = y;
-
-		//	ratio1 = (y - pri.vertex[0].pos.y) / (pri.vertex[2 - offset].pos.y -  pri.vertex[0].pos.y);
-		//	ratio2 = (y - pri.vertex[1 - offset].pos.y) / (pri.vertex[2].pos.y -  pri.vertex[1 - offset].pos.y);
-
-		//	interpolate(point1.pos,ratio1,pri.vertex[0].pos,pri.vertex[2 - offset].pos);
-		//	interpolate(point2.pos,ratio2,pri.vertex[1 - offset].pos,pri.vertex[2].pos);
-		//	
-		//	interpolate(point1.norm,ratio1,pri.vertex[0].norm,pri.vertex[2 - offset].norm);
-		//	interpolate(point2.norm,ratio2,pri.vertex[1 - offset].norm,pri.vertex[2].norm);
-		//	interpolate(point1.specular,ratio1,pri.vertex[0].specular,pri.vertex[2 - offset].specular);
-		//	interpolate(point2.specular,ratio2,pri.vertex[1 - offset].specular,pri.vertex[2].specular);
-
-		//	for (unsigned int i = 0; i < 8; ++i)
-		//	{
-		//		if (pri.sampler[i].texture != NULL)
-		//		{
-		//			interpolate(point1.texCrood[i],ratio1,pri.vertex[0].texCrood[i],pri.vertex[2 - offset].texCrood[i]);
-		//			interpolate(point2.texCrood[i],ratio2,pri.vertex[1 - offset].texCrood[i],pri.vertex[2].texCrood[i]);
-		//		
-		//		}
-		//		interpolate(point1.color[i],ratio1,pri.vertex[0].color[i],pri.vertex[2 - offset].color[i]);
-		//		interpolate(point2.color[i],ratio2,pri.vertex[1 - offset].color[i],pri.vertex[2].color[i]);
-		//	}
-
-
-		//	xmin = ceil(point1.pos.x);
-		//	xmax = ceil(point2.pos.x);
-		//	for (unsigned int x = xmin; x < xmax; ++x)
-		//	{
-		//		point3.x = x;
-
-		//		ratio3 = (x - point1.pos.x) / (point2.pos.x -  point1.pos.x);
-		//		//注意这里是 1/w
-		//		interpolate(point3.invw, ratio3,point1.pos.w,point2.pos.w);	
-		//		w = 1.0f / point3.invw;
-
-
-
-		//		interpolate(point3.specular, ratio3,point1.specular,point2.specular);
-		//		point3.specular *= w;
-		//		
-		//		//需要z 
-		//		interpolate(point3.z, ratio3,point1.pos.z,point2.pos.z);	
-		//		
-		//		
-		//		//临时处理
-		//		Colour colorBlend;
-		//		for (unsigned int i = 0; i < 8; ++i)
-		//		{
-		//			//只有当有mPixelShader的时候才执行后面的
-		//			if (mPixelShader || (!mPixelShader && i == 0))
-		//			{
-		//				//颜色
-		//				interpolate(point3.color[i], ratio3,point1.color[i],point2.color[i]);
-		//				point3.color[i] *= w;
-		//			}
-		//			if (pri.sampler[i].texture != NULL)
-		//			{
-		//				if (mPixelShader)
-		//					mPixelShader->sampler[i] = pri.sampler[i];
-		//				//这里的u v实际是 U/w V/w;
-		//				interpolate(point3.u,ratio3,point1.texCrood[i].x,point2.texCrood[i].x);
-		//				interpolate(point3.v,ratio3,point1.texCrood[i].y,point2.texCrood[i].y);
-		//				point3.u *= w;
-		//				point3.v *= w;
-		//				//先這裡就不混合了，到時候還要給混合公式
-		//				colorBlend = pri.sampler[i].sample(point3.u ,point3.v); 
-		//			}
-		//		}
-		//		//這裡也是
-		//		if (pri.sampler[0].texture != NULL)
-		//		point3.color[0] *= colorBlend;
-
-		//		if (mPixelShader != NULL)
-		//		{
-		//			point3.color[0] = mPixelShader->shade(point3);
-		//		}
-		//		else//加高光运算
-		//		{
-		//			if (pri.sampler[0].texture != NULL)
-		//				point3.color[0] *= colorBlend;
-		//			point3.color[0] = (point3.color[0] + point3.specular).clamp();
-		//		}
-
-		//		drawImpl(point3);
-		//	}
-		//}
 	}
 
 	Colour Rasterizer::getFactor(BlendMode bm,const Colour& srcColour, const Colour& destColour)
@@ -442,7 +343,7 @@ namespace RCP
 			}
 		default:
 			assert(0);
-		return 0;
+			return 0;
 		}
 	}
 
@@ -466,10 +367,10 @@ namespace RCP
 		unsigned int color;
 		mCurrentFrameBuffer.getValue(color,BT_COLOUR,p.x,p.y);
 		destColour.getFromARGB(color);
-		
+
 		color = alphaBlend( p.color[0],destColour).get32BitARGB();
 
-		
+
 		//color = p.color[0].get32BitARGB();
 		mCurrentFrameBuffer.setValue(BT_COLOUR,p.x,p.y,color);
 	}
@@ -563,7 +464,7 @@ namespace RCP
 
 	bool Rasterizer::pixelTest(const Pixel& p)
 	{
-		
+
 		//if (!scissorTest(p))
 		//	return false;
 		if (!alphaTest(p))
@@ -635,7 +536,7 @@ namespace RCP
 		default :
 			assert(0);
 			return false;
-		
+
 		}
 	}
 

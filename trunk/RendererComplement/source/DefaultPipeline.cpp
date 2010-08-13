@@ -29,11 +29,6 @@ namespace RCP
 
 	void DefaultPipeline::execute(const RenderData& renderData)
 	{
-		FILE* fp;
-		fp = fopen("timer.txt","a");
-		Timer t;
-		t.reset();
-		
 		const RenderData::RenderElementList& elems = renderData.getRenderElementList();
 		size_t elemSize = elems.size();
 		if (mVertexList.size() < elemSize)
@@ -49,8 +44,8 @@ namespace RCP
 			if (i->vertexBuffer->getVertexCount() > verIter->size())
 				verIter->resize(i->vertexBuffer->getVertexCount());//這裡就直接初始化了，下面就不再push_back了
 			vertexProcessing(*i,*verIter);
-			primitiveAssembly(*i,*verIter);
-			mRasterizer.flush(i->frameBuffer,i->renderState);
+			getWasteTime(	primitiveAssembly(*i,*verIter), "primtive.txt");
+			getWasteTime(	mRasterizer.flush(i->frameBuffer,i->renderState) , "rast.txt");
 		}
 		notifyCompleted();
 
@@ -452,8 +447,10 @@ namespace RCP
 
 		for (unsigned int i = 0; i < 8; ++i)
 		{
-			vert.texCrood[i] *= invw;
-			vert.color[i] *= invw;
+			if(vert.texCrood.isUsed(i))
+				vert.texCrood[i] *= invw;
+			if(vert.color.isUsed(i))
+				vert.color[i] *= invw;
 		}
 	}
 
@@ -479,8 +476,10 @@ namespace RCP
 		Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
 		for (unsigned int i = 0 ; i < 8; ++i)
 		{
-			Interpolate(newVertex.texCrood[i],vert1.texCrood[i],vert2.texCrood[i],scale);
-			Interpolate(newVertex.color[i],vert1.color[i],vert2.color[i],scale);
+			if (vert1.texCrood.isUsed(i) || vert2.texCrood.isUsed(i))
+				Interpolate(newVertex.texCrood[i],vert1.texCrood[i],vert2.texCrood[i],scale);
+			if (vert1.color.isUsed(i) || vert2.color.isUsed(i))
+				Interpolate(newVertex.color[i],vert1.color[i],vert2.color[i],scale);
 
 		}
 	}

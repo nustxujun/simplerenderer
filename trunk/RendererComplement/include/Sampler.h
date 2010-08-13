@@ -13,12 +13,14 @@ namespace RCP
 		Sampler();
 		~Sampler();
 
-		Colour sample(const Vector2& coord)const;
-		Colour sample(float u, float v)const ;
+		Colour sample(float u, float v,const Vector2& ddx, const Vector2& ddy, float lodbias = 0)const ;
 
 		void assignUV(float& u,float& v)const ;
 
 		void setTextureState(const TextureState& state);
+	private:
+		float collod(const Vector2& ddx, const Vector2& ddy, float lodbias);
+		int getColourData(float u, float v, float lod);
 	public:
 		const Texture* texture;
 	private:
