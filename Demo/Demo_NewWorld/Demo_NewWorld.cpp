@@ -32,15 +32,17 @@ INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 void render()
 {
-
+	
 	if (!g_Renderer.isInitialized())
 		return ;
 	// TODO: Add any drawing code here...
 	if (g_Renderer.isInitialized())
 	{
+		g_Renderer.clearColour(Colour(1,1,1));
+		g_Renderer.clearDepth(1.0f);
 		Matrix4X4 world;
 		static float i = 0;
-		i += 0.1;
+		i += 0.1f;
 		float r  = sin(i);
 		world = world * r;
 		world.m[3][3] = 1;
@@ -48,7 +50,7 @@ void render()
 		
 		g_Renderer.setVertexBuffer(g_vb);
 		g_Renderer.draw(PT_TRIANGLESTRIP,0,2);
-		g_Renderer.renderNow();
+		
 	}
 ;
 
@@ -94,6 +96,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 		else 
 		{
+			render();
 			RECT rect;
 			rect.bottom = 512;
 			rect.left = 0;
@@ -242,6 +245,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    rp.backBufferPixelFormat = PF_A8R8G8B8;
    g_Renderer.initialize(rp);
    g_Renderer.setPaintingMethod(&g_Painting);
+
    prepare();
 
    return TRUE;
@@ -290,7 +294,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (g_Renderer.isInitialized())
 		{
 			g_Painting.prepare(hdc);
-			render();
+			g_Renderer.renderNow();
 		}
 		EndPaint(hWnd, &ps);
 		break;
