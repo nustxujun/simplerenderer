@@ -44,8 +44,8 @@ namespace RCP
 			if (i->vertexBuffer->getVertexCount() > verIter->size())
 				verIter->resize(i->vertexBuffer->getVertexCount());//這裡就直接初始化了，下面就不再push_back了
 			vertexProcessing(*i,*verIter);
-			getWasteTime(	primitiveAssembly(*i,*verIter), "primtive.txt");
-			getWasteTime(	mRasterizer.flush(i->frameBuffer,i->renderState) , "rast.txt");
+			primitiveAssembly(*i,*verIter);
+			mRasterizer.flush(i->frameBuffer,i->renderState);
 		}
 		notifyCompleted();
 
@@ -347,7 +347,7 @@ namespace RCP
 			}
 						
 			//返回true则说明通过，false则剔除
-			 if (prim.type == Primitive::PT_ERROR  || !culling(prim) )
+			if (prim.type == Primitive::PT_ERROR  || !culling(prim,elem.renderState.cullMode) )
 				 continue;
 			 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
 			 clipping(prim,priResult);
@@ -362,9 +362,9 @@ namespace RCP
 		}
 	}
 
-	bool DefaultPipeline::culling(const Primitive& prim)
+	bool DefaultPipeline::culling(const Primitive& prim,CullMode cm)
 	{
-		if (prim.type != Primitive::PT_TRIANGLE)
+		if (prim.type != Primitive::PT_TRIANGLE || cm == CM_DISABLE)
 			return true;
 		
 
@@ -376,9 +376,9 @@ namespace RCP
 			pos1.w * (pos2.x * pos0.y - pos0.x * pos2.y) + 
 			pos2.w * (pos0.x * pos1.y - pos1.x * pos0.y)) ;
 		if (result > 0)
-			return true;
+			return cm == CM_CCW ;
 		else
-			return false;
+			return cm == CM_CCW;
 		
 	}
 

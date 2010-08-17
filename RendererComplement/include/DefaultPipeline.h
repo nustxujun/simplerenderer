@@ -30,7 +30,7 @@ namespace RCP
 		void primitiveAssembly(const RenderElement& elem,const VertexVector& verVec);
 
 		//返回true则说明通过，false则剔除
-		bool culling(const Primitive& prim);
+		bool culling(const Primitive& prim,CullMode fm);
 		bool checkPointInScreen(const Vector4& point);
 		void generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2,float dist1, float dist2);
 		template<class T>

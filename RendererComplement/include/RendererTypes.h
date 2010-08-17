@@ -132,6 +132,22 @@ namespace RCP
 	
 	};
 
+	enum CullMode
+	{
+		CM_DISABLE,
+		//À≥ ±’Î
+		CM_CW,
+		//ƒÊ ±’Î
+		CM_CCW,
+	};
+
+	enum FillMode
+	{
+		FM_POINT = 1,
+		FM_WIREFRAME = 2,
+		FM_SOLID = 3,
+	};
+
 	struct RenderState
 	{
 		//z test
@@ -155,6 +171,11 @@ namespace RCP
 		bool alphaBlendEnable;
 		BlendMode srcBlend;
 		BlendMode destBlend;
+
+		//cull
+		CullMode cullMode;
+		//fill
+		FillMode fillMode;
 	};
 
 	

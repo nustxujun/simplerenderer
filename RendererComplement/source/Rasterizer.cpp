@@ -137,23 +137,33 @@ namespace RCP
 		PrimitiveVector::iterator i,endi = mPrimitiveVector.end();
 		for (i = mPrimitiveVector.begin(); i != endi; ++i)
 		{
-			switch(i->type)
+			switch(state.fillMode)
 			{
-			case Primitive::PT_POINT:
+			case FM_POINT:
 				drawPoint(*i);
 				break;
-			case Primitive::PT_LINE:
+			case FM_WIREFRAME:
 				drawLine(*i);
 				break;
-			case Primitive::PT_TRIANGLE:
-				drawTriangle(*i);
+			case FM_SOLID:
+				switch(i->type)
+				{
+				case Primitive::PT_POINT:
+					drawPoint(*i);
+					break;
+				case Primitive::PT_LINE:
+					drawLine(*i);
+					break;
+				case Primitive::PT_TRIANGLE:
+					drawTriangle(*i);
+					break;
+				default:
+					assert(0);
+				}
 				break;
 			default:
 				assert(0);
 			}
-
-			//copyToTarget(target);
-			//clear();
 		}
 
 		mPrimitiveVector.clear();
@@ -223,6 +233,26 @@ namespace RCP
 
 	void Rasterizer::drawLine(const Primitive& pri)
 	{
+		//画线算法有待修改，临时这么简单写写了
+		int sum = 0;
+		switch (pri.type)
+		{
+		case Primitive::PT_POINT:
+			assert(0);
+			break;
+		case Primitive::PT_LINE:
+			break;
+		case Primitive::PT_TRIANGLE:
+			Primitive temp = pri;
+			temp.type = Primitive::PT_LINE;
+			drawLine(temp);
+			temp.vertex[1] = pri.vertex[2];
+			drawLine(temp);
+			temp.vertex[0] = pri.vertex[2];
+			drawLine(temp);
+			return;
+			break;
+		}
 		const Vertex& point1 = pri.vertex[0];
 		const Vertex& point2 = pri.vertex[1];
 		Vertex diff = point2 - point1;

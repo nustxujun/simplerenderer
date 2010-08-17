@@ -197,6 +197,14 @@ namespace RCP
 		}
 		
 		Sampler sampler[8];
+		Vertex ddx;
+		Vertex ddy;
+
+		Colour tex2D(unsigned int index ,float u, float v)
+		{
+			assert(index < 8);
+			return sampler[index].sample(u,v,ddx.texCrood[index],ddy.texCrood[index]);
+		}
 	};
 
 }
