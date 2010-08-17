@@ -69,7 +69,8 @@ namespace RCP
 
 			if (rt == NULL)
 			{
-				memset(&t,0,sizeof(T));
+				//不需要置空这样更能发现问题
+				//memset(&t,0,sizeof(T));
 				return;
 			}
 			if (mIsDirty)
