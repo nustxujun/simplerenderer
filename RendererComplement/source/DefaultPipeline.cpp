@@ -173,7 +173,8 @@ namespace RCP
 				if (texCroodDataOffset[k] != -1 && elem.sampler[k].texture != NULL)
 				{
 					mDataCollector.getData(verVec[i].texCrood[k],vertexData + texCroodDataOffset[k]);
-					elem.sampler[k].assignUV(verVec[i].texCrood[k].x,verVec[i].texCrood[k].y);					
+					//取样时才计算寻址
+					//elem.sampler[k].assignUV(verVec[i].texCrood[k].x,verVec[i].texCrood[k].y);					
 				}
 			}
 
@@ -349,7 +350,7 @@ namespace RCP
 			 if (prim.type == Primitive::PT_ERROR  || !culling(prim) )
 				 continue;
 			 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
-			 cliping(prim,priResult);
+			 clipping(prim,priResult);
 
 			 //产生的clip新结果插入
 			 for ( int k = 0; k < 5; ++k)
@@ -381,27 +382,23 @@ namespace RCP
 		
 	}
 
-	void DefaultPipeline::cliping(const Primitive& prim,Primitive prims[5])
+	void DefaultPipeline::clipping(const Primitive& prim,Primitive prims[5])
 	{
 		switch (prim.type)
 		{
 		case Primitive::PT_POINT:
 			{
-				const Vector4& pos = prim.vertex[0].pos;
-				//被裁减
-				if ( !checkPointInScreen(pos) )
-					 return;
-				prims[0] = prim;
+				clippingPoint(prim,prims[0]);
 				break;
 			}
 		case Primitive::PT_LINE:
 			{
-				clipingLine(prim,prims[0]);
+				clippingLine(prim,prims[0]);
 				break;
 			}
 		case Primitive::PT_TRIANGLE:
 			{
-				clipingTriangle(prim,prims);
+				clippingTriangle(prim,prims);
 				break;
 			}
 		default:
@@ -494,7 +491,20 @@ namespace RCP
 		return true;
 	}
 
-	void DefaultPipeline::clipingLine(const Primitive& prim,Primitive& resultPrim)
+	void DefaultPipeline::clippingPoint(const Primitive& prim,Primitive& resultPrim)
+	{
+		const Vector4& pos = prim.vertex[0].pos;
+		//被裁减
+		if ( !checkPointInScreen(pos) )
+			return;
+
+		resultPrim = prim;
+		homogeneousDivide(resultPrim.vertex[0]);
+		viewportMapping(resultPrim.vertex[0].pos,prim.vp);
+		
+	}
+
+	void DefaultPipeline::clippingLine(const Primitive& prim,Primitive& resultPrim)
 	{
 		assert(prim.type == Primitive::PT_LINE);
 
@@ -573,7 +583,7 @@ namespace RCP
 
 	}
 
-	void DefaultPipeline::clipingTriangle(const Primitive& prim,Primitive prims[5])
+	void DefaultPipeline::clippingTriangle(const Primitive& prim,Primitive prims[5])
 	{
 		assert(prim.type == Primitive::PT_TRIANGLE);
 		//2组顶点，一组裁剪前一组裁剪后，交替使用
