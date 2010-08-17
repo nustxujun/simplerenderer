@@ -246,22 +246,34 @@ namespace RCP
 			Primitive temp = pri;
 			temp.type = Primitive::PT_LINE;
 			drawLine(temp);
+			temp.vertex[0] = pri.vertex[1];
 			temp.vertex[1] = pri.vertex[2];
 			drawLine(temp);
 			temp.vertex[0] = pri.vertex[2];
+			temp.vertex[1] = pri.vertex[0];
 			drawLine(temp);
 			return;
 			break;
 		}
-		const Vertex& point1 = pri.vertex[0];
-		const Vertex& point2 = pri.vertex[1];
+		 Vertex point1 = pri.vertex[0];
+		 Vertex point2 = pri.vertex[1];
+		if (pri.vertex[0].pos.y > pri.vertex[1].pos.y)
+		{
+			point1= pri.vertex[1];
+			point2 = pri.vertex[0];
+		}
+
 		Vertex diff = point2 - point1;
 		Vertex point3( point1);
 		float height = point2.pos.y - point1.pos.y;
 		diff *= 1.0f / height;
 		Pixel point;
 		float w;
-		for (int y =0; y < height; ++y,point3 += diff)
+		unsigned int ymin,ymax;
+		ymin = ceil(point1.pos.y > point2.pos.y?point2.pos.y:point1.pos.y);
+		ymax = ceil(point1.pos.y > point2.pos.y?point1.pos.y:point2.pos.y);
+		point3 += diff * (ceil(point1.pos.y ) - point1.pos.y);
+		for (unsigned int y =ymin + 1; y < ymax; ++y,point3 += diff)
 		{
 			w = 1.0f /point3.pos.w;
 
