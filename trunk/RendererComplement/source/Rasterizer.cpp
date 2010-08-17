@@ -162,11 +162,122 @@ namespace RCP
 
 	void Rasterizer::drawPoint(const Primitive& pri)
 	{
+		int sum = 0;
+		switch (pri.type)
+		{
+		case Primitive::PT_POINT:
+			sum = 1;
+			break;
+		case Primitive::PT_LINE:
+			sum = 2;
+			break;
+		case Primitive::PT_TRIANGLE:
+			sum = 3;
+			break;
+		}
 
+		Pixel point;
+		float w;
+		for (int i = 0; i < sum; ++i)
+		{
+			point.x = ceil(pri.vertex[i].pos.x);
+			point.y = ceil(pri.vertex[i].pos.y);
+			point.z = pri.vertex[i].pos.z;
+			point.invw = pri.vertex[i].pos.w;
+			w = 1.0f/point.invw;
+			point.specular = pri.vertex[i].specular * w;
+			
+				Colour colorBlend;
+				for (unsigned int i = 0; i < 8; ++i)
+				{
+					point.color[i] = pri.vertex[i].color[i] * w;
+					if (pri.sampler[i].texture != NULL)
+					{
+						if (mPixelShader)
+							mPixelShader->sampler[i] = pri.sampler[i];
+						
+						point.u = pri.vertex[i].texCrood[i].x * w;
+						point.v = pri.vertex[i].texCrood[i].y * w;
+						//先這裡就不混合了，到時候還要給混合公式
+						//colorBlend = pri.sampler[i].sample(point.u ,point.v); 
+					}
+				}
+				//這裡也是
+				if (pri.sampler[0].texture != NULL)
+				point.color[0] *= colorBlend;
+
+				if (mPixelShader != NULL)
+				{
+					point.color[0] = mPixelShader->shade(point);
+				}
+				else//加高光运算
+				{
+					if (pri.sampler[0].texture != NULL)
+						point.color[0] *= colorBlend;
+					point.color[0] = (point.color[0] + point.specular).saturate();
+				}
+
+				drawImpl(point);
+		}
 	}
 
 	void Rasterizer::drawLine(const Primitive& pri)
 	{
+		const Vertex& point1 = pri.vertex[0];
+		const Vertex& point2 = pri.vertex[1];
+		Vertex diff = point2 - point1;
+		Vertex point3( point1);
+		float height = point2.pos.y - point1.pos.y;
+		diff *= 1.0f / height;
+		Pixel point;
+		float w;
+		for (int y =0; y < height; ++y,point3 += diff)
+		{
+			w = 1.0f /point3.pos.w;
+
+			point.x = ceil(point3.pos.x);
+			point.y = ceil(point3.pos.y);
+			point.invw = point3.pos.w;
+			point.z = point3.pos.z;
+			//point3 *= w;
+			point.specular = point3.specular * w;
+
+
+			//临时处理
+			Colour colorBlend;
+			for (unsigned int i = 0; i < 8; ++i)
+			{
+				point.color[i] = point3.color[i] * w;
+				if (pri.sampler[i].texture != NULL)
+				{
+					if (mPixelShader)
+						mPixelShader->sampler[i] = pri.sampler[i];
+
+					point.u = point3.texCrood[i].x * w;
+					point.v = point3.texCrood[i].y * w;
+					//先這裡就不混合了，到時候還要給混合公式
+					//colorBlend = pri.sampler[i].sample(point.u ,point.v); 
+				}
+			}
+			//這裡也是
+			if (pri.sampler[0].texture != NULL)
+				point.color[0] *= colorBlend;
+
+			if (mPixelShader != NULL)
+			{
+				point.color[0] = mPixelShader->shade(point);
+			}
+			else//加高光运算
+			{
+				if (pri.sampler[0].texture != NULL)
+					point.color[0] *= colorBlend;
+				point.color[0] = (point.color[0] + point.specular).saturate();
+			}
+
+			drawImpl(point);
+
+		}
+		
 
 	}
 
@@ -203,7 +314,6 @@ namespace RCP
 
 		Vertex point1, point2,point3,d3;
 		Pixel point;
-		float ratio1,ratio2,ratio3;
 		float w;
 		float x0,x1;
 		x0 = pri.vertex[0].pos.x + (ymin - pri.vertex[0].pos.y) * dx1;

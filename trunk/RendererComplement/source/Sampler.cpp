@@ -19,6 +19,7 @@ namespace RCP
 	{
 		float result = std::max<float>(ddx.dotProduct(ddx),ddy.dotProduct(ddy));
 		result = log2(std::max<float>(result,0.000001f) + lodbias);
+		return result;
 	}
 
 	Colour Sampler::sample(float u, float v,const Vector2& ddx,const Vector2& ddy, float lodbias)const 

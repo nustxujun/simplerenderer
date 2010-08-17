@@ -35,9 +35,10 @@ namespace RCP
 		void generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2,float dist1, float dist2);
 		template<class T>
 		inline void Interpolate(T& result, const T& vec1, const T& vec2, float scale);
-		void cliping(const Primitive& prim,Primitive prims[5]);
-		void clipingLine(const Primitive& prim,Primitive& resultPrim);
-		void clipingTriangle(const Primitive& prim,Primitive prims[5]);
+		void clipping(const Primitive& prim,Primitive prims[5]);
+		void clippingPoint(const Primitive& prim,Primitive& resultPrim);
+		void clippingLine(const Primitive& prim,Primitive& resultPrim);
+		void clippingTriangle(const Primitive& prim,Primitive prims[5]);
 		
 		void rasterize(Primitive& prim);
 		void homogeneousDivide(Vertex& vert);
