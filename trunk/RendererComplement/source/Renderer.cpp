@@ -74,6 +74,8 @@ namespace RCP
 		mRenderState.alphaBlendEnable = false;
 		mRenderState.srcBlend = BM_SRCALPHA;
 		mRenderState.destBlend = BM_INVSRCALPHA;
+		mRenderState.cullMode = CM_CCW;
+		mRenderState.fillMode = FM_WIREFRAME;
 
 
 	}
