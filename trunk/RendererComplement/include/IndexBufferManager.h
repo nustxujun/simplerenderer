@@ -10,7 +10,7 @@ namespace RCP
 		public ResourceManager
 	{
 	public:
-		IndexBuffer* createIndexBuffer();
+		IndexBuffer* createIndexBuffer(unsigned int indexCount, IndexFormat indexFormat);
 
 	};
 }

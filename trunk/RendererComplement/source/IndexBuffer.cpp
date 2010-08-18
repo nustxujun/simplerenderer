@@ -1,64 +1,81 @@
 #include "IndexBuffer.h"
-
+#include "MemoryBuffer.h"
 namespace RCP
 {
 	IndexBuffer::~IndexBuffer()
 	{
-
+		SAFE_DELETE(mData);
 	}
 
-	IndexBuffer::IndexBuffer(IndexBufferManager* mgr):
-		Resource((ResourceManager*)mgr)
+	IndexBuffer::IndexBuffer(unsigned int indexCount, IndexFormat indexformat,IndexBufferManager* mgr):
+		mIndexCount(indexCount),mIndexFormat(indexformat),Resource((ResourceManager*)mgr)
 	{
 
 	}
 
 	void IndexBuffer::initImpl() 
-	{}
-
-
-	void IndexBuffer::addIndex(unsigned int vertexIndex,unsigned int pos )
 	{
-		if (pos > mIndexList.size())
-		{
-			mIndexList.push_back(vertexIndex);
-		}
-		else
-		{
-			IndexList::iterator i,endi = mIndexList.end();
-			unsigned int index = 0;
-			for (i = mIndexList.begin(); i != endi; ++i,++index)
-			{
-				if (pos == index)
-					mIndexList.insert(i,vertexIndex);
-			}
-		}
+
+
+		size_t size = getSizePerIndex() * mIndexCount;
+		unsigned char* data = new unsigned char[size];
+		mData = new MemoryBuffer(data,size);	
 	}
 
-	void IndexBuffer::addIndex(unsigned int count,unsigned int numBytesPerIndex,const void* indexData)
+
+	void IndexBuffer::fillIndex(unsigned int vertexIndex,unsigned int pos )
 	{
-		assert(numBytesPerIndex <= 4);
-		unsigned int index ;
-		const char* data = (const char*)indexData;
-		for (unsigned int i = 0; i <  count; ++i)
-		{
-			index = 0;
-			memcpy(&index,data,numBytesPerIndex);
-			mIndexList.push_back(index);
-			data = data + numBytesPerIndex;
-				
-		}
+		mData->seek(pos *  getSizePerIndex());
+		mData->write(&vertexIndex,getSizePerIndex());
+	}
+
+	void IndexBuffer::fillIndex(unsigned int beginIndex,unsigned int indexCount,const void* indexData)
+	{
+		mData->seek(beginIndex *  getSizePerIndex());
+		mData->write(indexData,indexCount * getSizePerIndex());
 	}
 
 	const size_t IndexBuffer::getIndexCount()const
 	{
-		return mIndexList.size();
+		return mIndexCount;
 	}
 
 	unsigned int IndexBuffer::operator [](unsigned int index)const
 	{
-		assert(index < mIndexList.size());
-		return mIndexList[index];
+		assert(index < mIndexCount);
+		unsigned int value = 0;
+		memcpy(&value,mData->getData() + index * getSizePerIndex(),getSizePerIndex());
+		return value;
 	}
+
+	IndexFormat IndexBuffer::getIndexFormat()const
+	{
+		return mIndexFormat;
+	}
+
+	unsigned int IndexBuffer::getSizePerIndex()const
+	{
+		switch(mIndexFormat)
+		{
+		case IF_INDEX16:
+			return 2;
+			break;
+		case IF_INDEX32:
+			return 4;
+			break;
+		default:
+			assert(0);
+			return 0;
+		}
+	
+	}
+
+	void* IndexBuffer::lock()
+	{
+		return mData->getData();
+	}
+
+	void IndexBuffer::unlock()
+	{}
 
 }

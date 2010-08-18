@@ -75,7 +75,7 @@ namespace RCP
 		mRenderState.srcBlend = BM_SRCALPHA;
 		mRenderState.destBlend = BM_INVSRCALPHA;
 		mRenderState.cullMode = CM_CCW;
-		mRenderState.fillMode = FM_WIREFRAME;
+		mRenderState.fillMode = FM_SOLID;
 
 
 	}
@@ -180,10 +180,10 @@ namespace RCP
 		return mVertexBufferManager->createVertexBuffer(vertexCount,decl);
 	}
 
-	IndexBuffer* Renderer::createIndexBuffer()
+	IndexBuffer* Renderer::createIndexBuffer(unsigned int indexCount, IndexFormat indexFormat)
 	{
 		assert(mIsInitialized);
-		return mIndexBufferManager->createIndexBuffer();
+		return mIndexBufferManager->createIndexBuffer(indexCount,indexFormat);
 	}
 
 	Texture* Renderer::createTexture(unsigned int width, unsigned int height, unsigned int numMipmap, PixelFormat pf)

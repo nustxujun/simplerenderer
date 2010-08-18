@@ -55,6 +55,8 @@ namespace RCP
 		size_t getDataSizeInBytes()const;
 		const VertexDeclaration& getVertexDeclaration()const;
 		const unsigned int getVertexCount()const;
+		void* lock();
+		void unlock();
 	private :
 		VertexBuffer(const VertexDeclaration& decl,unsigned int vertexCount,VertexBufferManager* mgr);
 		void initImpl() ;

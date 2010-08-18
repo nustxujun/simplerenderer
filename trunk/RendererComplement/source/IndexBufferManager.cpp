@@ -3,9 +3,9 @@
 
 namespace RCP
 {
-	IndexBuffer* IndexBufferManager::createIndexBuffer()
+	IndexBuffer* IndexBufferManager::createIndexBuffer(unsigned int indexCount, IndexFormat indexFormat)
 	{
-		IndexBuffer* ib = new IndexBuffer(this);
+		IndexBuffer* ib = new IndexBuffer(indexCount,indexFormat,this);
 		ib->initialize();
 		ib->addRef();
 		add((Resource*)ib);

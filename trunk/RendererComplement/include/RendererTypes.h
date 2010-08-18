@@ -322,6 +322,11 @@ namespace RCP
 		BT_COUNT
 	};
 
+	enum IndexFormat
+	{
+		IF_INDEX16,
+		IF_INDEX32,
+	};
 
 
 
