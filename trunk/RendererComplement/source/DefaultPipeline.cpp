@@ -193,7 +193,7 @@ namespace RCP
 				elem.matWorld[TS_WORLD3] * weight[2] + 
 				elem.matWorld[TS_WORLD4] * weight[3];
 			//矩阵变换
-			verVec[i].pos = elem.matWorld[TS_VIEW] *( transMat * verVec[i].pos );//* elem.matWorld[TS_PROJECTION]  ;
+			verVec[i].pos =  transMat * verVec[i].pos ;
 			
 			//记录下变换前的坐标 进行光照计算
 			posVec.x = verVec[i].pos.x;
@@ -201,7 +201,7 @@ namespace RCP
 			posVec.z = verVec[i].pos.z;
 
 			//继续变换
-			verVec[i].pos = elem.matWorld[TS_PROJECTION] *  verVec[i].pos;	
+			verVec[i].pos = elem.matWorld[TS_PROJECTION] *  (elem.matWorld[TS_VIEW] *verVec[i].pos);	
 			
 
 
@@ -220,7 +220,7 @@ namespace RCP
 				//因为此时要的到顶点指向摄像机的向量需要摄像机坐标，而这里没有提供逆矩阵
 				//于是将法向量和灯变换到摄像机坐标系。
 				//当然法向量的话 还有一个世界坐标系的变换。
-				lightPos = elem.matWorld[TS_VIEW] *(transMat * elem.light[index].position);
+				lightPos = elem.light[index].position;
 				L = lightPos - posVec;
 				L.normalise();
 				V = - posVec;
@@ -231,7 +231,7 @@ namespace RCP
 				//注意这里有个隐藏操作是normVec4.w设为了0，不是1
 				normVec4 = verVec[i].norm;
 				//normal的话只需要旋转方向
-				normVec4 = elem.matWorld[TS_VIEW] *  normVec4;
+				normVec4 = transMat *  normVec4;
 				normVec3.x = normVec4.x;
 				normVec3.y = normVec4.y;
 				normVec3.z = normVec4.z;
