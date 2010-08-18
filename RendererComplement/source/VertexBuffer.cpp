@@ -53,6 +53,20 @@ namespace RCP
 		return mVertexCount;
 	}
 
+	void* VertexBuffer::lock()
+	{
+		//先进行加锁操作
+		return mData->getData();
+	}
+	void VertexBuffer::unlock()
+	{
+		//进行解锁
+	}
+
+
+
+
+
 	VertexDeclaration::VertexDeclaration():
 		mSize(0)
 	{

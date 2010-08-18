@@ -10,16 +10,21 @@ namespace RCP
 		friend class IndexBufferManager;
 	public:
 		~IndexBuffer();
-		void addIndex(unsigned int vertexIndex,unsigned int pos = -1);
-		void addIndex(unsigned int count,unsigned int numBytesPerIndex,const void* indexData);
+		void fillIndex(unsigned int vertexIndex,unsigned int pos);
+		void fillIndex(unsigned int count,unsigned int numBytesPerIndex,const void* indexData);
 		const size_t getIndexCount()const;
 		unsigned int operator [](unsigned int index)const;
+		IndexFormat getIndexFormat()const;
+		unsigned int getSizePerIndex()const;
+		void* lock();
+		void unlock();
 	private :
-		IndexBuffer(IndexBufferManager* mgr);
+		IndexBuffer(unsigned int indexCount, IndexFormat indexformat, IndexBufferManager* mgr);
 		void initImpl() ;
 	private:
-		typedef std::vector<unsigned int> IndexList;
-		IndexList mIndexList;
+		MemoryBuffer* mData;
+		unsigned int mIndexCount;
+		IndexFormat mIndexFormat;
 	};
 }
 #endif//_IndexBuffer_H_
