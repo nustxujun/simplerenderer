@@ -38,8 +38,36 @@ void App::init(Renderer& renderer, const AppParam& param)
 	data = mIB->lock();
 	fread(data,mIB->getSizePerIndex() * info.indexCount,1,f);
 	mIB->unlock();
-
 	fclose(f);
+
+	//创建Plane
+	struct vertexFormat
+	{
+		float x,y,z;
+		int color;
+		float u,v;
+	};
+	vertexFormat vertexData[] = 
+	{
+		-10.0f,-1.0f,-10.0f,0xffffffff,0.0f,1.0f,0.0f,
+		-10.0f,-1.0f,10.0f,0xffffffff,0.0f,0.0f,0.0f,
+		10.0f,-1.0f,-10.0f,0xffffffff,0.0f,1.0f,0.0f,
+
+		10.0f,-1.0f,-10.0f,0xffffffff,0.0f,1.0f,0.0f,
+		-10.0f,-1.0f,10.0f,0xffffffff,0.0f,0.0f,0.0f,
+		10.0f,-1.0f,10.0f,0xffffffff,0.0f,0.0f,0.0f,
+	};
+	VertexDeclaration vd2;
+	vd2.addElement(VET_FLOAT3,VES_POSITION);
+	vd2.addElement(VET_COLOUR,VES_DIFFUSE);
+	vd2.addElement(VET_FLOAT3,VES_NORMAL);
+	mPlaneVB = renderer.createVertexBuffer(6,vd2);
+	mPlaneVB->fill(0,6,vertexData);
+
+	//创建sm
+	RenderTarget* bb = renderer.getRenderTarget(0);
+	mShadowMap = renderer.createTexture(bb->getWidth(),bb->getHeight(),1,PF_A8R8G8B8);
+
 
 	//设置灯光
 	Light l;
@@ -72,6 +100,10 @@ void App::init(Renderer& renderer, const AppParam& param)
 	mPS.cameraPos = mCameraPos;
 	mPS.lightPos = mLightPos;
 	mPS.power = 20;
+	mPS.width = param.width;
+	mPS.height = param.height;
+
+
 
 }
 
@@ -79,33 +111,56 @@ void App::destroy(Renderer& renderer, const AppParam& param)
 {}
 void App::renderOneFrame(Renderer& renderer, const AppParam& param) 
 {
-	//清空framebuffer
-	renderer.clearColour(Colour(1,1,1,1));
-	renderer.clearDepth(1.0f);
 
-	Material mat;
-	mat.diffuse.getFromARGB(0xffffffff);
-	mat.specular.getFromARGB(0xffffffff);
-	mat.power = 50;
-	mat.ambient.getFromARGB(0xff030303);
-	renderer.setMaterial(mat);
+
+	//Material mat;
+	//mat.diffuse.getFromARGB(0xffffffff);
+	//mat.specular.getFromARGB(0xffffffff);
+	//mat.power = 50;
+	//mat.ambient.getFromARGB(0xff030303);
+	//renderer.setMaterial(mat);
 
 	Matrix4X4 world;
 	static float time = 0;
 
 	world.m[0][0] = cos(time);
 	world.m[0][2] = sin(time);
-
 	world.m[2][0] = -sin(time);
 	world.m[2][2] = cos(time);
 	time += 0.01f;
 
 	renderer.setMatrix(TS_WORLD,world);
 
+	RenderTarget* backBuffer = renderer.getRenderTarget(0);
+
+	renderer.setRenderTarget(0,mShadowMap->getRenderTarget(0));
+	union Value
+	{
+		float f;
+		int i;
+	};
+	Value v;
+	v.f = 1.0f;
+	renderer.clearColour(Colour().getFromARGB(v.i));
+	renderer.clearDepth(1.0f);
+	mSMMakerVS.setMatrix(TS_WORLD,world);
+	renderer.setProperty("VertexShader",(VertexShader*)&mSMMakerVS);
+	renderer.setProperty("PixelShader",(PixelShader*)&mSMMakerPS);
+	renderer.setIndexBuffer(mIB);
+	renderer.setVertexBuffer(mVB);
+	renderer.draw(PT_TRIANGLESTRIP,0,mIB->getIndexCount() / 3 );
+
+	renderer.setRenderTarget(0,backBuffer);
+	renderer.clearColour(Colour(1,1,1,1));
+	renderer.clearDepth(1.0f);
+	renderer.setTexture(0,mShadowMap);
 	mVS.setMatrix(TS_WORLD,world);
 	renderer.setProperty("VertexShader",(VertexShader*)&mVS);
 	renderer.setProperty("PixelShader",(PixelShader*)&mPS);
 
+
+	renderer.setVertexBuffer(mPlaneVB);
+	renderer.draw(PT_TRIANGLESTRIP,0,2 );
 
 	renderer.setIndexBuffer(mIB);
 	renderer.setVertexBuffer(mVB);

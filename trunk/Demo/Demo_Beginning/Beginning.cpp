@@ -32,13 +32,13 @@ void App::init(Renderer& renderer, const AppParam& param)
 	};
 	vertexFormat vertexData[] = 
 	{
-		-1.0f,-1.0f,0.0f,0xffff0000,1.0f,1.0f,
-		-1.0f,1.0f,0.0f,0xff00ff00,1.0f,0.0f,
-		1.0f,-1.0f,0.f,0xff0000ff,0.0f,1.0f,
+		-1.0f,-1.0f,0.0f,0x50ff0000,1.0f,1.0f,
+		-1.0f,1.0f,0.0f,0x5000ff00,1.0f,0.0f,
+		1.0f,-1.0f,0.f,0x500000ff,0.0f,1.0f,
 
-		1.0f,-1.0f,0.f,0xffff00ff,0.0f,1.0f,
-		-1.0f,1.0f,0.0f,0xff00ff00,1.0f,0.0f,
-		1.0f,1.0f,0.0f,0xff0000ff,0.0f,0.0f,
+		1.0f,-1.0f,0.f,0x50ff00ff,0.0f,1.0f,
+		-1.0f,1.0f,0.0f,0x5000ff00,1.0f,0.0f,
+		1.0f,1.0f,0.0f,0x500000ff,0.0f,0.0f,
 	};
 
 	mVB = renderer.createVertexBuffer(6,vd2);
