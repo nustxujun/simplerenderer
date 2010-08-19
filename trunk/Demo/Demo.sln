@@ -13,6 +13,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo_Beginning", "Demo_Begi
 		{5B99DE8C-4FE7-495C-9D82-2FB684F0C08E} = {5B99DE8C-4FE7-495C-9D82-2FB684F0C08E}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo_LocalIlluminationAndSimpleShadowMap", "Demo_LocalIlluminationAndSimpleShadowMap\Demo_LocalIlluminationAndSimpleShadowMap.vcproj", "{FEBBA23B-20A4-4483-918C-1A1583917912}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5B99DE8C-4FE7-495C-9D82-2FB684F0C08E} = {5B99DE8C-4FE7-495C-9D82-2FB684F0C08E}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +36,10 @@ Global
 		{8F7449E8-74BF-403C-B005-6DC912D5A76D}.Debug|Win32.Build.0 = Debug|Win32
 		{8F7449E8-74BF-403C-B005-6DC912D5A76D}.Release|Win32.ActiveCfg = Release|Win32
 		{8F7449E8-74BF-403C-B005-6DC912D5A76D}.Release|Win32.Build.0 = Release|Win32
+		{FEBBA23B-20A4-4483-918C-1A1583917912}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FEBBA23B-20A4-4483-918C-1A1583917912}.Debug|Win32.Build.0 = Debug|Win32
+		{FEBBA23B-20A4-4483-918C-1A1583917912}.Release|Win32.ActiveCfg = Release|Win32
+		{FEBBA23B-20A4-4483-918C-1A1583917912}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

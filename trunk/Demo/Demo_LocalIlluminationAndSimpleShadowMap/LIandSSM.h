@@ -1,7 +1,9 @@
+#pragma once;
 #include "..\QuickStart\QuickStart.h"
 #include <windows.h>
 #include "..\..\RendererComplement\include\RendererHeader.h"
-#pragma once;
+#include "Shader.h"
+
 using namespace RCP;
 class App:public QSApplication
 {
@@ -11,5 +13,14 @@ class App:public QSApplication
 	virtual void renderOneFrame(Renderer& renderer, const AppParam& param) ;
 
 	VertexBuffer* mVB;
+	IndexBuffer* mIB;
+	Texture* mShadowMap;
+	
+	SMMakerVS mSMMakerVS;
+	SMMakerPS mSMMakerPS;
+	VS mVS;
+	PS mPS;
 
+	Vector3 mLightPos;
+	Vector3 mCameraPos;
 };

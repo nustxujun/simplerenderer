@@ -7,13 +7,13 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return 0;
 }
 
-void App::init(Renderer& renderer) 
+void App::init(Renderer& renderer, const AppParam& param) 
 {
 	Matrix4X4 view, projection,world;
 	MatrixUtil::getViewSpace(view,Vector3(0,0,-3),Vector3(0,0,0),Vector3(0,1,0));
 	renderer.setMatrix(TS_VIEW,view);	
 
-	MatrixUtil::getPerspectiveProjectionSpace(projection,3.14159265 / 4,320.f / 240.f,0.1,10);
+	MatrixUtil::getPerspectiveProjectionSpace(projection,3.14159265 / 4,param.width / param.height,0.1,10);
 	renderer.setMatrix(TS_PROJECTION,projection);	
 
 
@@ -46,9 +46,9 @@ void App::init(Renderer& renderer)
 
 }
 
-void App::destroy(Renderer& renderer)
+void App::destroy(Renderer& renderer, const AppParam& param)
 {}
-void App::renderOneFrame(Renderer& renderer) 
+void App::renderOneFrame(Renderer& renderer, const AppParam& param) 
 {
 		renderer.clearColour(Colour(1,1,1));
 		renderer.clearDepth(1.0f);
