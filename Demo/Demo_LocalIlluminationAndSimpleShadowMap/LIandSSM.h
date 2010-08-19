@@ -15,6 +15,7 @@ class App:public QSApplication
 	VertexBuffer* mVB;
 	IndexBuffer* mIB;
 	Texture* mShadowMap;
+	VertexBuffer* mPlaneVB;
 	
 	SMMakerVS mSMMakerVS;
 	SMMakerPS mSMMakerPS;
