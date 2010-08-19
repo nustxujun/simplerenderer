@@ -31,7 +31,7 @@ public:
 
 		AppParam():
 			name("hello world!"),
-			left(100),top(100),width(320),height(240),
+			left(100),top(100),width(640),height(480),
 			fullScreen(false)
 		{}
 	};
@@ -47,13 +47,16 @@ public:
 	virtual ~QSApplication();
 	void start();
 
-
+	const AppParam& getParam()
+	{
+		return mAppParam;
+	}
 
 protected:
-	virtual void init(RCP::Renderer& renderer) = 0;
-	virtual void reset(RCP::Renderer& renderer) = 0;
-	virtual void destroy(RCP::Renderer& renderer) = 0;
-	virtual void renderOneFrame(RCP::Renderer& renderer) = 0;
+	virtual void init(RCP::Renderer& renderer, const AppParam& param) = 0;
+	virtual void reset(RCP::Renderer& renderer, const AppParam& param) = 0;
+	virtual void destroy(RCP::Renderer& renderer, const AppParam& param) = 0;
+	virtual void renderOneFrame(RCP::Renderer& renderer, const AppParam& param) = 0;
 private:
 	void begin();
 	void createWindow();

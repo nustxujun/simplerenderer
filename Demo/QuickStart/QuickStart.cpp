@@ -31,7 +31,7 @@ void QSApplication::begin()
 	initRenderer();
 
 
-	init(*mRenderer);
+	init(*mRenderer,mAppParam);
 }
 
 void QSApplication::initRenderer()
@@ -163,7 +163,7 @@ void QSApplication::mainLoop()
 		}
 		else 
 		{
-			renderOneFrame(*mRenderer);
+			renderOneFrame(*mRenderer,mAppParam);
 			
 			rect.bottom = mAppParam.height;
 			rect.left = 0;
@@ -176,7 +176,7 @@ void QSApplication::mainLoop()
 
 void QSApplication::shutdown()
 {
-	destroy(*mRenderer);
+	destroy(*mRenderer,mAppParam);
 	mRenderer->release();
 	delete mRenderer;
 	delete mGdiPainting;
