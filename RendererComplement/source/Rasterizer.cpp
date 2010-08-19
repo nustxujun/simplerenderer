@@ -98,7 +98,7 @@ namespace RCP
 			lerp(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
 			for (unsigned int i = 0; i < 8 ; ++i)
 			{
-				if (mPixelShader || (!mPixelShader && i == 0))
+				if (resultPri.vertex[0].color.isUsed(i) || resultPri.vertex[2].color.isUsed(i))
 					lerp(newVertex.color[i],ratio,resultPri.vertex[0].color[i],resultPri.vertex[2].color[i]);
 				if (pri.sampler[i].texture != NULL)//有纹理的话
 					lerp(newVertex.texCrood[i],ratio,resultPri.vertex[0].texCrood[i],resultPri.vertex[2].texCrood[i]);
