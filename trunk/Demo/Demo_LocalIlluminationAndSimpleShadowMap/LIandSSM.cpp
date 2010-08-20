@@ -12,7 +12,7 @@ void App::init(Renderer& renderer, const AppParam& param)
 {
 
 	//模型数据事先随便写的
-	FILE* f = fopen("teapot.mesh","rb");
+	FILE* f = fopen("../Reasource/Model/teapot.mesh","rb");
 	assert(f);
 	struct MeshInfo
 	{
