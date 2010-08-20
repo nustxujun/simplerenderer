@@ -403,10 +403,6 @@ namespace RCP
 						colorBlend = pri.sampler[i].sample(point.u ,point.v,ddx.texCrood[i],ddy.texCrood[i]); 
 					}
 				}
-				//ß@ÑeÒ²ÊÇ
-				if (pri.sampler[0].texture != NULL)
-				point.color[0] *= colorBlend;
-
 				if (mPixelShader != NULL)
 				{
 					point.color[0] = mPixelShader->shade(point);
