@@ -46,7 +46,7 @@ public:
 		//记录法线
 		vert.color[0] = convert(matrix[TS_WORLD] * Vector4(vert.norm,0.0f));
 		//记录该点在灯空间下的投影 TS_WORLD2代替lightView
-		vert.color[1] = convert(matrix[TS_PROJECTION] * (matrix[TS_WORLD2] * vert.pos));
+		vert.color[1] = convert(matrix[TS_PROJECTION] * (matrix[TS_WORLD2] * ( matrix[TS_WORLD] * vert.pos)));
 		//记录该点实际坐标
 		vert.color[2] = convert(matrix[TS_WORLD] * vert.pos);
 
@@ -114,7 +114,7 @@ public:
 			c = tex2D(0,stc.x,stc.y - pixelSizeH).get32BitARGB();
 			depth[4] = *(float*)(&c) ;
 
-#define SHADOW_EPSILON 0.0005f
+#define SHADOW_EPSILON 0.002f
 
 			float result = 0;
 			for (int i = 0; i < 5; ++i)
@@ -129,10 +129,11 @@ public:
 			
 			diffuse = diffuse * shadow;
 			diffuse.saturate();
+			if (shadow < 1.0f)
+				return diffuse;
+			else 
+				return (diffuse + specular).saturate();
 			
-			//return shadow;
-			return  (diffuse + specular).saturate();
-			//return (diffuse * shadow).clamp();
 		}
 		else
 		{
