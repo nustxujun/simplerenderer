@@ -24,7 +24,7 @@ public :
 	void init(HDC hdc,unsigned int w, unsigned int h,RCP::PixelFormat pf)
 	{
 		mhdc = hdc;
-		mBitmap = new Bitmap(w,h,PixelFormat32bppARGB);
+		mBitmap = new Bitmap(w,h,PixelFormat32bppRGB);
 	}
 	virtual void paint(const BackBuffer* backbuffer) 
 	{
