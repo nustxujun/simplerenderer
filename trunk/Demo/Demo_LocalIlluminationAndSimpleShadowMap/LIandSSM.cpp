@@ -123,13 +123,21 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 	Matrix4X4 world;
 	static float time = 0;
 
-	world.m[0][0] = cos(time);
-	world.m[0][2] = sin(time);
-	world.m[2][0] = -sin(time);
-	world.m[2][2] = cos(time);
+	world.m[0][0] = cos(0.01);
+	world.m[0][2] = sin(0.01);
+	world.m[2][0] = -sin(0.01);
+	world.m[2][2] = cos(0.01);
 	time += 0.01f;
 
 	renderer.setMatrix(TS_WORLD,world);
+
+	mLightPos = world * mLightPos;
+	Matrix4X4 lightView;
+	MatrixUtil::getViewSpace(lightView,mLightPos,Vector3(0,0,0),Vector3(0,1,0));
+	mSMMakerVS.setMatrix(TS_VIEW,lightView);
+	mVS.setMatrix(TS_WORLD2,lightView);
+	mPS.lightPos = mLightPos;
+
 
 	RenderTarget* backBuffer = renderer.getRenderTarget(0);
 
@@ -143,7 +151,7 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 	v.f = 1.0f;
 	renderer.clearColour(Colour().getFromARGB(v.i));
 	renderer.clearDepth(1.0f);
-	mSMMakerVS.setMatrix(TS_WORLD,world);
+	mSMMakerVS.setMatrix(TS_WORLD,Matrix4X4());
 	renderer.setProperty("VertexShader",(VertexShader*)&mSMMakerVS);
 	renderer.setProperty("PixelShader",(PixelShader*)&mSMMakerPS);
 	renderer.setIndexBuffer(mIB);
@@ -154,7 +162,7 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 	renderer.clearColour(Colour(1,1,1,1));
 	renderer.clearDepth(1.0f);
 	renderer.setTexture(0,mShadowMap);
-	mVS.setMatrix(TS_WORLD,world);
+	mVS.setMatrix(TS_WORLD,Matrix4X4());
 	renderer.setProperty("VertexShader",(VertexShader*)&mVS);
 	renderer.setProperty("PixelShader",(PixelShader*)&mPS);
 
