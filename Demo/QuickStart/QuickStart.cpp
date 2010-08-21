@@ -15,8 +15,10 @@ QSApplication::QSApplication():
 QSApplication::~QSApplication()
 {}
 
-void QSApplication::start()
+void QSApplication::start(const AppParam* param )
 {
+	if (param != NULL)
+		mAppParam = *param;
 	begin();
 	mRunning = true;
 	mainLoop();
