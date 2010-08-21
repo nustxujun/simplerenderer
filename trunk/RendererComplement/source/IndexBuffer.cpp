@@ -42,7 +42,8 @@ namespace RCP
 
 	unsigned int IndexBuffer::operator [](unsigned int index)const
 	{
-		assert(index < mIndexCount);
+		if (index >= mIndexCount)
+			THROW_EXCEPTION("Ô½½ç");
 		unsigned int value = 0;
 		memcpy(&value,mData->getData() + index * getSizePerIndex(),getSizePerIndex());
 		return value;

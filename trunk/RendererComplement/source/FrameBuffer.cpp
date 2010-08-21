@@ -34,8 +34,8 @@ namespace RCP
 	void FrameBuffer::setBuffer(BufferTpye type,RenderTarget* rt)
 	{
 		assert(type < BT_COUNT);
-		assert(rt->getWidth() == mWidth);
-		assert(rt->getHeight() == mHeight);
+		if (rt->getWidth() != mWidth || rt->getHeight() != mHeight)
+			THROW_EXCEPTION("buffer size does not match framebuffer.");
 		mBuffers[type] = rt;
 	}
 
@@ -61,7 +61,9 @@ namespace RCP
 				return ;
 			}
 			
-			assert(rt->getColourDepth() == mClearValue[index].getSize());
+			if (rt->getColourDepth() != mClearValue[index].getSize())
+				THROW_EXCEPTION("value of clearing does not match colourDepth.");
+			
 
 			size_t size = rt->getWidth() * rt->getHeight();
 			rt->seek(0);

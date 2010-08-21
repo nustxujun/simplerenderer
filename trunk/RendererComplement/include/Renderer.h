@@ -62,6 +62,9 @@ namespace RCP
 		RenderTarget* getRenderTarget(unsigned int index = 0);
 
 	private:
+		void initAssert();
+
+	private:
 		bool mIsInitialized;
 
 		RenderQueue* mRenderQueue;

@@ -190,8 +190,8 @@ namespace RCP
 		float w;
 		for (int i = 0; i < sum; ++i)
 		{
-			point.x = ceil(pri.vertex[i].pos.x);
-			point.y = ceil(pri.vertex[i].pos.y);
+			point.x = fastCeil(pri.vertex[i].pos.x);
+			point.y = fastCeil(pri.vertex[i].pos.y);
 			point.z = pri.vertex[i].pos.z;
 			point.invw = pri.vertex[i].pos.w;
 			w = 1.0f/point.invw;
@@ -270,15 +270,15 @@ namespace RCP
 		Pixel point;
 		float w;
 		unsigned int ymin,ymax;
-		ymin = ceil(point1.pos.y > point2.pos.y?point2.pos.y:point1.pos.y);
-		ymax = ceil(point1.pos.y > point2.pos.y?point1.pos.y:point2.pos.y);
-		point3 += diff * (ceil(point1.pos.y ) - point1.pos.y);
+		ymin = fastCeil(point1.pos.y > point2.pos.y?point2.pos.y:point1.pos.y);
+		ymax = fastCeil(point1.pos.y > point2.pos.y?point1.pos.y:point2.pos.y);
+		point3 += diff * (fastCeil(point1.pos.y ) - point1.pos.y);
 		for (unsigned int y =ymin + 1; y < ymax; ++y,point3 += diff)
 		{
 			w = 1.0f /point3.pos.w;
 
-			point.x = ceil(point3.pos.x);
-			point.y = ceil(point3.pos.y);
+			point.x = fastCeil(point3.pos.x);
+			point.y = fastCeil(point3.pos.y);
 			point.invw = point3.pos.w;
 			point.z = point3.pos.z;
 			//point3 *= w;
@@ -328,10 +328,10 @@ namespace RCP
 		assert(pri.triType != 0);
 		unsigned int offset = ( pri.triType + 1 )/2;
 		unsigned int xmin,xmax,ymin,ymax;
-		xmin = ceil(pri.vertex[offset].pos.x);
-		xmax = ceil(pri.vertex[offset + 1].pos.x);
-		ymin = ceil(pri.vertex[0].pos.y);
-		ymax = ceil(pri.vertex[2].pos.y);
+		xmin = fastCeil(pri.vertex[offset].pos.x);
+		xmax = fastCeil(pri.vertex[offset + 1].pos.x);
+		ymin = fastCeil(pri.vertex[0].pos.y);
+		ymax = fastCeil(pri.vertex[2].pos.y);
 
 		assert(xmin <= xmax);
 		assert(ymin <= ymax);
@@ -360,8 +360,8 @@ namespace RCP
 		float x0,x1;
 		x0 = pri.vertex[0].pos.x + (ymin - pri.vertex[0].pos.y) * dx1;
 		x1 = pri.vertex[1-offset].pos.x + (ymin - pri.vertex[1-offset].pos.y) * dx2;
-		xmin = ceil(x0);
-		xmax = ceil(x1);
+		xmin = fastCeil(x0);
+		xmax = fastCeil(x1);
 
 		for (unsigned int y = ymin; y < ymax; ++y )
 		{
@@ -420,8 +420,8 @@ namespace RCP
 
 			x0 += dx1;
 			x1 += dx2;
-			xmin = ceil(x0);
-			xmax = ceil(x1);
+			xmin = fastCeil(x0);
+			xmax = fastCeil(x1);
 			
 		}
 

@@ -27,6 +27,7 @@
 #include "Vector4.h"
 #include "Vector2.h"
 #include "PixelUtil.h"
+#include "Exception.h"
 
 //stable classes
 

@@ -5,7 +5,8 @@ namespace RCP
 {
 	ResourceManager::~ResourceManager()
 	{
-		assert(mResourceList.empty());
+		if (!mResourceList.empty())
+			THROW_EXCEPTION("ÓÐ×ÊÔ´Î´ÊÍ");
 	}
 
 
