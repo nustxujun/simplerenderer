@@ -55,7 +55,7 @@ namespace RCP
 			color.getFromRGBA(c);
 			break;
 		default:
-			assert(0);
+			THROW_EXCEPTION("Unexpected pixel format.");
 		}
 
 		return color;

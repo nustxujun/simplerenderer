@@ -1,6 +1,6 @@
 #ifndef _Math_H_
 #define _Math_H_
-
+#include <Math.h>
 namespace RCP
 {
 	inline float log2(float f)
@@ -33,13 +33,9 @@ namespace RCP
 		return false;
 	}
 
-	inline unsigned int ceil(float val)
+	inline unsigned int fastCeil(float val)
 	{
-		int i = (int)val;
-		if (val > i + 0.001f)
-			return i +1;
-		else
-			return i;
+		return (unsigned int)ceil(val);
 	}
 
 	inline unsigned int floor(float val)

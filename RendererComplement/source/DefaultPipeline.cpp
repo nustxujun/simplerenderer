@@ -71,7 +71,8 @@ namespace RCP
 			texCroodDataOffset[i] = verDecl.getElementOffsetInBytes(VES_TEXTURE_COORDINATES,i);
 		}
 		//尋不到Position信息就傻了
-		assert(posDataOffset != -1);
+		if(posDataOffset == -1)
+			THROW_EXCEPTION("未找到顶点位置信息，因为没有多流，因此顶点处理失败");
 		//獲取4個權重的偏移
 		unsigned int weightDataOffet[4] ;
 		for (int i = 0; i < 4; ++i )
@@ -318,7 +319,8 @@ namespace RCP
 		}
 
 		//保证剩余顶点数足够形成图元
-		assert(realVertexCount - skipVertexCount >= vertexNumInGeom*elem.primitiveCount );
+		if (realVertexCount - skipVertexCount < vertexNumInGeom*elem.primitiveCount )
+			THROW_EXCEPTION("顶点数量不足以绘制指定数量图元");
 
 		Primitive prim ;
 		Primitive priResult[5];

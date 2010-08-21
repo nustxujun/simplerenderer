@@ -55,7 +55,8 @@ namespace RCP
 				clearImpl();
 
 			unsigned colorDepth = rt->getColourDepth();
-			assert(colorDepth == sizeof (value));
+			if (colorDepth != sizeof (value))
+				THROW_EXCEPTION("value does not match colourDepth.");
 			size_t pos = getBufferPos(x,y,rt->getWidth(),colorDepth);
 			rt->seek(pos);
 			rt->write(&value,sizeof (value));
@@ -77,7 +78,8 @@ namespace RCP
 				clearImpl();
 
 			unsigned colorDepth = rt->getColourDepth();
-			assert(colorDepth == sizeof (T));
+			if (colorDepth != sizeof (t))
+				THROW_EXCEPTION("container does not match colourDepth.");
 			size_t pos = getBufferPos(x,y,rt->getWidth(),colorDepth);
 			rt->seek(pos);
 			rt->read(&t,sizeof (T));

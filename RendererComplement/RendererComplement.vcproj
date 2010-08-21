@@ -299,6 +299,10 @@
 			Name="Tools"
 			>
 			<File
+				RelativePath=".\include\Exception.h"
+				>
+			</File>
+			<File
 				RelativePath=".\source\MemoryBuffer.cpp"
 				>
 			</File>

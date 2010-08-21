@@ -83,7 +83,7 @@ namespace RCP
 	//设置渲染器基本属性
 	void Renderer::setup(RendererParameters rp)
 	{
-		assert(mIsInitialized);
+		initAssert();
 		mRenderTarget = mBackBuffer->getRenderTarget();
 	}
 
@@ -103,8 +103,9 @@ namespace RCP
 
 	void Renderer::renderNow()
 	{
-		assert(mIsInitialized);
-		assert(mPaitingMethod);
+		initAssert();
+		if (mPaitingMethod == NULL)
+			THROW_EXCEPTION("未指定绘制方法。");
 		//输入流水线
 		if (mRenderQueue->isRenderDataReady())
 			mPipeline->import(mRenderQueue->postRenderData());
@@ -120,7 +121,7 @@ namespace RCP
 
 	void Renderer::draw(Primitives type,unsigned int beginPrimitiveOffset,unsigned int primitiveCount)
 	{
-		assert(mIsInitialized);
+		initAssert();
 		assert(mVertexBuffer != NULL);
 		assert(primitiveCount);
 		Matrix4X4 mat[TS_BASALNUM];
@@ -176,19 +177,19 @@ namespace RCP
 
 	VertexBuffer* Renderer::createVertexBuffer(unsigned int vertexCount, const VertexDeclaration& decl)
 	{
-		assert(mIsInitialized);
+		initAssert();
 		return mVertexBufferManager->createVertexBuffer(vertexCount,decl);
 	}
 
 	IndexBuffer* Renderer::createIndexBuffer(unsigned int indexCount, IndexFormat indexFormat)
 	{
-		assert(mIsInitialized);
+		initAssert();
 		return mIndexBufferManager->createIndexBuffer(indexCount,indexFormat);
 	}
 
 	Texture* Renderer::createTexture(unsigned int width, unsigned int height, unsigned int numMipmap, PixelFormat pf)
 	{
-		assert(mIsInitialized);
+		initAssert();
 		return mTextureManager->createTexture( width, height, numMipmap, pf);
 	}
 
@@ -245,6 +246,12 @@ namespace RCP
 	RenderTarget* Renderer::getRenderTarget(unsigned int index )
 	{
 		return mFrameBuffer->getBuffer(BT_COLOUR);
+	}
+
+	void Renderer::initAssert()
+	{
+		if (!mIsInitialized)
+			THROW_EXCEPTION("渲染器未初始化。");
 	}
 
 

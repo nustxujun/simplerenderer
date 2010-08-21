@@ -48,7 +48,8 @@ namespace RCP
 
 	RenderTarget* Texture::getRenderTarget(unsigned int level)const
 	{
-		assert( level < mLevels);
+		if (level >= mLevels)
+			THROW_EXCEPTION("level 超出最大层数");
 		assert(isInitialized());
 
 		return mRenderTargets[level];
