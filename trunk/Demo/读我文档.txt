@@ -1,2 +1,8 @@
-Demo_NewWorld
-通过GDI+实现的简单绘制
+QuickStart
+简单封装了窗体，方便以后使用
+
+Demo_Beginning
+实现的简单绘制
+
+Demo_LocalIlluminationAndSimpleShadowMap
+简单的实现局部光照和简单的shadowmap，

@@ -45,7 +45,7 @@ public :
 public:
 	QSApplication();
 	virtual ~QSApplication();
-	void start();
+	void start(const AppParam* param = NULL);
 
 	const AppParam& getParam()
 	{
