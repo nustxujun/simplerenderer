@@ -32,7 +32,7 @@ namespace RCP
 	public:
 		VertexBuffer* createVertexBuffer(unsigned int vertexCount, const VertexDeclaration& decl);
 		IndexBuffer* createIndexBuffer(unsigned int indexCount, IndexFormat indexFormat);
-		Texture* createTexture(unsigned int width, unsigned int height, unsigned int numMipmap, PixelFormat pf);
+		Texture* createTexture(unsigned int width, unsigned int height, unsigned int numMipmap,TextureType type, PixelFormat pf);
 
 		/*
 		para:

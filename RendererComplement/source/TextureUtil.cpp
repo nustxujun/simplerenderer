@@ -70,7 +70,7 @@ namespace RCP
 			assert(0);
 		}
 
-		tex = renderer->createTexture(width, height,mipLevels,pf);
+		tex = renderer->createTexture(width, height,mipLevels,TT_2D,pf);
 		//get real level count;
 		mipLevels = tex->getLevelCount();
 

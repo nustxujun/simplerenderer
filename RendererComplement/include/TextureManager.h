@@ -8,7 +8,7 @@ namespace RCP
 		public ResourceManager
 	{
 	public:
-		Texture* createTexture(unsigned int width, unsigned int height, unsigned int numMipmap, PixelFormat pf);
+		Texture* createTexture(unsigned int width, unsigned int height, unsigned int numMipmap,TextureType type, PixelFormat pf);
 	};
 }
 #endif//_TextureManager_H_
