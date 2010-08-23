@@ -187,10 +187,10 @@ namespace RCP
 		return mIndexBufferManager->createIndexBuffer(indexCount,indexFormat);
 	}
 
-	Texture* Renderer::createTexture(unsigned int width, unsigned int height, unsigned int numMipmap, PixelFormat pf)
+	Texture* Renderer::createTexture(unsigned int width, unsigned int height, unsigned int numMipmap,TextureType type, PixelFormat pf)
 	{
 		initAssert();
-		return mTextureManager->createTexture( width, height, numMipmap, pf);
+		return mTextureManager->createTexture( width, height, numMipmap,type,pf);
 	}
 
 	void Renderer::setPaintingMethod(PaintingMethod* pm)

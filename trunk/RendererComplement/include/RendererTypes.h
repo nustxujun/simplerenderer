@@ -78,6 +78,18 @@ namespace RCP
         PFF_LUMINANCE       = 0x00000020
     };
 
+	enum TextureType
+	{
+		/// 1D texture, used in combination with 1D texture coordinates
+		TT_1D = 1,
+		/// 2D texture, used in combination with 2D texture coordinates (default)
+		TT_2D = 2,
+		/// 3D volume texture, used in combination with 3D texture coordinates
+		TT_3D = 3,
+		/// 3D cube map, used in combination with 3D texture coordinates
+		TT_TYPE_CUBE_MAP = 4
+    };
+
 	//渲染器创建参数
 	struct RendererParameters
 	{
