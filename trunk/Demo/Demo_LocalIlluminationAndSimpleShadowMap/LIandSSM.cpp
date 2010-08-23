@@ -66,7 +66,7 @@ void App::init(Renderer& renderer, const AppParam& param)
 
 	//创建sm
 	RenderTarget* bb = renderer.getRenderTarget(0);
-	mShadowMap = renderer.createTexture(bb->getWidth(),bb->getHeight(),1,PF_A8R8G8B8);
+	mShadowMap = renderer.createTexture(bb->getWidth(),bb->getHeight(),0,TT_2D,PF_A8R8G8B8);
 
 
 	//设置灯光
