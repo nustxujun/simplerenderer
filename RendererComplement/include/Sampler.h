@@ -14,6 +14,7 @@ namespace RCP
 		~Sampler();
 
 		Colour sample(float u, float v,const Vector2& ddx, const Vector2& ddy, float lodbias = 0)const ;
+		Colour sampleCube(float u, float v, float w, const Vector2& ddx, const Vector2& ddy, float lodbias = 0)const;
 
 		void assignUV(float& u,float& v)const ;
 
@@ -21,6 +22,8 @@ namespace RCP
 	private:
 		float collod(const Vector2& ddx, const Vector2& ddy, float lodbias);
 		int getColourData(float u, float v, float lod);
+
+		Colour sampleImpl(RenderTarget* rt,float u, float v,const Vector2& ddx, const Vector2& ddy, float lodbias )const;
 	public:
 		const Texture* texture;
 	private:

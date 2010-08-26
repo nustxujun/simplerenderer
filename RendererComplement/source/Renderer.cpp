@@ -135,6 +135,12 @@ namespace RCP
 		mMaterial = Material::DEFAULT;
 		//去掉清除標識
 		mFrameBuffer->reset();
+		//viewport也恢复成默认大小，防止改变renderTarget的时候发生大小差异
+		mViewport.width = mFrameBuffer->getBuffer(BT_COLOUR)->getWidth();
+		mViewport.height = mFrameBuffer->getBuffer(BT_COLOUR)->getHeight();
+		mViewport.x = mViewport.y = 0;
+		mViewport.zMax = 1.0f;
+		mViewport.zMin = 0.0f;
 
 	}
 
@@ -241,6 +247,11 @@ namespace RCP
 	void Renderer::setRenderTarget(unsigned int index,RenderTarget* rt)
 	{
 		mFrameBuffer->setBuffer(BT_COLOUR, rt);
+		mViewport.width = rt->getWidth();
+		mViewport.height = rt->getHeight();
+		mViewport.x = mViewport.y = 0;
+		mViewport.zMax = 1.0f;
+		mViewport.zMin = 0.0f;
 	}
 
 	RenderTarget* Renderer::getRenderTarget(unsigned int index )

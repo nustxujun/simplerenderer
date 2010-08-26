@@ -32,7 +32,7 @@ namespace RCP
 		for (unsigned int face = 0; face < getFaceCount(); ++face)
 		{
 			unsigned int w = mWidth;
-			unsigned int h = getTextureType() == TT_TYPE_CUBE_MAP ? mWidth : mHeight;
+			unsigned int h = getTextureType() == TT_CUBE_MAP ? mWidth : mHeight;
 			unsigned int lev = 0;
 			while ( !(w ==0 && h == 0) && lev < mLevels)
 			{
@@ -84,7 +84,7 @@ namespace RCP
 
 	unsigned int Texture::getFaceCount()const
 	{
-		return getTextureType() == TT_TYPE_CUBE_MAP ? 6 : 1;
+		return getTextureType() == TT_CUBE_MAP ? 6 : 1;
 	}
 
 	TextureType Texture::getTextureType()const
