@@ -1,6 +1,6 @@
 #include "DefaultPipeline.h"
 #include "RendererHeader.h"
-#include "Timer.h"
+#include <sstream>
 namespace RCP
 {
 	DefaultPipeline::DefaultPipeline():
@@ -715,16 +715,51 @@ result:
 
 	void DefaultPipeline::setOtherState(const std::map<std::string,Any>& p)
 	{
+		VertexShader* vs = NULL;
+		PixelShader* ps = NULL;
 		std::map<std::string,Any>::const_iterator i,endi = p.end();
 		i = p.find("VertexShader");
 		if (i != endi)
 		{
-			setVertexShader(any_cast<VertexShader*>(i->second));
+			vs = any_cast<VertexShader*>(i->second);
+			setVertexShader(vs);
 		}
 		i = p.find("PixelShader");
 		if (i != endi)
 		{
-			setPixelShader(any_cast<PixelShader*>(i->second));
+			ps = any_cast<PixelShader*>(i->second);
+			setPixelShader(ps);
+		}
+
+		std::string mhead ="Matrix";
+		std::string vhead ="Vector";
+		std::string param;
+		for (unsigned int index = 0; index < 16; ++index)
+		{
+			std::ostringstream convert;
+			convert << (int)index;
+			//matrix
+			param = mhead + convert.str();
+			i = p.find(param);
+			if (i != endi)
+			{
+				if (vs != NULL)
+					vs->matrix4X4[index] = any_cast< Matrix4X4>(i->second);
+				if(ps != NULL)
+					ps->matrix4X4[index] = any_cast<Matrix4X4>(i->second);
+			}
+			//vector
+			param = vhead + convert.str();
+			i = p.find(param);
+			if (i != endi)
+			{
+				if (vs != NULL)
+					vs->vector4[index] = any_cast<Vector4>(i->second);
+				if(ps != NULL)
+					ps->vector4[index] = any_cast<Vector4>(i->second);
+			}
+				
+
 		}
 	}
 

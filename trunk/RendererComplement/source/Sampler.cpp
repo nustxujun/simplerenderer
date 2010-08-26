@@ -22,15 +22,11 @@ namespace RCP
 		return result;
 	}
 
-	Colour Sampler::sample(float u, float v,const Vector2& ddx,const Vector2& ddy, float lodbias)const 
+	Colour Sampler::sampleImpl(RenderTarget* rt,float u, float v,const Vector2& ddx, const Vector2& ddy, float lodbias )const
 	{
-		if (texture == NULL)
-			return Colour(1.0f);
-
 		assignUV(u,v);
 		//先不管mipmap
 		unsigned int x,y;
-		RenderTarget* rt = texture->getRenderTarget(0);
 		x = unsigned int ((rt->getWidth()-1) * u);
 		y = unsigned int ((rt->getHeight()-1) * v);
 		size_t pos = (x + y * rt->getWidth() )* rt->getColourDepth();
@@ -58,7 +54,19 @@ namespace RCP
 			THROW_EXCEPTION("Unexpected pixel format.");
 		}
 
-		return color;
+		return color;	
+	}
+
+	Colour Sampler::sample(float u, float v,const Vector2& ddx,const Vector2& ddy, float lodbias)const 
+	{
+		if (texture == NULL)
+			return Colour(1.0f);
+
+		assignUV(u,v);
+		//先不管mipmap
+		unsigned int x,y;
+		RenderTarget* rt = texture->getRenderTarget(0);
+		return sampleImpl(rt,u,v,ddx,ddy,lodbias);
 	}
 
 
@@ -132,6 +140,68 @@ namespace RCP
 	void Sampler::setTextureState(const TextureState& state)
 	{
 		mTextureState = state;
+	}
+
+	Colour Sampler::sampleCube(float u, float v, float w, const Vector2& ddx, const Vector2& ddy, float lodbias )const
+	{
+		int face = 0;
+		float s, t, m;
+
+		float x = u;
+		float y = v;
+		float z = w;
+
+		float ax = abs(x);
+		float ay = abs(y);
+		float az = abs(z);
+
+		if(ax > ay && ax > az)
+		{
+			// x max
+			m = ax;
+			if(x > 0){
+				//+x
+				s = 0.5f * (z / m + 1.0f);
+				t = 0.5f * (y / m + 1.0f);
+				face = 0;
+			} else {
+				//-x
+
+				s = 0.5f * (-z / m + 1.0f);
+				t = 0.5f * (y / m + 1.0f);
+				face = 1;
+			}
+		} else {
+
+			if(ay > ax && ay > az){
+				m = ay;
+				if(y > 0){
+					//+y
+					s =0.5f * (x / m + 1.0f);
+					t = 0.5f * (z / m + 1.0f);
+					face = 2;
+				} else {
+					s = 0.5f * (x / m + 1.0f);
+					t = 0.5f * (-z / m + 1.0f);
+					face = 3;
+				}
+			} else {
+				m = az;
+				if(z > 0){
+					//+z
+					s = 0.5f * (-x / m + 1.0f);
+					t = 0.5f * (y / m + 1.0f);
+					face = 4;
+				} else {
+					s = 0.5f * (x / m + 1.0f);
+					t = 0.5f * (y / m + 1.0f);
+					face = 5;
+				}
+			}
+		}
+
+		RenderTarget* rt = texture->getRenderTarget(0,face);
+		return sampleImpl(rt,s,t,ddx,ddy,lodbias);
 	}
 
 }

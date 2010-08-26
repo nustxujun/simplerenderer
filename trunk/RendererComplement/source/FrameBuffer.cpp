@@ -34,8 +34,8 @@ namespace RCP
 	void FrameBuffer::setBuffer(BufferTpye type,RenderTarget* rt)
 	{
 		assert(type < BT_COUNT);
-		if (rt->getWidth() != mWidth || rt->getHeight() != mHeight)
-			THROW_EXCEPTION("buffer size does not match framebuffer.");
+		if (rt->getWidth() > mWidth || rt->getHeight() > mHeight)
+			THROW_EXCEPTION("buffer size is bigger than backbuffer.");
 		mBuffers[type] = rt;
 	}
 

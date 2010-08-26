@@ -155,7 +155,15 @@ namespace RCP
 
 	};
 
-	class VertexShader
+	class Shader
+	{
+	public:
+		Matrix4X4 matrix4X4[16];
+		Vector4 vector4[16];
+
+	};
+
+	class VertexShader:public Shader
 	{
 	public:
 		virtual void execute(Vertex& ver) = 0;
@@ -181,7 +189,7 @@ namespace RCP
 		}
 	};
 
-	class PixelShader
+	class PixelShader:public Shader
 	{
 	public:
 		virtual Colour shade(const Pixel& pixel) = 0;
@@ -204,6 +212,12 @@ namespace RCP
 		{
 			assert(index < 8);
 			return sampler[index].sample(u,v,ddx.texCrood[index],ddy.texCrood[index]);
+		}
+
+		Colour texCube(unsigned int index ,float u, float v, float w)
+		{
+			assert(index < 8);
+			return sampler[index].sampleCube(u,v,w,ddx.texCrood[index],ddy.texCrood[index]);
 		}
 	};
 

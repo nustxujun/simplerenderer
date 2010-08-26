@@ -87,7 +87,7 @@ namespace RCP
 		/// 3D volume texture, used in combination with 3D texture coordinates
 		TT_3D = 3,
 		/// 3D cube map, used in combination with 3D texture coordinates
-		TT_TYPE_CUBE_MAP = 4
+		TT_CUBE_MAP = 4
     };
 
 	//渲染器创建参数
