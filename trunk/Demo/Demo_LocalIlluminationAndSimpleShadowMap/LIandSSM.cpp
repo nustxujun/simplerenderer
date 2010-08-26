@@ -45,7 +45,7 @@ void App::init(Renderer& renderer, const AppParam& param)
 	{
 		float x,y,z;
 		int color;
-		float u,v;
+		float u,v,w;
 	};
 	vertexFormat vertexData[] = 
 	{
@@ -108,7 +108,12 @@ void App::init(Renderer& renderer, const AppParam& param)
 }
 
 void App::destroy(Renderer& renderer, const AppParam& param)
-{}
+{
+	mVB->Release();
+	mIB->Release();
+	mShadowMap->Release();
+	mPlaneVB->Release();
+}
 void App::renderOneFrame(Renderer& renderer, const AppParam& param) 
 {
 

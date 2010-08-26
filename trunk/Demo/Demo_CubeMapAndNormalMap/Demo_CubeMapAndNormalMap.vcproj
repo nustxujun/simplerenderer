@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Demo_Beginning"
-	ProjectGUID="{8F7449E8-74BF-403C-B005-6DC912D5A76D}"
-	RootNamespace="Demo_Beginning"
+	Name="Demo_CubeMapAndNormalMap"
+	ProjectGUID="{B39B5172-4C40-4273-BB97-8E5177FE56F8}"
+	RootNamespace="Demo_CubeMapAndNormalMap"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -170,11 +170,15 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\Beginning.cpp"
+			RelativePath=".\CMandNM.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\Beginning.h"
+			RelativePath=".\CMandNM.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Shader.h"
 			>
 		</File>
 	</Files>
