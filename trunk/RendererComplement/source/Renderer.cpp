@@ -1,6 +1,5 @@
 #include "Renderer.h"
 #include "DefaultPipeline.h"
-#include "RenderQueue.h"
 #include "BackBuffer.h"
 #include "PaintingMethod.h"
 #include "VertexBufferManager.h"
