@@ -8,6 +8,8 @@
 #include "Light.h"
 #include "Viewport.h"
 #include "Sampler.h"
+#include "CommandLine.h"
+#include "RenderData.h"
 
 
 namespace RCP
@@ -15,6 +17,29 @@ namespace RCP
 
 	class Renderer
 	{
+	private:
+		enum
+		{
+			DRAW,
+			SETVERTEXBUFFER,
+			SETINDEXBUFFER,
+			SETTEXTURE,
+			SETTEXTURESTATE,
+			SETMATERIAL,
+			SETMATRIX,
+			SETPAINTINGMETHOD,
+			SETLIGHT,			
+			SETVIEWPORT,
+			SETPIPELINE,
+			SETRENDERSTATE,
+			CLEARDEPTH,
+			CLEARSTENCIL,
+			CLEARCOLOR,
+			SETPROPERTY,
+			SETRENDERTARGET,
+
+			FUNC_NUM,
+		};
 	public :
 		Renderer();
 		~Renderer();
@@ -59,15 +84,15 @@ namespace RCP
 		void setProperty(const std::string& funcName,const Any& attribute);
 		//index默认0，等到完善MRT的时候再实现
 		void setRenderTarget(unsigned int index,RenderTarget* rt);
-		RenderTarget* getRenderTarget(unsigned int index = 0);
+		RenderTarget* getBackBuffer();
 
 	private:
 		void initAssert();
+		void processor(unsigned int index, const CommandLine::ParameterList& paras);
 
 	private:
 		bool mIsInitialized;
 
-		RenderQueue* mRenderQueue;
 		//当前渲染流水线
 		Pipeline* mPipeline;
 		//默认渲染流水线
@@ -81,36 +106,13 @@ namespace RCP
 		//纹理管理器
 		TextureManager* mTextureManager;
 
-		//当前保存量
-		//当前绘制内存空间
-		RenderTarget* mRenderTarget;
 		//当前绘制方法
 		PaintingMethod* mPaitingMethod;
-		//当前vb
-		VertexBuffer* mVertexBuffer;
-		//当前ib
-		IndexBuffer* mIndexBuffer;
-		//当前纹理,限定8层（不是有什么不可实现，只是模拟显卡最大数）
-		Texture* mTexture[8];
-		//当前材质
-		Material mMaterial;
-		//当前矩阵
-		Matrix4X4 mMatrices[TS_BASALNUM];
-		//灯光
-		Light mLight[8];
-		//视口
-		Viewport mViewport;
-		//纹理状态
-		Sampler mSampler[8];
-		//渲染状态
-		RenderState mRenderState;
-		//frameBuffer
-		FrameBuffer* mFrameBuffer;
-		//assistantBuffer,暂时是z + stencil
-		RenderTarget* mAssistantBuffer[2];
-		//其他属性状态
-		typedef std::map<std::string , Any> Propertys;
-		Propertys mPropertys;
+
+		RenderParameter mRenderParameter;
+
+		//commandLine
+		CommandLine mCommandLine;
 
 
 	};

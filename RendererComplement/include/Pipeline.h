@@ -37,17 +37,11 @@ namespace RCP
 
 		const RendererParameters& getRendererParameters()const ;
 
-		template<class T>
-		void clear(const T& t)
-		{
-			
-		}
 	protected:
 		//通知接受结果的单位，并删除该RenderElement
 		void notifyCompleted();
 	private:
-		//当前渲染的数据
-		RenderData* mRenderData;
+
 
 		RendererParameters mRendererParameters;
 

@@ -37,6 +37,7 @@ namespace RCP
 	class Any;
 	class BackBuffer;
 	class Colour;
+	class CommandLine;
 	class FrameBuffer;
 	class IndexBuffer;
 	class IndexBufferManager;
@@ -47,7 +48,6 @@ namespace RCP
 	class PaintingMethod;
 	class Pipeline;
 	class Renderer;
-	class RenderQueue;
 	class RenderTarget;
 	class Resource;
 	class ResourceManager;
