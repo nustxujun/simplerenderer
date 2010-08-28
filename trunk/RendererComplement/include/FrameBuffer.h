@@ -23,24 +23,40 @@ namespace RCP
 
 
 		/*
-			为了配合Renderer的统一渲染(渲染状态都保存到当renderNow再开始draw)
-			clear操作也作为状态延时到实际写入之前进行。
-			因此需要注意的当外部调用setValue getvalue的时候
-			如果光栅化和renderer的drawPrimitive是异步的，可能会使framebuffer提前clear;
-			因此禁止外部直接调用setValue getvalue，只能在光栅化的时候使用。
-			同样禁止向外部提供frameBuffer;
+		为了配合Renderer的统一渲染(渲染状态都保存到当renderNow再开始draw)
+		clear操作也作为状态延时到实际写入之前进行。
+		因此需要注意的当外部调用setValue getvalue的时候
+		如果光栅化和renderer的drawPrimitive是异步的，可能会使framebuffer提前clear;
+		因此禁止外部直接调用setValue getvalue，只能在光栅化的时候使用。
+		同样禁止向外部提供frameBuffer;
 		*/
 
 		template<class T>
-		void clear(BufferTpye type, const T& t)
+		void clear(BufferTpye type, const T& value)
 		{
 			assert(type < BT_COUNT);
+			RenderTarget* rt = mBuffers[type];
 
-			mClearValue[type] = t;
-			mIsDirty = true;
+			if (rt == NULL)
+			{
+				return ;
+			}
+
+			unsigned int valueSize = sizeof(value);
+			if (rt->getColourDepth() != valueSize)
+				THROW_EXCEPTION("value of clearing does not match colourDepth.");
+
+
+			size_t size = rt->getWidth() * rt->getHeight();
+			rt->seek(0);
+
+			for (size_t i = 0; i < size; ++i)
+			{
+				rt->write(&value,valueSize);
+			}
+
 		}
 
-		void reset();
 
 		template<class T>
 		inline void setValue(BufferTpye type,unsigned int x, unsigned int y,const T& value)
@@ -50,9 +66,6 @@ namespace RCP
 
 			if (rt == NULL)
 				return;
-
-			if (mIsDirty)
-				clearImpl();
 
 			unsigned colorDepth = rt->getColourDepth();
 			if (colorDepth != sizeof (value))
@@ -74,8 +87,6 @@ namespace RCP
 				//memset(&t,0,sizeof(T));
 				return;
 			}
-			if (mIsDirty)
-				clearImpl();
 
 			unsigned colorDepth = rt->getColourDepth();
 			if (colorDepth != sizeof (t))
@@ -94,16 +105,13 @@ namespace RCP
 			return (x + y * width) * colorDepth;
 		}
 
-		void clearImpl();
+
 	private:
 		RenderTarget* mBuffers[BT_COUNT];
 
 		unsigned int mWidth;
 		unsigned int mHeight;
 
-		bool mIsDirty;
-
-		Any mClearValue[BT_COUNT];
 	};
 }
 #endif//_FrameBuffer_H_

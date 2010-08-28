@@ -2,29 +2,9 @@
 #include "RenderQueue.h"
 namespace RCP
 {
-
-	RenderData::RenderData(RenderQueue* rq):
-		mRenderQueue(rq)
-	{}
-
-	RenderData::~RenderData()
-	{}
-
-	void RenderData::insertRenderElement(unsigned int offset ,unsigned int c, Primitives type, VertexBuffer* vb, 
-		const Matrix4X4 world[TS_BASALNUM],const Sampler spl[8], IndexBuffer* ib,const Material& mat,const Light light[8],const Viewport& vp, const RenderState& rs,const FrameBuffer& fb,const std::map<std::string ,Any>& ps)
+	RenderData::RenderData(Primitives type, unsigned int offset, unsigned int count, const RenderParameter& paras):
+		ptType(type),beginPrimitiveOffset(offset),primitiveCount(count),renderParameter(paras)
 	{
-		mRenderElementList.push_back(RenderElement(offset,c,type,vb,world,spl,ib,mat,light,vp,rs,fb,ps));
 	}
 
-	void RenderData::junk()
-	{
-		//注意这里是进行了delete this这样的操作
-		mRenderQueue->destroyRenderData(this);
-	}
-
-
-	const RenderData::RenderElementList& RenderData::getRenderElementList() const
-	{
-		return mRenderElementList;
-	}
 }

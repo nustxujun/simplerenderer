@@ -199,18 +199,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\RenderElement.h"
-				>
-			</File>
-			<File
-				RelativePath=".\source\RenderQueue.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\RenderQueue.h"
-				>
-			</File>
-			<File
 				RelativePath=".\source\RenderTarget.cpp"
 				>
 			</File>
@@ -298,6 +286,14 @@
 		<Filter
 			Name="Tools"
 			>
+			<File
+				RelativePath=".\source\CommandLine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\CommandLine.h"
+				>
+			</File>
 			<File
 				RelativePath=".\include\Exception.h"
 				>

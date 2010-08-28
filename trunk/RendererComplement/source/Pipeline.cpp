@@ -5,8 +5,7 @@ namespace RCP
 	Pipeline::ResultListener::~ResultListener()
 	{}
 
-	Pipeline::Pipeline():
-		mRenderData(NULL)
+	Pipeline::Pipeline()
 	{
 
 	}
@@ -25,10 +24,7 @@ namespace RCP
 
 	void Pipeline::import(RenderData& data)
 	{
-		//如果还在渲染中。就不进行新的操作
-		if (isWorking())
-			return;
-		mRenderData = &data;
+
 		execute(data);
 	}
 
@@ -38,19 +34,9 @@ namespace RCP
 
 	}
 
-	bool Pipeline::isWorking()
-	{
-		return mRenderData != NULL;
-	}
-
 	const RendererParameters& Pipeline::getRendererParameters()const 
 	{
 		return mRendererParameters;
 	}
 
-	void Pipeline::notifyCompleted()
-	{
-		mRenderData->junk();
-		mRenderData = NULL;
-	}
 }

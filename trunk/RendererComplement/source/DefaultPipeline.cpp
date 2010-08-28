@@ -29,33 +29,24 @@ namespace RCP
 
 	void DefaultPipeline::execute(const RenderData& renderData)
 	{
-		const RenderData::RenderElementList& elems = renderData.getRenderElementList();
-		size_t elemSize = elems.size();
-		if (mVertexList.size() < elemSize)
-			mVertexList.resize(elemSize);
 
-		//show time.
-		RenderData::RenderElementList::const_iterator i,endi = elems.end();
-		VertexList::iterator verIter = mVertexList.begin();
-		for (i = elems.begin(); i != endi; ++i,++verIter)
-		{
-			//设置自定义渲染状态
-			setOtherState(i->propertys);
-			if (i->vertexBuffer->getVertexCount() > verIter->size())
-				verIter->resize(i->vertexBuffer->getVertexCount());//這裡就直接初始化了，下面就不再push_back了
-			vertexProcessing(*i,*verIter);
-			primitiveAssembly(*i,*verIter);
-			mRasterizer.flush(i->frameBuffer,i->renderState);
-		}
-		notifyCompleted();
+		const RenderParameter& rp = renderData.renderParameter;
+		 
+		//设置自定义渲染状态
+		setOtherState(rp.propertys);
+		if (rp.vertexBuffer->getVertexCount() > mVertexList.size())
+			mVertexList.resize(rp.vertexBuffer->getVertexCount());//這裡就直接初始化了，下面就不再push_back了
+		vertexProcessing(renderData,mVertexList);
+		primitiveAssembly(renderData,mVertexList);
+		mRasterizer.flush(*rp.frameBuffer,rp.renderState);
 
 	}
 
 	
 
-	void DefaultPipeline::vertexProcessing(const RenderElement& elem, VertexVector& verVec)
+	void DefaultPipeline::vertexProcessing(const RenderData& elem, VertexList& verVec)
 	{
-		const VertexBuffer* vb = elem.vertexBuffer;
+		const VertexBuffer* vb = elem.renderParameter.vertexBuffer;
 		unsigned int vertexSize = vb->getVertexDeclaration().getSizeInBytes();
 		//這裡取的是elem的vertexCount，注意，和VertexBuffer裏不一樣
 		size_t dataSize = vb->getVertexCount() * vertexSize;
@@ -122,11 +113,11 @@ namespace RCP
 			}
 
 			//获取颜色(材质ye处理) 
-			diffuse = elem.material.diffuse;
-			specular = elem.material.specular;
-			power = elem.material.power;
-			ambient = elem.material.ambient;
-			if (diffuseDataOffset != -1 && elem.material.isDiffuseVertexColorEnable())
+			diffuse = elem.renderParameter.material.diffuse;
+			specular = elem.renderParameter.material.specular;
+			power = elem.renderParameter.material.power;
+			ambient = elem.renderParameter.material.ambient;
+			if (diffuseDataOffset != -1 && elem.renderParameter.material.isDiffuseVertexColorEnable())
 			{
 				if (verDecl.getElementSizeInBytes(VES_DIFFUSE) == 4)
 				{
@@ -144,7 +135,7 @@ namespace RCP
 				}
 				
 			}
-			if (specularDataOffset != -1 && elem.material.isSpecularVertexColorEnable())
+			if (specularDataOffset != -1 && elem.renderParameter.material.isSpecularVertexColorEnable())
 			{
 				if (verDecl.getElementSizeInBytes(VES_SPECULAR) == 4)
 				{
@@ -171,7 +162,7 @@ namespace RCP
 			//纹理坐标
 			for (unsigned char k = 0; k < 8; ++k )
 			{
-				if (texCroodDataOffset[k] != -1 && elem.sampler[k].texture != NULL)
+				if (texCroodDataOffset[k] != -1 && elem.renderParameter.sampler[k].texture != NULL)
 				{
 					mDataCollector.getData(verVec[i].texCrood[k],vertexData + texCroodDataOffset[k]);
 					//取样时才计算寻址
@@ -189,12 +180,12 @@ namespace RCP
 			//以下为数据计算
 
 			//計算混合
-			transMat = elem.matWorld[TS_WORLD] * weight[0] + 
-				elem.matWorld[TS_WORLD2] * weight[1] + 
-				elem.matWorld[TS_WORLD3] * weight[2] + 
-				elem.matWorld[TS_WORLD4] * weight[3];
+			transMat = elem.renderParameter.matrices[TS_WORLD] * weight[0] + 
+				elem.renderParameter.matrices[TS_WORLD2] * weight[1] + 
+				elem.renderParameter.matrices[TS_WORLD3] * weight[2] + 
+				elem.renderParameter.matrices[TS_WORLD4] * weight[3];
 			//矩阵变换
-			verVec[i].pos = elem.matWorld[TS_VIEW] *( transMat * verVec[i].pos );//* elem.matWorld[TS_PROJECTION]  ;
+			verVec[i].pos = elem.renderParameter.matrices[TS_VIEW] *( transMat * verVec[i].pos );//* elem.matrices[TS_PROJECTION]  ;
 			
 			//记录下变换前的坐标 进行光照计算
 			posVec.x = verVec[i].pos.x;
@@ -202,7 +193,7 @@ namespace RCP
 			posVec.z = verVec[i].pos.z;
 
 			//继续变换
-			verVec[i].pos = elem.matWorld[TS_PROJECTION] *  verVec[i].pos;	
+			verVec[i].pos = elem.renderParameter.matrices[TS_PROJECTION] *  verVec[i].pos;	
 			
 
 
@@ -213,7 +204,7 @@ namespace RCP
 			enable = false;
 			for (unsigned int index = 0; index < 8; ++index)
 			{
-				if (!elem.light[index].isEnable())
+				if (!elem.renderParameter.light[index].isEnable())
 					continue;
 				enable = true;
 				
@@ -221,7 +212,7 @@ namespace RCP
 				//因为此时要的到顶点指向摄像机的向量需要摄像机坐标，而这里没有提供逆矩阵
 				//于是将法向量和灯变换到摄像机坐标系。
 				//当然法向量的话 还有一个世界坐标系的变换。
-				lightPos = elem.matWorld[TS_VIEW] *(elem.light[index].position);
+				lightPos = elem.renderParameter.matrices[TS_VIEW] *(elem.renderParameter.light[index].position);
 				L = lightPos - posVec;
 				L.normalise();
 				V = - posVec;
@@ -232,17 +223,17 @@ namespace RCP
 				//注意这里有个隐藏操作是normVec4.w设为了0，不是1
 				normVec4 = verVec[i].norm;
 				//normal的话只需要旋转方向
-				normVec4 = elem.matWorld[TS_VIEW] * (transMat * normVec4);
+				normVec4 = elem.renderParameter.matrices[TS_VIEW] * (transMat * normVec4);
 				normVec3.x = normVec4.x;
 				normVec3.y = normVec4.y;
 				normVec3.z = normVec4.z;
 
-				diffuseBlend += elem.light[index].diffuse * 
+				diffuseBlend += elem.renderParameter.light[index].diffuse * 
 					std::max<float>(0,normVec3.dotProduct(L));
 
-				specularBlend += elem.light[index].specular * 
+				specularBlend += elem.renderParameter.light[index].specular * 
 					pow(std::max<float>(0,H.dotProduct(normVec3)),power);
-				ambientBlend += elem.light[index].ambient;
+				ambientBlend += elem.renderParameter.light[index].ambient;
 			}
 
 			//如果使用了灯光。
@@ -270,10 +261,10 @@ namespace RCP
 		}
 	}
 
-	void DefaultPipeline::primitiveAssembly(const RenderElement& elem,const VertexVector& verVec)
+	void DefaultPipeline::primitiveAssembly(const RenderData& elem,const VertexList& verVec)
 	{
-		const IndexBuffer* ib = elem.indexBuffer;
-		const VertexBuffer* vb = elem.vertexBuffer;
+		const IndexBuffer* ib = elem.renderParameter.indexBuffer;
+		const VertexBuffer* vb = elem.renderParameter.vertexBuffer;
 		unsigned int skipVertexCount = 0;
 		size_t realVertexCount = 0;
 		unsigned int type = 0;
@@ -327,11 +318,11 @@ namespace RCP
 		for (unsigned int i = 0; i < elem.primitiveCount; ++i)
 		{
 			prim.type = type;
-			prim.vp = &elem.viewport;
+			prim.vp = &elem.renderParameter.viewport;
 			
 			for (short j = 0; j < 8; ++j)
 			{
-				prim.sampler[j] = elem.sampler[j];
+				prim.sampler[j] = elem.renderParameter.sampler[j];
 			}
 			
 			
@@ -349,7 +340,7 @@ namespace RCP
 			}
 						
 			//返回true则说明通过，false则剔除
-			if (prim.type == Primitive::PT_ERROR  || !culling(prim,elem.renderState.cullMode) )
+			if (prim.type == Primitive::PT_ERROR  || !culling(prim,elem.renderParameter.renderState.cullMode) )
 				 continue;
 			 //同时把齐次归一，视口映射给做了，因为在顶点级可以少做几个顶点
 			 clipping(prim,priResult);

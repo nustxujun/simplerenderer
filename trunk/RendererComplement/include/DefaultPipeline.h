@@ -11,8 +11,8 @@ namespace RCP
 		public Pipeline
 	{
 
-		typedef std::vector<Vertex> VertexVector;
-		typedef std::list<VertexVector> VertexList;
+		typedef std::vector<Vertex> VertexList;
+
 
 	public:
 
@@ -25,9 +25,9 @@ namespace RCP
 
 	protected:
 	
-		void vertexProcessing(const RenderElement& elem,VertexVector& verVec);
+		void vertexProcessing(const RenderData& elem,VertexList& verVec);
 		
-		void primitiveAssembly(const RenderElement& elem,const VertexVector& verVec);
+		void primitiveAssembly(const RenderData& elem,const VertexList& verVec);
 
 		//返回true则说明通过，false则剔除
 		bool culling(const Primitive& prim,CullMode fm);

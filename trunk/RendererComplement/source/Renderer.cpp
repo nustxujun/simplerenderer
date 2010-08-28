@@ -7,6 +7,7 @@
 #include "IndexBufferManager.h"
 #include "TextureManager.h"
 #include "FrameBuffer.h"
+#include "CommandLine.h"
 
 namespace RCP 
 {
@@ -25,58 +26,63 @@ namespace RCP
 	//初始化渲染器，启动渲染器最低标准
 	void Renderer::initialize(const RendererParameters& rp)
 	{
+		//初始化CommandLine
+		mCommandLine.addProcessorFunc(this,&Renderer::processor);
 		//渲染流水线
-		mRenderQueue = new RenderQueue();
 		mDefaultPipeline = new DefaultPipeline();
 		mDefaultPipeline->initialize(rp);
 		mPipeline = mDefaultPipeline;
-
-		//RenderTarget
-		mBackBuffer = new BackBuffer();
-		mBackBuffer->initialize(rp.backBufferWidth,rp.backBufferHeight,rp.backBufferPixelFormat);
-		mRenderTarget = mBackBuffer->getRenderTarget();
-		mAssistantBuffer[0] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
-		mAssistantBuffer[1] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
-		mFrameBuffer = new FrameBuffer(rp.backBufferWidth,rp.backBufferHeight);
-		//设置好FrameBuffer
-		mFrameBuffer->setBuffer(BT_COLOUR,mRenderTarget);
-		mFrameBuffer->setBuffer(BT_DEPTH,mAssistantBuffer[0]);
-		mFrameBuffer->setBuffer(BT_STENCIL,mAssistantBuffer[1]);
-
-		//绘制方式
-		mPaitingMethod = NULL;
 
 		//各种管理器
 		mVertexBufferManager = new VertexBufferManager();
 		mIndexBufferManager = new IndexBufferManager();
 		mTextureManager = new TextureManager();
 
-		//各种属性
-		mVertexBuffer = NULL;
-		mIndexBuffer = NULL;
-		memset(mTexture,0,sizeof(mTexture));
-		mMaterial = Material::DEFAULT;
-		for (unsigned int i = 0; i < 8 ; ++i)
-			mLight[i].setEnable(false);
-		mViewport = Viewport(0,0, rp.backBufferWidth, rp.backBufferHeight,0.f,1.f);
-		mIsInitialized = true;
-		mRenderState.alphaTestFunc = CF_ALWAYS;
-		mRenderState.alphaTestRef  = 0;
-		mRenderState.zWriteEnable = true;
-		mRenderState.zTestEnable = true;
-		mRenderState.stencilTestFunc = CF_ALWAYS;
-		mRenderState.stencilRef = 0;
-		mRenderState.stencilMask = -1;
-		mRenderState.stencilWriteMask = -1;
-		mRenderState.stencilFail = SO_KEEP;
-		mRenderState.stencilPass = SO_KEEP;
-		mRenderState.stencilZFail = SO_KEEP;
-		mRenderState.alphaBlendEnable = false;
-		mRenderState.srcBlend = BM_SRCALPHA;
-		mRenderState.destBlend = BM_INVSRCALPHA;
-		mRenderState.cullMode = CM_CCW;
-		mRenderState.fillMode = FM_SOLID;
+		//backbuffer
+		mBackBuffer = new BackBuffer();
+		mBackBuffer->initialize(rp.backBufferWidth,rp.backBufferHeight,rp.backBufferPixelFormat);
 
+		//assistantbuffer
+		mRenderParameter.assistantBuffer[0] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
+		mRenderParameter.assistantBuffer[1] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
+		mRenderParameter.frameBuffer = new FrameBuffer(rp.backBufferWidth,rp.backBufferHeight);
+		//设置好FrameBuffer
+		mRenderParameter.frameBuffer->setBuffer(BT_COLOUR,mBackBuffer->getRenderTarget());
+		mRenderParameter.frameBuffer->setBuffer(BT_DEPTH,mRenderParameter.assistantBuffer[0]);
+		mRenderParameter.frameBuffer->setBuffer(BT_STENCIL,mRenderParameter.assistantBuffer[1]);
+
+		//绘制方式
+		mPaitingMethod = NULL;
+
+
+
+		//各种属性
+		mRenderParameter.vertexBuffer = NULL;
+		mRenderParameter.indexBuffer = NULL;
+		memset(mRenderParameter.texture,0,sizeof(mRenderParameter.texture));
+		mRenderParameter.material = Material::DEFAULT;
+		for (unsigned int i = 0; i < 8 ; ++i)
+			mRenderParameter.light[i].setEnable(false);
+		mRenderParameter.viewport = Viewport(0,0, rp.backBufferWidth, rp.backBufferHeight,0.f,1.f);
+		mRenderParameter.renderState.alphaTestFunc = CF_ALWAYS;
+		mRenderParameter.renderState.alphaTestRef  = 0;
+		mRenderParameter.renderState.zWriteEnable = true;
+		mRenderParameter.renderState.zTestEnable = true;
+		mRenderParameter.renderState.stencilTestFunc = CF_ALWAYS;
+		mRenderParameter.renderState.stencilRef = 0;
+		mRenderParameter.renderState.stencilMask = -1;
+		mRenderParameter.renderState.stencilWriteMask = -1;
+		mRenderParameter.renderState.stencilFail = SO_KEEP;
+		mRenderParameter.renderState.stencilPass = SO_KEEP;
+		mRenderParameter.renderState.stencilZFail = SO_KEEP;
+		mRenderParameter.renderState.alphaBlendEnable = false;
+		mRenderParameter.renderState.srcBlend = BM_SRCALPHA;
+		mRenderParameter.renderState.destBlend = BM_INVSRCALPHA;
+		mRenderParameter.renderState.cullMode = CM_CCW;
+		mRenderParameter.renderState.fillMode = FM_SOLID;
+
+
+		mIsInitialized = true;
 
 	}
 
@@ -84,20 +90,19 @@ namespace RCP
 	void Renderer::setup(RendererParameters rp)
 	{
 		initAssert();
-		mRenderTarget = mBackBuffer->getRenderTarget();
+		//mRenderParameter.frameBuffer->setBuffer(BT_COLOUR, mBackBuffer->getRenderTarget());
 	}
 
 	//释放渲染器资源
 	void Renderer::release()
 	{
-		SAFE_DELETE(mRenderQueue);
 		SAFE_DELETE(mDefaultPipeline);
 		SAFE_DELETE(mBackBuffer);
 		SAFE_DELETE(mVertexBufferManager);
 		SAFE_DELETE(mIndexBufferManager);
 		SAFE_DELETE(mTextureManager);
 		for (int i = 0; i < 2; ++i)
-			SAFE_DELETE(mAssistantBuffer[i]);
+			SAFE_DELETE(mRenderParameter.assistantBuffer[i]);
 
 	}
 
@@ -106,9 +111,10 @@ namespace RCP
 		initAssert();
 		if (mPaitingMethod == NULL)
 			THROW_EXCEPTION("未指定绘制方法。");
-		//输入流水线
-		if (mRenderQueue->isRenderDataReady())
-			mPipeline->import(mRenderQueue->postRenderData());
+
+		while(!mCommandLine.empty())
+			mCommandLine.execute();			
+		
 
 		//绘制道屏幕
 		mPaitingMethod->paint(mBackBuffer);
@@ -121,63 +127,48 @@ namespace RCP
 
 	void Renderer::draw(Primitives type,unsigned int beginPrimitiveOffset,unsigned int primitiveCount)
 	{
-		initAssert();
-		assert(mVertexBuffer != NULL);
 		assert(primitiveCount);
 		Matrix4X4 mat[TS_BASALNUM];
-		memcpy(mat,mMatrices,sizeof (Matrix4X4)*TS_BASALNUM);
-		mRenderQueue->createRenderElement(beginPrimitiveOffset,primitiveCount,type,mVertexBuffer,
-			mat,mSampler,mLight,mIndexBuffer,mMaterial,mViewport,mRenderState,*mFrameBuffer,mPropertys);
+		memcpy(mat,mRenderParameter.matrices,sizeof (Matrix4X4)*TS_BASALNUM);
 
-		//恢复到初始，防止被再用
-		mVertexBuffer = NULL;
-		mIndexBuffer = NULL;
-		mMaterial = Material::DEFAULT;
-		//去掉清除標識
-		mFrameBuffer->reset();
-		//viewport也恢复成默认大小，防止改变renderTarget的时候发生大小差异
-		mViewport.width = mFrameBuffer->getBuffer(BT_COLOUR)->getWidth();
-		mViewport.height = mFrameBuffer->getBuffer(BT_COLOUR)->getHeight();
-		mViewport.x = mViewport.y = 0;
-		mViewport.zMax = 1.0f;
-		mViewport.zMin = 0.0f;
+		mCommandLine.pushCommand(DRAW,type,beginPrimitiveOffset,primitiveCount);
 
 	}
 
 	void Renderer::setVertexBuffer(VertexBuffer* vb)
 	{
 		assert(vb);
-		mVertexBuffer = vb;
+		mCommandLine.pushCommand(SETVERTEXBUFFER,vb);
 	}
 
 	void Renderer::setIndexBuffer(IndexBuffer* ib)
 	{
 		assert(ib);
-		mIndexBuffer = ib;
+		mCommandLine.pushCommand(SETINDEXBUFFER,ib);
 	}
 
 	void Renderer::setTexture(unsigned int index,Texture* tex)
 	{
 		assert(index < 8);
 		assert(tex);
-		mSampler[index].texture = tex;
+		mCommandLine.pushCommand(SETTEXTURE,index,tex);
 	}
 
 	void Renderer::setTextureState(unsigned int index, const TextureState& ts)
 	{
 		assert(index < 8);
-		mSampler[index].setTextureState(ts);
+		mCommandLine.pushCommand(SETTEXTURESTATE,index,ts);
 	}
 
 	void Renderer::setMaterial(Material mat)
 	{
-		mMaterial = mat;
+		mCommandLine.pushCommand(SETMATERIAL,mat);
 	}
 
 	void Renderer::setMatrix(TransformStateType type,const Matrix4X4& mat)
 	{
 		assert(type < TS_BASALNUM);
-		mMatrices[type] = mat;
+		mCommandLine.pushCommand(SETMATRIX,type,mat);
 	}
 
 
@@ -216,53 +207,153 @@ namespace RCP
 	void Renderer::setLight(unsigned int index,const Light& l)
 	{
 		assert(index < 8);
-		mLight[index] = l;
+		mCommandLine.pushCommand(SETLIGHT,index,l);
 	}
 
 	void Renderer::setRenderState(const RenderState& rs)
 	{
-		mRenderState = rs;
+		mCommandLine.pushCommand(SETRENDERSTATE,rs);
 	}
 
 	void Renderer::clearDepth(float d)
 	{
-		mFrameBuffer->clear(BT_DEPTH,d);
+		mCommandLine.pushCommand(CLEARDEPTH,d);
 	}
 
 	void Renderer::clearStencil(unsigned int s)
 	{
-		mFrameBuffer->clear(BT_STENCIL,s);
+		mCommandLine.pushCommand(CLEARSTENCIL,s);
 	}
 
 	void Renderer::clearColour(const Colour& c)
 	{
-		mFrameBuffer->clear(BT_COLOUR,c.get32BitARGB());
+		mCommandLine.pushCommand(CLEARCOLOR,c.get32BitARGB());
 	}
 
 	void Renderer::setProperty(const std::string& funcName,const Any& attribute)
 	{
-		mPropertys[funcName] = attribute;
+		mCommandLine.pushCommand(SETPROPERTY,funcName,attribute);
 	}
 
 	void Renderer::setRenderTarget(unsigned int index,RenderTarget* rt)
 	{
-		mFrameBuffer->setBuffer(BT_COLOUR, rt);
-		mViewport.width = rt->getWidth();
-		mViewport.height = rt->getHeight();
-		mViewport.x = mViewport.y = 0;
-		mViewport.zMax = 1.0f;
-		mViewport.zMin = 0.0f;
+		mCommandLine.pushCommand(SETRENDERTARGET,index,rt);
 	}
 
-	RenderTarget* Renderer::getRenderTarget(unsigned int index )
+	RenderTarget* Renderer::getBackBuffer()
 	{
-		return mFrameBuffer->getBuffer(BT_COLOUR);
+		return mBackBuffer->getRenderTarget();
 	}
 
 	void Renderer::initAssert()
 	{
 		if (!mIsInitialized)
 			THROW_EXCEPTION("渲染器未初始化。");
+	}
+
+	void Renderer::processor(unsigned int index, const CommandLine::ParameterList& paras)
+	{
+		initAssert();
+		switch (index)
+		{
+		case DRAW:
+			{
+				assert(mRenderParameter.vertexBuffer != NULL);
+				RenderData data(any_cast<Primitives>(paras[0]), any_cast<unsigned int>(paras[1]), any_cast<unsigned int>(paras[2]), mRenderParameter);
+				mPipeline->import(data);
+				//恢复到初始，防止被再用
+				mRenderParameter.vertexBuffer = NULL;
+				mRenderParameter.indexBuffer = NULL;
+				mRenderParameter.material = Material::DEFAULT;
+
+				//viewport也恢复成默认大小，防止改变renderTarget的时候发生大小差异
+				mRenderParameter.viewport.width = mRenderParameter.frameBuffer->getBuffer(BT_COLOUR)->getWidth();
+				mRenderParameter.viewport.height = mRenderParameter.frameBuffer->getBuffer(BT_COLOUR)->getHeight();
+				mRenderParameter.viewport.x = mRenderParameter.viewport.y = 0;
+				mRenderParameter.viewport.zMax = 1.0f;
+				mRenderParameter.viewport.zMin = 0.0f;
+				break;
+			}
+			case SETVERTEXBUFFER:
+			{
+				mRenderParameter.vertexBuffer = any_cast<VertexBuffer*>(paras[0]);
+				break;
+			}
+			case SETINDEXBUFFER:
+			{
+				mRenderParameter.indexBuffer = any_cast<IndexBuffer*>(paras[0]);
+				break;
+			}
+			case SETTEXTURE:
+			{
+				mRenderParameter.sampler[any_cast<unsigned int >(paras[0])].texture = any_cast<Texture*>(paras[1]);
+				break;
+			}
+			case SETTEXTURESTATE:
+			{
+				mRenderParameter.sampler[any_cast<unsigned int >(paras[0])].setTextureState(any_cast<TextureState>(paras[1]));
+				break;
+			}
+			case SETMATERIAL:
+			{
+				mRenderParameter.material = any_cast<Material>(paras[0]);
+				break;
+			}
+			case SETMATRIX:
+			{
+				mRenderParameter.matrices[any_cast<TransformStateType>(paras[0])] = any_cast<Matrix4X4>(paras[1]);
+				break;
+			}
+			case SETLIGHT:
+			{
+				mRenderParameter.light[any_cast<unsigned int >(paras[0])] = any_cast<Light>(paras[1]);
+				break;
+			}
+			case SETVIEWPORT:
+			{
+				mRenderParameter.viewport = any_cast<Viewport>(paras[0]);
+				break;
+			}
+			case SETRENDERSTATE:
+			{
+				mRenderParameter.renderState = any_cast<RenderState>(paras[0]);
+				break;
+			}
+			case CLEARDEPTH:
+			{
+				mRenderParameter.frameBuffer->clear(BT_DEPTH,any_cast<float>(paras[0]));
+				break;
+			}
+			case CLEARSTENCIL:
+			{				
+				mRenderParameter.frameBuffer->clear(BT_STENCIL,any_cast<unsigned int>(paras[0]));
+				break;
+			}
+			case CLEARCOLOR:
+			{
+				mRenderParameter.frameBuffer->clear(BT_COLOUR,any_cast<unsigned int>(paras[0]));
+				break;
+			}
+			case SETPROPERTY:
+			{
+				mRenderParameter.propertys[any_cast<std::string>(paras[0])] = paras[1];
+				break;
+			}
+			case SETRENDERTARGET:
+			{
+				//paras[0]是索引，用于mrt
+				RenderTarget* rt = any_cast<RenderTarget*>(paras[1]);
+				mRenderParameter.frameBuffer->setBuffer(BT_COLOUR,rt);
+				mRenderParameter.viewport.width = rt->getWidth();
+				mRenderParameter.viewport.height = rt->getHeight();
+				mRenderParameter.viewport.x = mRenderParameter.viewport.y = 0;
+				mRenderParameter.viewport.zMax = 1.0f;
+				mRenderParameter.viewport.zMin = 0.0f;
+				break;
+			}
+			default:
+				THROW_EXCEPTION("Unknown operation.");
+		}
 	}
 
 

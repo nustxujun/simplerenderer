@@ -3,32 +3,53 @@
 #include "Prerequisites.h"
 #include "RenderElement.h"
 #include "Material.h"
-#include "Viewport.h"
-#include "FrameBuffer.h"
 
 namespace RCP
 {
-	//渲染数据组,一个RenderData绘制出完整的一帧
+	struct RenderParameter
+	{
+		//当前vb
+		VertexBuffer* vertexBuffer;
+		//当前ib
+		IndexBuffer* indexBuffer;
+		//当前纹理,限定8层（不是有什么不可实现，只是模拟显卡最大数）
+		Texture* texture[8];
+		//当前材质
+		Material material;
+		//当前矩阵
+		Matrix4X4 matrices[TS_BASALNUM];
+		//灯光
+		Light light[8];
+		//视口
+		Viewport viewport;
+		//纹理状态
+		Sampler sampler[8];
+		//渲染状态
+		RenderState renderState;
+		//frameBuffer
+		FrameBuffer* frameBuffer;
+		//assistantBuffer,暂时是z + stencil
+		RenderTarget* assistantBuffer[2];
+		//其他属性状态
+		typedef std::map<std::string , Any> Propertys;
+		Propertys propertys;
+	};
+
 	class RenderData
 	{
-		friend class RenderQueue;
-	public:
-		typedef std::list<RenderElement> RenderElementList;
-	public:
-		RenderData(RenderQueue* rq);
-		~RenderData();
-		
-		//使用完丢弃
-		//会造成类似delete this的效果，所以之后请别调用
-		void junk();
+	public :
+		RenderData(Primitives type, unsigned int offset, unsigned int count, const RenderParameter& paras);
 
-		const RenderElementList& getRenderElementList() const;
-		void insertRenderElement(unsigned int offset ,unsigned int c, Primitives type,VertexBuffer* vb, const Matrix4X4 world[TS_BASALNUM],
-			const Sampler spl[8], IndexBuffer* ib,const Material& mat,const Light light[8],const Viewport& vp, const RenderState& rs,const FrameBuffer& fb,const std::map<std::string ,Any>& ps);
-	private:
+
+		Primitives ptType;
+		unsigned int beginPrimitiveOffset;
+		unsigned int primitiveCount;
+		const RenderParameter& renderParameter;
+
 		
-		RenderElementList mRenderElementList;
-		RenderQueue* mRenderQueue;
+
+
+
 	};
 }
 #endif//_RenderData_H_
