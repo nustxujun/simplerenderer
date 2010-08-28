@@ -1,8 +1,10 @@
 #ifndef _RenderData_H_
 #define _RenderData_H_
 #include "Prerequisites.h"
-#include "RenderElement.h"
 #include "Material.h"
+#include "Light.h"
+#include "Viewport.h"
+#include "Sampler.h"
 
 namespace RCP
 {
