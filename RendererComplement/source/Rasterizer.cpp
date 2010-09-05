@@ -332,7 +332,7 @@ namespace RCP
 		xmin = fastCeil(pri.vertex[offset].pos.x);
 		xmax = fastCeil(pri.vertex[offset + 1].pos.x);
 		ymin = std::max<unsigned int>(fastCeil(pri.vertex[0].pos.y),pri.vp->y);
-		ymax = std::min<unsigned int>(fastCeil(pri.vertex[2].pos.y),pri.vp->height);
+		ymax = std::min<unsigned int>(fastCeil(pri.vertex[2].pos.y),pri.vp->y + pri.vp->height);
 
 		assert(xmin <= xmax);
 		assert(ymin <= ymax);
