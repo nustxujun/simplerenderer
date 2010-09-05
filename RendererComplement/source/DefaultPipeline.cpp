@@ -371,7 +371,7 @@ namespace RCP
 		if (result > 0)
 			return cm == CM_CCW ;
 		else
-			return cm == CM_CCW;
+			return cm != CM_CCW;
 		
 	}
 
