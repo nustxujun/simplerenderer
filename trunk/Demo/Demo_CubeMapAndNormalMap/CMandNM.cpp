@@ -71,34 +71,7 @@ void App::init(Renderer& renderer, const AppParam& param)
 	Vector3 vLookDir,vUpDir;
 	for (int face = 0; face < 6; ++face)
 	{
-		switch( face )
-		{
-		case 0:
-			vLookDir = Vector3( 1.0f, 0.0f, 0.0f );
-			vUpDir   = Vector3( 0.0f, 1.0f, 0.0f );
-			break;
-		case 1:
-			vLookDir = Vector3(-1.0f, 0.0f, 0.0f );
-			vUpDir   = Vector3( 0.0f, 1.0f, 0.0f );
-			break;
-		case 2:
-			vLookDir = Vector3( 0.0f, 1.0f, 0.0f );
-			vUpDir   = Vector3( 0.0f, 0.0f,-1.0f );
-			break;
-		case 3:
-			vLookDir = Vector3( 0.0f,-1.0f, 0.0f );
-			vUpDir   = Vector3( 0.0f, 0.0f, 1.0f );
-			break;
-		case 4:
-			vLookDir = Vector3( 0.0f, 0.0f, 1.0f );
-			vUpDir   = Vector3( 0.0f, 1.0f, 0.0f );
-			break;
-		case 5:
-			vLookDir = Vector3( 0.0f, 0.0f,-1.0f );
-			vUpDir   = Vector3( 0.0f, 1.0f, 0.0f );
-			break;
-		}
-		MatrixUtil::getViewSpace(mOrinViewMatrix[face],vEyePt,vLookDir,vUpDir);
+		MatrixUtil::getCubeMapViewMatrix(mOrinViewMatrix[face], face);
 	}
 
 
@@ -110,7 +83,7 @@ void App::init(Renderer& renderer, const AppParam& param)
 	l.position = Vector3(3,3,-3);
 	renderer.setLight(0,l);
 
-	mCameraPos = Vector3(0,0,3);
+	mCameraPos = Vector3(3,3,3);
 	mLightPos = Vector3(3,3,-3);
 
 	Matrix4X4 view, projection,world,lightView;
@@ -122,16 +95,47 @@ void App::init(Renderer& renderer, const AppParam& param)
 	renderer.setMatrix(TS_WORLD,world);
 
 
-	Texture* tex = TextureUtil::loadTextureFromFile(&renderer,"test.bmp",0,PF_A8R8G8B8);
-	RenderTarget* rt = tex->getRenderTarget(0);
+	//Texture* tex = TextureUtil::loadTextureFromFile(&renderer,"tex1.bmp",0,PF_A8R8G8B8);
+	//RenderTarget* rt = tex->getRenderTarget(0);
 
-	for (int i = 4; i < 6; ++i)
-	{
-		void *data = mCubeMap->getRenderTarget(0,i)->getData();
-		memcpy(data,rt->getData(),rt->getSizeInBytes());
+	//for (int i = 0; i < 6; ++i)
+	//{
+	//	void *data = mCubeMap->getRenderTarget(0,i)->getData();
+	//	memcpy(data,rt->getData(),rt->getSizeInBytes());
 
-	}
+	//}
 
+	//RenderTarget* rt = NULL;
+	//int i = 0;
+	//int c = 0;
+
+	//rt = mCubeMap->getRenderTarget(0,i++);
+	//c = 0xffff0000;
+	//for (int j = 0; j < 256 * 256; ++j)
+	//	rt->write(&c,4);
+
+	//rt = mCubeMap->getRenderTarget(0,i++);
+	//c = 0xff00ff00;
+	//for (int j = 0; j < 256 * 256; ++j)
+	//	rt->write(&c,4);
+
+	//rt = mCubeMap->getRenderTarget(0,i++);
+	//c = 0xff0000ff;
+	//for (int j = 0; j < 256 * 256; ++j)
+	//	rt->write(&c,4);
+
+	//rt = mCubeMap->getRenderTarget(0,i++);
+	//c = 0xffffff00;
+	//for (int j = 0; j < 256 * 256; ++j)
+	//	rt->write(&c,4);
+
+	//rt = mCubeMap->getRenderTarget(0,i++);
+	//c = 0xffff00ff;
+	//for (int j = 0; j < 256 * 256; ++j)
+	//	rt->write(&c,4);
+	
+
+	
 }
 
 void App::destroy(Renderer& renderer, const AppParam& param)
@@ -144,35 +148,41 @@ void App::destroy(Renderer& renderer, const AppParam& param)
 void App::renderObject(Renderer& renderer)
 {
 	
-		renderer.clearColour(1.0f);
+		renderer.clearColour(0.5f);
 		renderer.clearDepth(1.0f);
 
 	Material mat;
+	Matrix4X4 world;
 	mat.diffuse.getFromARGB(0xffffffff);
 	mat.specular.getFromARGB(0xffffffff);
 	mat.power = 50;
 	mat.ambient.getFromARGB(0xff030303);
 	renderer.setMaterial(mat);
-
+	renderer.setMatrix(TS_WORLD,world);
 	renderer.setVertexBuffer(mPlaneVB);
 	renderer.draw(PT_TRIANGLESTRIP,0,2 );
 
-	//renderer.setMaterial(mat);
-	//renderer.setIndexBuffer(mIB);
-	//renderer.setVertexBuffer(mVB);
-	//renderer.draw(PT_TRIANGLESTRIP,0,mIB->getIndexCount() / 3 );
+
+	
+	world.m[0][3] = -1.5;
+	world.m[2][3] = 2;
+	renderer.setMatrix(TS_WORLD,world);
+	renderer.setMaterial(mat);
+	renderer.setIndexBuffer(mIB);
+	renderer.setVertexBuffer(mVB);
+	renderer.draw(PT_TRIANGLESTRIP,0,mIB->getIndexCount() / 3 );
 }
 
 void App::renderCubeMap(Renderer& renderer)
 {
 	Matrix4X4 projection;
 	MatrixUtil::getPerspectiveProjectionSpace(projection,3.14159265 * 0.5f,1,0.1,10);
-
+	renderer.setMatrix(TS_PROJECTION,projection);
 	Matrix4X4 viewDir = mView;
 	viewDir.m[0][3] = viewDir.m[1][3] = viewDir.m[2][3] = 0.0f;
 
 	
-	RenderTarget* backbuffer = renderer.getRenderTarget(0);
+	RenderTarget* backbuffer = renderer.getBackBuffer();
 
 	RenderTarget* rt;
 	Matrix4X4 view;
@@ -180,7 +190,8 @@ void App::renderCubeMap(Renderer& renderer)
 	{
 		rt = mCubeMap->getRenderTarget(0,i);
 		renderer.setRenderTarget(0,rt);
-		view = viewDir * mOrinViewMatrix[i];
+		view =  mOrinViewMatrix[i] * viewDir ;
+		renderer.setMatrix(TS_VIEW,view);
 		renderObject(renderer);
 		
 	}
@@ -191,17 +202,24 @@ void App::renderCubeMap(Renderer& renderer)
 void App::renderOneFrame(Renderer& renderer, const AppParam& param) 
 {
 
-	//renderCubeMap(renderer);
+	renderer.setTexture(0,NULL);
+	renderCubeMap(renderer);
 
-	//renderObject(renderer);
+	renderer.setMatrix(TS_VIEW,mView);
+	renderer.setMatrix(TS_PROJECTION,mProjection);	
+	renderObject(renderer);
 
-		renderer.clearColour(1.0f);
-		renderer.clearDepth(1.0f);
+		//renderer.clearColour(1.0f);
+		//renderer.clearDepth(1.0f);
 	renderer.setProperty("VertexShader",(VertexShader*)&mVS);
 	renderer.setProperty("PixelShader",(PixelShader*)&mPS);
 	renderer.setProperty("Matrix1",mView);
 	renderer.setProperty("Matrix2",mProjection);
 	renderer.setTexture(0,mCubeMap);
+	TextureState ts;
+	ts.addresingModeU = TAM_MIRROR;
+	ts.addresingModeV = TAM_MIRROR;
+	renderer.setTextureState(0,ts);
 	renderer.setIndexBuffer(mIB);
 	renderer.setVertexBuffer(mVB);
 	renderer.draw(PT_TRIANGLESTRIP,0,mIB->getIndexCount() / 3 );
