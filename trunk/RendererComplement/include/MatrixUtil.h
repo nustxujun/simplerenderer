@@ -10,6 +10,7 @@ namespace RCP
 	public :
 		static void getViewSpace(Matrix4X4& output,const Vector3&  eye, const Vector3& at, const Vector3& up);
 		static void getPerspectiveProjectionSpace(Matrix4X4& output, float fov, float aspect, float near, float far);
+		static void getCubeMapViewMatrix(Matrix4X4& output, unsigned int face);
 	};
 }
 #endif//_MatrixUtil_H_
