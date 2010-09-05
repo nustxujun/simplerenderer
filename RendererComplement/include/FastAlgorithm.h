@@ -35,10 +35,15 @@ namespace RCP
 
 	inline unsigned int fastCeil(float val)
 	{
-		return (unsigned int)ceil(val);
+		float f = floor(val);
+		//0.01f的精度控制。避免过小小数部分而导致进位。现象是，会出现奇怪的底色杂点
+		if (val > f + 0.01f)
+			return (unsigned int)f + 1;
+		else 
+			return (unsigned int)f;
 	}
 
-	inline unsigned int floor(float val)
+	inline unsigned int fastFloor(float val)
 	{
 		return (unsigned int )val;
 	}
