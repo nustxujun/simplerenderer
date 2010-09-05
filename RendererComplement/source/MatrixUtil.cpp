@@ -62,6 +62,40 @@ namespace RCP
 		output.m[2][3] = 2 * far * near / (near - far);
 		output.m[3][2] = -1;
 
+	}
 
+	void MatrixUtil::getCubeMapViewMatrix(Matrix4X4& output, unsigned int face)
+	{
+		Vector3 vEyePt   = Vector3( 0.0f, 0.0f, 0.0f );
+		Vector3 vLookDir,vUpDir;
+
+		switch( face )
+		{
+		case 0:
+			vLookDir = Vector3( 1.0f, 0.0f, 0.0f );
+			vUpDir   = Vector3( 0.0f, 1.0f, 0.0f );
+			break;
+		case 1:
+			vLookDir = Vector3(-1.0f, 0.0f, 0.0f );
+			vUpDir   = Vector3( 0.0f, 1.0f, 0.0f );
+			break;
+		case 2:
+			vLookDir = Vector3( 0.0f, 1.0f, 0.0f );
+			vUpDir   = Vector3( 0.0f, 0.0f,-1.0f );
+			break;
+		case 3:
+			vLookDir = Vector3( 0.0f,-1.0f, 0.0f );
+			vUpDir   = Vector3( 0.0f, 0.0f, 1.0f );
+			break;
+		case 4:
+			vLookDir = Vector3( 0.0f, 0.0f, 1.0f );
+			vUpDir   = Vector3( 0.0f, 1.0f, 0.0f );
+			break;
+		case 5:
+			vLookDir = Vector3( 0.0f, 0.0f,-1.0f );
+			vUpDir   = Vector3( 0.0f, 1.0f, 0.0f );
+			break;
+		}
+		MatrixUtil::getViewSpace(output,vEyePt,vLookDir,vUpDir);
 	}
 }
