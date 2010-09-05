@@ -161,13 +161,13 @@ namespace RCP
 			m = ax;
 			if(x > 0){
 				//+x
-				s = 0.5f * (-z / m + 1.0f);
+				s = 0.5f * (z / m + 1.0f);
 				t = 0.5f * (-y / m + 1.0f);
 				face = 0;
 			} else {
 				//-x
 
-				s = 0.5f * (z / m + 1.0f);
+				s = 0.5f * (-z / m + 1.0f);
 				t = 0.5f * (-y / m + 1.0f);
 				face = 1;
 			}
@@ -177,11 +177,11 @@ namespace RCP
 				m = ay;
 				if(y > 0){
 					//+y
-					s =0.5f * (x / m + 1.0f);
+					s =0.5f * (-x / m + 1.0f);
 					t = 0.5f * (z / m + 1.0f);
 					face = 2;
 				} else {
-					s = 0.5f * (x / m + 1.0f);
+					s = 0.5f * (-x / m + 1.0f);
 					t = 0.5f * (-z / m + 1.0f);
 					face = 3;
 				}
@@ -189,11 +189,11 @@ namespace RCP
 				m = az;
 				if(z > 0){
 					//+z
-					s = 0.5f * (x / m + 1.0f);
+					s = 0.5f * (-x / m + 1.0f);
 					t = 0.5f * (-y / m + 1.0f);
 					face = 4;
 				} else {
-					s = 0.5f * (-x / m + 1.0f);
+					s = 0.5f * (x / m + 1.0f);
 					t = 0.5f * (-y / m + 1.0f);
 					face = 5;
 				}
