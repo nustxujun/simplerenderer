@@ -74,17 +74,18 @@ void App::init(Renderer& renderer, const AppParam& param)
 		MatrixUtil::getCubeMapViewMatrix(mOrinViewMatrix[face], face);
 	}
 
+	mCameraPos = Vector3(3,3,3);
+	mLightPos = Vector3(3,3,-3);
+
+
 
 	//ÉèÖÃµÆ¹â
 	Light l;
 	l.diffuse.getFromARGB(0xffffffff);
 	l.ambient.getFromARGB(0xffffffff);
 	l.specular.getFromARGB(0xffffffff);
-	l.position = Vector3(3,3,-3);
+	l.position = mLightPos;
 	renderer.setLight(0,l);
-
-	mCameraPos = Vector3(3,3,3);
-	mLightPos = Vector3(3,3,-3);
 
 	Matrix4X4 view, projection,world,lightView;
 	MatrixUtil::getViewSpace(mView,mCameraPos,Vector3(0,0,0),Vector3(0,1,0));
@@ -148,14 +149,14 @@ void App::destroy(Renderer& renderer, const AppParam& param)
 void App::renderObject(Renderer& renderer)
 {
 	
-		renderer.clearColour(0.5f);
+		renderer.clearColour(1.0f);
 		renderer.clearDepth(1.0f);
 
 	Material mat;
 	Matrix4X4 world;
 	mat.diffuse.getFromARGB(0xffffffff);
 	mat.specular.getFromARGB(0xffffffff);
-	mat.power = 50;
+	mat.power = 200;
 	mat.ambient.getFromARGB(0xff030303);
 	renderer.setMaterial(mat);
 	renderer.setMatrix(TS_WORLD,world);
@@ -215,11 +216,9 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 	renderer.setProperty("PixelShader",(PixelShader*)&mPS);
 	renderer.setProperty("Matrix1",mView);
 	renderer.setProperty("Matrix2",mProjection);
+	renderer.setProperty("Vector0",Vector4(mCameraPos,1));
+	renderer.setProperty("Vector1",Vector4(mLightPos,1));
 	renderer.setTexture(0,mCubeMap);
-	TextureState ts;
-	ts.addresingModeU = TAM_MIRROR;
-	ts.addresingModeV = TAM_MIRROR;
-	renderer.setTextureState(0,ts);
 	renderer.setIndexBuffer(mIB);
 	renderer.setVertexBuffer(mVB);
 	renderer.draw(PT_TRIANGLESTRIP,0,mIB->getIndexCount() / 3 );
