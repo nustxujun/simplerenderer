@@ -50,7 +50,7 @@ void App::destroy(Renderer& renderer, const AppParam& param)
 {}
 void App::renderOneFrame(Renderer& renderer, const AppParam& param) 
 {
-		renderer.clearColour(Colour(1,1,1));
+		renderer.clearColour(Colour(0,0,0));
 		renderer.clearDepth(1.0f);
 		Matrix4X4 world;
 		static float i = 0;
@@ -61,7 +61,7 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 		renderer.setMatrix(RCP::TS_WORLD,world);
 
 
-		renderer.clearColour(Colour(1));
+	
 		renderer.setVertexBuffer(mVB);
 		renderer.draw(PT_TRIANGLESTRIP,0,2);
 }

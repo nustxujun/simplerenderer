@@ -65,7 +65,7 @@ void App::init(Renderer& renderer, const AppParam& param)
 	mPlaneVB->fill(0,6,vertexData);
 
 	//´´½¨sm
-	RenderTarget* bb = renderer.getRenderTarget(0);
+	RenderTarget* bb = renderer.getBackBuffer();
 	mShadowMap = renderer.createTexture(bb->getWidth(),bb->getHeight(),0,TT_2D,PF_A8R8G8B8);
 
 
@@ -144,7 +144,7 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 	mPS.lightPos = mLightPos;
 
 
-	RenderTarget* backBuffer = renderer.getRenderTarget(0);
+	RenderTarget* backBuffer = renderer.getBackBuffer();
 
 	renderer.setRenderTarget(0,mShadowMap->getRenderTarget(0));
 	union Value
