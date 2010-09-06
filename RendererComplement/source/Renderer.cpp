@@ -149,7 +149,6 @@ namespace RCP
 	void Renderer::setTexture(unsigned int index,Texture* tex)
 	{
 		assert(index < 8);
-		assert(tex);
 		mCommandLine.pushCommand(SETTEXTURE,index,tex);
 	}
 
