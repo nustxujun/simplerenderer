@@ -28,6 +28,8 @@ namespace RCP
 	{
 		Vector4 pos;
 		Vector3 norm;
+		Vector3 tan;
+		Vector3 bino;
 		//透视除法后，这里将保存 color/w specular/w texCrood/w;
 		Array<Colour,8> color;
 		Colour specular;
@@ -41,6 +43,8 @@ namespace RCP
 			result.pos = pos - vert.pos;
 			result.norm = norm - vert.norm;
 			result.specular = specular - vert.specular;
+			result.tan = tan - vert.tan;
+			result.bino = tan - vert.bino;
 			for (int i = 0; i < 8; ++i)
 			{
 				if (color.isUsed(i) || vert.color.isUsed(i))
@@ -56,6 +60,8 @@ namespace RCP
 			pos *= f;
 			norm *= f;
 			specular *= f;
+			tan *= f;
+			bino*= f;
 			for (int i = 0; i < 8; ++i)
 			{
 				if (color.isUsed(i))
@@ -71,6 +77,8 @@ namespace RCP
 			result.pos = pos * f;
 			result.norm = norm * f;
 			result.specular = specular * f;
+			result.tan = tan * f;
+			result.bino = bino * f;
 			for (int i = 0; i < 8; ++i)
 			{
 				if (color.isUsed(i))
@@ -86,6 +94,8 @@ namespace RCP
 			pos += vert.pos;
 			norm += vert.norm;
 			specular += vert.specular;
+			tan += vert.tan;
+			bino += vert.bino;
 			for (int i = 0; i < 8; ++i)
 			{
 				
@@ -96,10 +106,6 @@ namespace RCP
 			}
 			return *this;
 		}
-
-
-
-
 	};
 
 	struct Pixel
