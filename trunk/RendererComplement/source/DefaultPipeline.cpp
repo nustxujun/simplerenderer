@@ -56,6 +56,8 @@ namespace RCP
 		unsigned int diffuseDataOffset = verDecl.getElementOffsetInBytes(VES_DIFFUSE);
 		unsigned int specularDataOffset = verDecl.getElementOffsetInBytes(VES_SPECULAR);
 		unsigned int normalDataOffset = verDecl.getElementOffsetInBytes(VES_NORMAL);
+		unsigned int tangentDataOffset = verDecl.getElementOffsetInBytes(VES_TANGENT);
+		unsigned int binormalDataOffset = verDecl.getElementOffsetInBytes(VES_BINORMAL);
 		unsigned int texCroodDataOffset[8];
 		for (unsigned char i = 0; i < 8; ++i)
 		{
@@ -169,6 +171,18 @@ namespace RCP
 					//elem.sampler[k].assignUV(verVec[i].texCrood[k].x,verVec[i].texCrood[k].y);					
 				}
 			}
+
+			//切线
+			if (tangentDataOffset != -1)
+			{
+				mDataCollector.getData(verVec[i].tan,vertexData + tangentDataOffset);			
+			}
+			//次法线
+			if (binormalDataOffset != -1)
+			{
+				mDataCollector.getData(verVec[i].bino,vertexData + binormalDataOffset);			
+			}
+
 
 			//以上为数据采集
 			if (mVertexShader != NULL)
@@ -449,27 +463,20 @@ namespace RCP
 		vp->mapping(pos);
 	}
 
-
-
-
-	template<class T>
-	void DefaultPipeline::Interpolate(T& result, const T& vec1, const T& vec2, float scale)
-	{
-		result = (vec2 - vec1) * scale + vec1;
-	}
-
 	void DefaultPipeline::generateNewVertex(Vertex& newVertex,const Vertex& vert1, const Vertex& vert2, float dist1, float dist2)
 	{
 		float scale = (0 - dist1) / (dist2 - dist1);
-		Interpolate(newVertex.specular,vert1.specular,vert2.specular,scale);
-		Interpolate(newVertex.norm,vert1.norm,vert2.norm,scale);
-		Interpolate(newVertex.pos,vert1.pos,vert2.pos,scale);
+		lerp(newVertex.specular,scale,vert1.specular,vert2.specular);
+		lerp(newVertex.norm,scale,vert1.norm,vert2.norm);
+		lerp(newVertex.tan,scale,vert1.tan,vert2.tan);
+		lerp(newVertex.bino,scale,vert1.bino,vert2.bino);
+		lerp(newVertex.pos,scale,vert1.pos,vert2.pos);
 		for (unsigned int i = 0 ; i < 8; ++i)
 		{
 			if (vert1.texCrood.isUsed(i) || vert2.texCrood.isUsed(i))
-				Interpolate(newVertex.texCrood[i],vert1.texCrood[i],vert2.texCrood[i],scale);
+				lerp(newVertex.texCrood[i],scale,vert1.texCrood[i],vert2.texCrood[i]);
 			if (vert1.color.isUsed(i) || vert2.color.isUsed(i))
-				Interpolate(newVertex.color[i],vert1.color[i],vert2.color[i],scale);
+				lerp(newVertex.color[i],scale,vert1.color[i],vert2.color[i]);
 
 		}
 	}

@@ -96,6 +96,8 @@ namespace RCP
 			lerp(newVertex.pos,ratio,resultPri.vertex[0].pos,resultPri.vertex[2].pos);
 			newVertex.pos.y = resultPri.vertex[1].pos.y;
 			lerp(newVertex.norm,ratio,resultPri.vertex[0].norm,resultPri.vertex[2].norm);
+			lerp(newVertex.tan,ratio,resultPri.vertex[0].tan,resultPri.vertex[2].tan);
+			lerp(newVertex.bino,ratio,resultPri.vertex[0].bino,resultPri.vertex[2].bino);
 			lerp(newVertex.specular,ratio,resultPri.vertex[0].specular,resultPri.vertex[2].specular);
 			for (unsigned int i = 0; i < 8 ; ++i)
 			{
