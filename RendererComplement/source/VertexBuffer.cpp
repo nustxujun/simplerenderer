@@ -154,4 +154,16 @@ namespace RCP
 		return -1;
 	}
 
+	bool VertexDeclaration::hasElement(VertexElementSemantic semantic,unsigned int index)const
+	{
+		VertexElementList::const_iterator i,endi = mVertexElementList.end();
+		for (i = mVertexElementList.begin(); i != endi; ++i)
+		{
+			if (i->semantic == semantic && (index == -1 || i->index == index))
+				return true;
+			
+		}
+		return false;
+	}
+
 }

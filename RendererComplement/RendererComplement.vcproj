@@ -295,6 +295,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\source\DataCollector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DataCollector.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\Exception.h"
 				>
 			</File>
@@ -371,6 +379,14 @@
 				</File>
 				<File
 					RelativePath=".\include\PixelUtil.h"
+					>
+				</File>
+				<File
+					RelativePath=".\source\TangentUtil.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\TangentUtil.h"
 					>
 				</File>
 				<File

@@ -34,6 +34,7 @@ namespace RCP
 		unsigned int getTypeSize(VertexElementType type) const;
 		unsigned int getElementOffsetInBytes(VertexElementSemantic semantic, unsigned int index = 0)const;
 		unsigned int getElementSizeInBytes(VertexElementSemantic semantic, unsigned int index = 0)const;
+		bool hasElement(VertexElementSemantic semantic, unsigned int index = -1)const;
 	private:
 		unsigned int mSize;
 		typedef std::list<VertexElement> VertexElementList;

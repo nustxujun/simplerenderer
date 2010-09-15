@@ -4,6 +4,7 @@
 #include "Pipeline.h"
 #include "Rasterizer.h"
 #include "PipelinePlus.h"
+#include "DataCollector.h"
 
 namespace RCP
 {
