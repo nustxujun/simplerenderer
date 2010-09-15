@@ -16,6 +16,7 @@
 #include "Texture.h"
 #include "TextureUtil.h"
 #include "VertexBuffer.h"
+#include "TangentUtil.h"
 
 
 
