@@ -43,8 +43,11 @@ namespace RCP
 				if (used != 0)
 				{
 					normal /= used;
+					normal.normalise();
 					tangent /= used;
-					tangent /= used;
+					tangent.normalise();
+					binormal /= used;
+					binormal.normalise();
 				}
 			}
 		};
