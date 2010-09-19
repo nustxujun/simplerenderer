@@ -1,6 +1,8 @@
 #include "QuickStart.h"
 #include "RendererHeader.h" 
 #include "GDIPainting.h"
+#include "PerformanceTester.h"
+#include <sstream>
 using namespace RCP;
 
 QSApplication* QSApplication::mSingleton = NULL;
@@ -31,9 +33,20 @@ void QSApplication::begin()
 	createWindow();
 	initGDI();
 	initRenderer();
-
-
 	init(*mRenderer,mAppParam);
+
+	new PerformanceTester();
+}
+
+void QSApplication::shutdown()
+{
+	destroy(*mRenderer,mAppParam);
+	mRenderer->release();
+	delete mRenderer;
+	delete mGdiPainting;
+	Gdiplus::GdiplusShutdown(mGdiplusToken);
+
+	delete PerformanceTester::getSingletonPtr();
 }
 
 void QSApplication::initRenderer()
@@ -154,6 +167,11 @@ void QSApplication::mainLoop()
 	MSG msg;
 	RECT rect;
 	ZeroMemory( &msg, sizeof(msg) );
+	bool switcher = false;
+
+	PerformanceTester::getSingletonPtr()->addItem("OneFrame");
+	PerformanceTester::getSingletonPtr()->addItem("OneFrameLogic");
+	PerformanceTester::getSingletonPtr()->addItem("OneFrameRendering");
 	while (msg.message!=WM_QUIT && mRunning/*GetMessage(&msg, NULL, 0, 0)*/)
 	{
 		if( PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
@@ -162,11 +180,22 @@ void QSApplication::mainLoop()
 			//render();
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+			if (switcher)
+			{
+				const PerformanceTester::Result& result = PerformanceTester::getSingletonPtr()->end();
+				std::ostringstream io;
+				io << "max:" << result.maxValue <<" min:"<<result.minValue<<" avarage:"<<result.average;
+				SetWindowText(mHWnd,io.str().c_str());
+				switcher = false;
+			}
 		}
 		else 
 		{
+			switcher = true;
+			PerformanceTester::getSingletonPtr()->begin("OneFrame");
+			PerformanceTester::getSingletonPtr()->begin("OneFrameLogic");
 			renderOneFrame(*mRenderer,mAppParam);
-			
+			PerformanceTester::getSingletonPtr()->end();
 			rect.bottom = mAppParam.height;
 			rect.left = 0;
 			rect.right = mAppParam.width;
@@ -176,14 +205,6 @@ void QSApplication::mainLoop()
 	}
 }
 
-void QSApplication::shutdown()
-{
-	destroy(*mRenderer,mAppParam);
-	mRenderer->release();
-	delete mRenderer;
-	delete mGdiPainting;
-	Gdiplus::GdiplusShutdown(mGdiplusToken);
-}
 
 LRESULT CALLBACK QSApplication::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -199,7 +220,9 @@ LRESULT CALLBACK QSApplication::WndProc(HWND hWnd, UINT message, WPARAM wParam, 
 		// TODO: Add any drawing code here...
 		if (app->mRunning && app->mRenderer->isInitialized())
 		{
+			PerformanceTester::getSingletonPtr()->begin("OneFrameRendering");
 			app->mRenderer->renderNow();
+			PerformanceTester::getSingletonPtr()->end();
 		}
 		EndPaint(hWnd, &ps);
 		break;
