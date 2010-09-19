@@ -148,6 +148,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\PerformanceTester.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\PerformanceTester.h"
+			>
+		</File>
+		<File
 			RelativePath=".\QuickStart.cpp"
 			>
 		</File>
