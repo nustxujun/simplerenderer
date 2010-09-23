@@ -26,9 +26,9 @@ public :
 		mhdc = hdc;
 		mBitmap = new Bitmap(w,h,PixelFormat32bppRGB);
 	}
-	virtual void paint(const BackBuffer* backbuffer) 
+	virtual void paint(const RenderTarget* renderTarget) 
 	{
-		RenderTarget* rt = backbuffer->getRenderTarget();
+		const RenderTarget* rt = renderTarget;
 		size_t w = rt->getWidth();
 		size_t h = rt->getHeight();
 		//rt->seek(0);

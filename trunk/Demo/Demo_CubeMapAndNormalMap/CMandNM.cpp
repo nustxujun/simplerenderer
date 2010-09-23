@@ -141,9 +141,9 @@ void App::init(Renderer& renderer, const AppParam& param)
 
 void App::destroy(Renderer& renderer, const AppParam& param)
 {
-	mVB->Release();
-	mIB->Release();
-	mPlaneVB->Release();
+	mVB->release();
+	mIB->release();
+	mPlaneVB->release();
 }
 
 void App::renderObject(Renderer& renderer)
