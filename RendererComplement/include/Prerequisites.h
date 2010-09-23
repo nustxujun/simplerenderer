@@ -35,7 +35,6 @@
 namespace RCP
 {
 	class Any;
-	class BackBuffer;
 	class Colour;
 	class CommandLine;
 	class FrameBuffer;
@@ -53,6 +52,7 @@ namespace RCP
 	class ResourceManager;
 	class Sampler;
 	class SharedPtr;
+	class SwapChain;
 	class Texture;
 	class TextureManager;
 	class Vector3;

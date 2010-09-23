@@ -11,7 +11,7 @@ namespace RCP
 	public :
 		Resource(ResourceManager* mgr);
 		virtual ~Resource();
-		void Release();
+		void release();
 		void initialize();
 		virtual void initImpl() = 0;
 		bool isInitialized()const;

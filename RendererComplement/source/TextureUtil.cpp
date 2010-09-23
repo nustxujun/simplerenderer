@@ -81,7 +81,7 @@ namespace RCP
 		h = height;
 		unsigned int elemBytes = PixelUtil::getNumElemBytes(pf);
 		unsigned int wSize = w * elemBytes;
-		for (unsigned int i = 0; i < mipLevels; ++i)
+		for (unsigned int i = 0; i < 1/*mipLevels*//*目前不支持自动生成mipmap*/; ++i)
 		{
 			rt = tex->getRenderTarget(i);
 			for (int h = height - 1; h >= 0; --h)

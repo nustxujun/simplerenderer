@@ -8,7 +8,7 @@ namespace RCP
 	public:
 		virtual ~PaintingMethod(){}
 
-		virtual void paint(const BackBuffer* backbuffer) = 0;
+		virtual void paint(const RenderTarget* renderTarget) = 0;
 	};
 }
 #endif//_PaintingMethod_H_

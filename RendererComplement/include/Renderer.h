@@ -97,8 +97,8 @@ namespace RCP
 		Pipeline* mPipeline;
 		//默认渲染流水线
 		Pipeline* mDefaultPipeline;
-		//后备缓冲
-		BackBuffer* mBackBuffer;
+		//交换链（直译？）
+		SwapChain* mSwapChain;
 		//顶点管理器
 		VertexBufferManager* mVertexBufferManager; 
 		//索引管理器

@@ -13,10 +13,11 @@ namespace RCP
 		RenderTarget(unsigned int width, unsigned int height, unsigned int colourDepth);
 		virtual ~RenderTarget();
 		
-		unsigned int getWidth();
-		unsigned int getHeight();
-		unsigned int getColourDepth();
+		unsigned int getWidth()const;
+		unsigned int getHeight()const;
+		unsigned int getColourDepth()const;
 
+		void swap(RenderTarget& rt);
 	private:
 		unsigned int mWidth;
 		unsigned int mHeight;

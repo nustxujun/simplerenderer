@@ -24,12 +24,13 @@ namespace RCP
 		void seek(size_t pos); 
 		size_t tell()const ;
 		bool eof()const;
-		unsigned char* getData();
+		unsigned char* getData()const;
 		size_t getSizeInBytes()const;
 
 		void setAutoFree(bool enable);
 		bool isAutoFree();
 
+		void swap(MemoryBuffer& mem);
 	protected:
 		unsigned char* mData;
 		unsigned char* mPos;
