@@ -65,8 +65,9 @@ void App::init(Renderer& renderer, const AppParam& param)
 	mPlaneVB->fill(0,6,vertexData);
 
 	//创建sm
-	RenderTarget* bb = renderer.getBackBuffer();
-	mShadowMap = renderer.createTexture(bb->getWidth(),bb->getHeight(),0,TT_2D,PF_A8R8G8B8);
+	const RenderTarget* bb = renderer.getBackBuffer();
+	mShadowMap = renderer.createTexture(bb->getWidth(),
+		bb->getHeight(),0,TT_2D,PF_A8R8G8B8);
 
 
 	//设置灯光
@@ -109,10 +110,10 @@ void App::init(Renderer& renderer, const AppParam& param)
 
 void App::destroy(Renderer& renderer, const AppParam& param)
 {
-	mVB->Release();
-	mIB->Release();
-	mShadowMap->Release();
-	mPlaneVB->Release();
+	mVB->release();
+	mIB->release();
+	mShadowMap->release();
+	mPlaneVB->release();
 }
 void App::renderOneFrame(Renderer& renderer, const AppParam& param) 
 {
