@@ -171,9 +171,12 @@ namespace RCP
 				t = 0.5f * (-y / m + 1.0f);
 				face = 1;
 			}
-		} else {
+		} 
+		else 
+		{
 
-			if(ay > ax && ay > az){
+			if(ay > ax && ay > az)
+			{
 				m = ay;
 				if(y > 0){
 					//+y
@@ -185,8 +188,11 @@ namespace RCP
 					t = 0.5f * (-z / m + 1.0f);
 					face = 3;
 				}
-			} else {
+			} 
+			else 
+			{
 				m = az;
+				assert(az > 0.0f);
 				if(z > 0){
 					//+z
 					s = 0.5f * (-x / m + 1.0f);

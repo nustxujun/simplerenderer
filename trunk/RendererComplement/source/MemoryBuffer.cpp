@@ -7,8 +7,7 @@ namespace RCP
 	{
 		if (mAutoFree)
 		{
-			assert(mData);
-			delete mData;
+			SAFE_DELETE(mData);
 		}
 	}
 
@@ -70,7 +69,7 @@ namespace RCP
 		return mPos >= mEnd;
 	}
 
-	unsigned char* MemoryBuffer::getData()
+	unsigned char* MemoryBuffer::getData()const
 	{
 		return mData;
 	}
@@ -88,6 +87,15 @@ namespace RCP
 	bool MemoryBuffer::isAutoFree()
 	{
 		return mAutoFree;
+	}
+
+	void MemoryBuffer::swap(MemoryBuffer& mem)
+	{
+		std::swap(mData,mem.mData);
+		std::swap(mPos,mem.mPos);
+		std::swap(mEnd,mem.mEnd);
+		std::swap(mSize,mem.mSize);
+		std::swap(mAutoFree,mem.mAutoFree);
 	}
 
 

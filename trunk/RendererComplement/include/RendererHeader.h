@@ -5,7 +5,6 @@
 	使用Renderer的基本头文件，所有向外提供的共能都放在这里
 */
 
-#include "BackBuffer.h"
 #include "IndexBuffer.h"
 #include "Light.h"
 #include "MatrixUtil.h"

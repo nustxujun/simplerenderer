@@ -12,7 +12,7 @@ namespace RCP
 	{
 	}
 
-	void Resource::Release()
+	void Resource::release()
 	{
 		mManager->destroy(this);
 	}

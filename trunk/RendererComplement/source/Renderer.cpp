@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "DefaultPipeline.h"
-#include "BackBuffer.h"
+#include "SwapChain.h"
 #include "PaintingMethod.h"
 #include "VertexBufferManager.h"
 #include "IndexBufferManager.h"
@@ -38,15 +38,15 @@ namespace RCP
 		mTextureManager = new TextureManager();
 
 		//backbuffer
-		mBackBuffer = new BackBuffer();
-		mBackBuffer->initialize(rp.backBufferWidth,rp.backBufferHeight,rp.backBufferPixelFormat);
+		mSwapChain = new SwapChain();
+		mSwapChain->initialize(rp.backBufferWidth,rp.backBufferHeight,rp.backBufferPixelFormat,2);
 
 		//assistantbuffer
 		mRenderParameter.assistantBuffer[0] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
 		mRenderParameter.assistantBuffer[1] = new RenderTarget(rp.backBufferWidth,rp.backBufferHeight,4);
 		mRenderParameter.frameBuffer = new FrameBuffer(rp.backBufferWidth,rp.backBufferHeight);
 		//设置好FrameBuffer
-		mRenderParameter.frameBuffer->setBuffer(BT_COLOUR,mBackBuffer->getRenderTarget());
+		mRenderParameter.frameBuffer->setBuffer(BT_COLOUR,mSwapChain->getBackBuffer());
 		mRenderParameter.frameBuffer->setBuffer(BT_DEPTH,mRenderParameter.assistantBuffer[0]);
 		mRenderParameter.frameBuffer->setBuffer(BT_STENCIL,mRenderParameter.assistantBuffer[1]);
 
@@ -96,7 +96,7 @@ namespace RCP
 	void Renderer::release()
 	{
 		SAFE_DELETE(mDefaultPipeline);
-		SAFE_DELETE(mBackBuffer);
+		SAFE_DELETE(mSwapChain);
 		SAFE_DELETE(mVertexBufferManager);
 		SAFE_DELETE(mIndexBufferManager);
 		SAFE_DELETE(mTextureManager);
@@ -116,7 +116,9 @@ namespace RCP
 		
 
 		//绘制道屏幕
-		mPaitingMethod->paint(mBackBuffer);
+		mPaitingMethod->paint(mSwapChain->getFrontBuffer());
+
+		mSwapChain->swap();
 	}
 
 	bool Renderer::isInitialized()
@@ -240,7 +242,7 @@ namespace RCP
 
 	RenderTarget* Renderer::getBackBuffer()
 	{
-		return mBackBuffer->getRenderTarget();
+		return mSwapChain->getBackBuffer();
 	}
 
 	void Renderer::initAssert()
