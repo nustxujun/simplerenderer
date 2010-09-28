@@ -74,6 +74,9 @@ namespace RCP
 
 		unsigned char* vertex = new unsigned char[newVertexSize];
 		unsigned char* r = new unsigned char[4 * 3 * 3];
+		unsigned int normDataOffset = newVD.getElementOffsetInBytes(VES_NORMAL);
+		unsigned int tanDataOffset = newVD.getElementOffsetInBytes(VES_TANGENT);
+		unsigned int binoDataOffset = newVD.getElementOffsetInBytes(VES_BINORMAL);
 		for (unsigned int i = 0; i < vb->getVertexCount(); ++i)
 		{
 			//copy¾ÉÊý¾Ý
@@ -92,24 +95,23 @@ namespace RCP
 			((float*)r)[7] =  vertexList[i].binormal.y;
 			((float*)r)[8] =  vertexList[i].binormal.z;
 
-			int counter = 0;
 			if (!hasNormal)
 			{
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 0,4);
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 1,4);
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 2,4);
+				memcpy(vertex + normDataOffset + 0 * 4,r + 4 * 0,4);
+				memcpy(vertex + normDataOffset + 1 * 4,r + 4 * 1,4);
+				memcpy(vertex + normDataOffset + 2 * 4,r + 4 * 2,4);
 			}
 			if (!hasTangent)
 			{
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 3,4);
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 4,4);
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 5,4);
+				memcpy(vertex + tanDataOffset + 0 * 4,r + 4 * 3,4);
+				memcpy(vertex + tanDataOffset + 1 * 4,r + 4 * 4,4);
+				memcpy(vertex + tanDataOffset + 2 * 4,r + 4 * 5,4);
 			}
 			if (!hasBinormal)
 			{
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 6,4);
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 7,4);
-				memcpy(vertex + oldVertexSize + counter++ * 4,r + 4 * 8,4);
+				memcpy(vertex + binoDataOffset + 0 * 4,r + 4 * 6,4);
+				memcpy(vertex + binoDataOffset + 1 * 4,r + 4 * 7,4);
+				memcpy(vertex + binoDataOffset + 2 * 4,r + 4 * 8,4);
 			}
 			newVB->fill(i,vertex);
 		}
