@@ -209,8 +209,8 @@ namespace RCP
 						if (mPixelShader)
 							mPixelShader->sampler[i] = pri.sampler[i];
 						
-						point.u = pri.vertex[i].texCrood[i].x * w;
-						point.v = pri.vertex[i].texCrood[i].y * w;
+						point.u[i] = pri.vertex[i].texCrood[i].x * w;
+						point.v[i] = pri.vertex[i].texCrood[i].y * w;
 						//先這裡就不混合了，到時候還要給混合公式
 						//colorBlend = pri.sampler[i].sample(point.u ,point.v); 
 					}
@@ -298,8 +298,8 @@ namespace RCP
 					if (mPixelShader)
 						mPixelShader->sampler[i] = pri.sampler[i];
 
-					point.u = point3.texCrood[i].x * w;
-					point.v = point3.texCrood[i].y * w;
+					point.u[i] = point3.texCrood[i].x * w;
+					point.v[i] = point3.texCrood[i].y * w;
 					//先這裡就不混合了，到時候還要給混合公式
 					//colorBlend = pri.sampler[i].sample(point.u ,point.v); 
 				}
@@ -400,10 +400,10 @@ namespace RCP
 						if (mPixelShader)
 							mPixelShader->sampler[i] = pri.sampler[i];
 						
-						point.u = point3.texCrood[i].x * w;
-						point.v = point3.texCrood[i].y * w;
+						point.u[i] = point3.texCrood[i].x * w;
+						point.v[i] = point3.texCrood[i].y * w;
 						//先這裡就不混合了，到時候還要給混合公式
-						colorBlend = pri.sampler[i].sample(point.u ,point.v,ddx.texCrood[i],ddy.texCrood[i]); 
+						colorBlend = pri.sampler[i].sample(point.u[i] ,point.v[i] ,ddx.texCrood[i],ddy.texCrood[i]); 
 					}
 				}
 				if (mPixelShader != NULL)
