@@ -99,7 +99,7 @@ namespace RCP
 		float z,invw;
 		Colour color[8];
 		Colour specular;
-		float u,v;
+		float u[8],v[8];
 	};
 
 	struct Primitive
