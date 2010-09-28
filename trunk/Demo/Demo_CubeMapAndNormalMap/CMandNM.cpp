@@ -13,7 +13,8 @@ void App::init(Renderer& renderer, const AppParam& param)
 {
 
 	//模型数据事先随便写的
-	FILE* f = fopen("../Reasource/Model/teapot.mesh","rb");
+	//FILE* f = fopen("../Reasource/Model/teapot.mesh","rb");
+	FILE* f = fopen("../Reasource/Model/tiger.mesh","rb");
 	assert(f);
 	struct MeshInfo
 	{
@@ -27,7 +28,9 @@ void App::init(Renderer& renderer, const AppParam& param)
 	//创建vb 和 ib
 	VertexDeclaration vd;
 	vd.addElement(VET_FLOAT3,VES_POSITION);
-	vd.addElement(VET_FLOAT3,VES_NORMAL);
+	//vd.addElement(VET_FLOAT3,VES_NORMAL);
+	vd.addElement(VET_FLOAT2,VES_TEXTURE_COORDINATES);
+
 	mVB = renderer.createVertexBuffer(info.vertexCount,vd);
 	mIB = renderer.createIndexBuffer(info.indexCount,IF_INDEX16);
 
@@ -41,29 +44,45 @@ void App::init(Renderer& renderer, const AppParam& param)
 	mIB->unlock();
 	fclose(f);
 
+
 	//创建Plane
 	struct vertexFormat
 	{
 		float x,y,z;
 		int color;
-		float u,v,w;
+		//float u,v,w;
+		//float i,j,k;
+		//float a,b,c;
+		float m,n;
 	};
 	vertexFormat vertexData[] = 
 	{
-		-10.0f,-1.0f,-10.0f,0xffffffff,0.0f,1.0f,0.0f,
-		-10.0f,-1.0f,10.0f,0xffffffff,0.0f,0.0f,0.0f,
-		10.0f,-1.0f,-10.0f,0xffffffff,0.0f,1.0f,0.0f,
+		-10.0f,-1.0f,-10.0f,0xffffffff,/*0.0f,1.0f,0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,1.0f,*/ 0.0f,0.0f,
+		-10.0f,-1.0f,10.0f,0xffffffff,/*0.0f,1.0f,0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,1.0f,*/ 0.0f,1.0f,
+		10.0f,-1.0f,-10.0f,0xffffffff,/*0.0f,1.0f,0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,1.0f,*/ 1.0f,0.0f,
 
-		10.0f,-1.0f,-10.0f,0xffffffff,0.0f,1.0f,0.0f,
-		-10.0f,-1.0f,10.0f,0xffffffff,0.0f,0.0f,0.0f,
-		10.0f,-1.0f,10.0f,0xffffffff,0.0f,0.0f,0.0f,
+		10.0f,-1.0f,-10.0f,0xffffffff,/*0.0f,1.0f,0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,1.0f,*/ 1.0f,0.0f,
+		-10.0f,-1.0f,10.0f,0xffffffff,/*0.0f,1.0f,0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,1.0f,*/ 0.0f,1.0f,
+		10.0f,-1.0f,10.0f,0xffffffff,/*0.0f,1.0f,0.0f, 1.0f,0.0f,0.0f, 0.0f,0.0f,1.0f,*/ 1.0f,1.0f,
 	};
 	VertexDeclaration vd2;
 	vd2.addElement(VET_FLOAT3,VES_POSITION);
 	vd2.addElement(VET_COLOUR,VES_DIFFUSE);
-	vd2.addElement(VET_FLOAT3,VES_NORMAL);
+	//vd2.addElement(VET_FLOAT3,VES_NORMAL);
+	//vd2.addElement(VET_FLOAT3,VES_TANGENT);
+	//vd2.addElement(VET_FLOAT3,VES_BINORMAL);
+	vd2.addElement(VET_FLOAT2,VES_TEXTURE_COORDINATES);
 	mPlaneVB = renderer.createVertexBuffer(6,vd2);
 	mPlaneVB->fill(0,6,vertexData);
+
+	
+	VertexBuffer* tvb = TangentUtil::calculateTangentSpace(&renderer,mVB,mIB);
+	mVB->release();
+	mVB = tvb;
+	tvb = TangentUtil::calculateTangentSpace(&renderer,mPlaneVB,NULL);
+	mPlaneVB->release();
+	mPlaneVB = tvb;
+
 
 	//初始化cubemap
 	mCubeMap =renderer.createTexture(CubeMapSize,CubeMapSize,0,TT_CUBE_MAP,PF_A8R8G8B8);
@@ -74,7 +93,16 @@ void App::init(Renderer& renderer, const AppParam& param)
 		MatrixUtil::getCubeMapViewMatrix(mOrinViewMatrix[face], face);
 	}
 
-	mCameraPos = Vector3(3,3,3);
+	mNormalMap = TextureUtil::loadTextureFromFile(&renderer,"normalmap.bmp",0,PF_A8R8G8B8);
+	//mNormalMap = renderer.createTexture(CubeMapSize,CubeMapSize,0,TT_CUBE_MAP,PF_A8R8G8B8);
+	//RenderTarget* rt = temp->getRenderTarget(0);
+	//for(int i = 0; i<6;++i)
+	//{
+	//	mNormalMap->getRenderTarget(0,i)->write(rt->getData(),rt->getSizeInBytes());
+	//}
+	//mNormalMap = temp;
+
+	mCameraPos = Vector3(3,3,-3);
 	mLightPos = Vector3(3,3,-3);
 
 
@@ -94,48 +122,6 @@ void App::init(Renderer& renderer, const AppParam& param)
 	MatrixUtil::getPerspectiveProjectionSpace(mProjection,3.14159265 / 4,(float)param.width / (float)param.height,0.1,10);
 	renderer.setMatrix(TS_PROJECTION,mProjection);
 	renderer.setMatrix(TS_WORLD,world);
-
-
-	//Texture* tex = TextureUtil::loadTextureFromFile(&renderer,"tex1.bmp",0,PF_A8R8G8B8);
-	//RenderTarget* rt = tex->getRenderTarget(0);
-
-	//for (int i = 0; i < 6; ++i)
-	//{
-	//	void *data = mCubeMap->getRenderTarget(0,i)->getData();
-	//	memcpy(data,rt->getData(),rt->getSizeInBytes());
-
-	//}
-
-	//RenderTarget* rt = NULL;
-	//int i = 0;
-	//int c = 0;
-
-	//rt = mCubeMap->getRenderTarget(0,i++);
-	//c = 0xffff0000;
-	//for (int j = 0; j < 256 * 256; ++j)
-	//	rt->write(&c,4);
-
-	//rt = mCubeMap->getRenderTarget(0,i++);
-	//c = 0xff00ff00;
-	//for (int j = 0; j < 256 * 256; ++j)
-	//	rt->write(&c,4);
-
-	//rt = mCubeMap->getRenderTarget(0,i++);
-	//c = 0xff0000ff;
-	//for (int j = 0; j < 256 * 256; ++j)
-	//	rt->write(&c,4);
-
-	//rt = mCubeMap->getRenderTarget(0,i++);
-	//c = 0xffffff00;
-	//for (int j = 0; j < 256 * 256; ++j)
-	//	rt->write(&c,4);
-
-	//rt = mCubeMap->getRenderTarget(0,i++);
-	//c = 0xffff00ff;
-	//for (int j = 0; j < 256 * 256; ++j)
-	//	rt->write(&c,4);
-	
-
 	
 }
 
@@ -149,14 +135,14 @@ void App::destroy(Renderer& renderer, const AppParam& param)
 void App::renderObject(Renderer& renderer)
 {
 	
-		renderer.clearColour(1.0f);
-		renderer.clearDepth(1.0f);
+	renderer.clearColour(1.0f);
+	renderer.clearDepth(1.0f);
 
 	Material mat;
 	Matrix4X4 world;
 	mat.diffuse.getFromARGB(0xffffffff);
 	mat.specular.getFromARGB(0xffffffff);
-	mat.power = 200;
+	mat.power = 100;
 	mat.ambient.getFromARGB(0xff030303);
 	renderer.setMaterial(mat);
 	renderer.setMatrix(TS_WORLD,world);
@@ -165,7 +151,7 @@ void App::renderObject(Renderer& renderer)
 
 
 	
-	world.m[0][3] = -1.5;
+	world.m[0][3] = 1.5;
 	world.m[2][3] = 2;
 	renderer.setMatrix(TS_WORLD,world);
 	renderer.setMaterial(mat);
@@ -204,14 +190,24 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 {
 
 	renderer.setTexture(0,NULL);
+	renderer.setTexture(1,NULL);
 	renderCubeMap(renderer);
 
 	renderer.setMatrix(TS_VIEW,mView);
 	renderer.setMatrix(TS_PROJECTION,mProjection);	
 	renderObject(renderer);
+	//renderer.setProperty("VertexShader",(VertexShader*)&mNMVS);
+	//renderer.setProperty("PixelShader",(PixelShader*)&mNMPS);
+	//renderer.setProperty("Matrix1",mView);
+	//renderer.setProperty("Matrix2",mProjection);
+	//renderer.setProperty("Vector0",Vector4(mCameraPos,1));
+	//renderer.setProperty("Vector1",Vector4(mLightPos,1));
+	//renderer.clearColour(1.0f);
+	//renderer.clearDepth(1.0f);
+	//renderer.setTexture(0,mNormalMap);	
+	////renderer.setVertexBuffer(mPlaneVB);
+	////renderer.draw(PT_TRIANGLESTRIP,0,2 );
 
-		//renderer.clearColour(1.0f);
-		//renderer.clearDepth(1.0f);
 	renderer.setProperty("VertexShader",(VertexShader*)&mVS);
 	renderer.setProperty("PixelShader",(PixelShader*)&mPS);
 	renderer.setProperty("Matrix1",mView);
@@ -219,11 +215,14 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 	renderer.setProperty("Vector0",Vector4(mCameraPos,1));
 	renderer.setProperty("Vector1",Vector4(mLightPos,1));
 	renderer.setTexture(0,mCubeMap);
+	renderer.setTexture(1,mNormalMap);
 	renderer.setIndexBuffer(mIB);
 	renderer.setVertexBuffer(mVB);
 	renderer.draw(PT_TRIANGLESTRIP,0,mIB->getIndexCount() / 3 );
 
 	renderer.setProperty("VertexShader",(VertexShader*)NULL);
 	renderer.setProperty("PixelShader",(PixelShader*)NULL);
+	renderer.setTexture(0,NULL);
+	renderer.setTexture(1,NULL);
 
 }
