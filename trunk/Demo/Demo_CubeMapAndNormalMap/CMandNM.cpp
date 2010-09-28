@@ -93,7 +93,7 @@ void App::init(Renderer& renderer, const AppParam& param)
 		MatrixUtil::getCubeMapViewMatrix(mOrinViewMatrix[face], face);
 	}
 
-	mNormalMap = TextureUtil::loadTextureFromFile(&renderer,"normalmap.bmp",0,PF_A8R8G8B8);
+	mNormalMap = TextureUtil::loadTextureFromFile(&renderer,"../Reasource/Texture/normalmap.bmp",0,PF_A8R8G8B8);
 	//mNormalMap = renderer.createTexture(CubeMapSize,CubeMapSize,0,TT_CUBE_MAP,PF_A8R8G8B8);
 	//RenderTarget* rt = temp->getRenderTarget(0);
 	//for(int i = 0; i<6;++i)
