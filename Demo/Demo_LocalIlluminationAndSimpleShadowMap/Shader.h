@@ -46,11 +46,11 @@ public:
 		//记录法线
 		vert.color[0] = convert(matrix[TS_WORLD] * Vector4(vert.norm,0.0f));
 		//记录该点在灯空间下的投影 TS_WORLD2代替lightView
-		vert.color[1] = convert(matrix[TS_PROJECTION] * (matrix[TS_WORLD2] * ( matrix[TS_WORLD] * vert.pos)));
+		vert.color[1] = convert(matrix[TS_PROJECTION] * matrix[TS_WORLD2] *  matrix[TS_WORLD] * vert.pos);
 		//记录该点实际坐标
 		vert.color[2] = convert(matrix[TS_WORLD] * vert.pos);
 
-		vert.pos = matrix[TS_PROJECTION] * (matrix[TS_VIEW] *(matrix[TS_WORLD] * vert.pos));
+		vert.pos = matrix[TS_PROJECTION] * matrix[TS_VIEW] *matrix[TS_WORLD] * vert.pos;
 	}
 };
 
