@@ -32,6 +32,4 @@ class App:public QSApplication
 	VS mVS;
 	PS mPS;
 
-	NMVS mNMVS;
-	NMPS mNMPS;
 };
