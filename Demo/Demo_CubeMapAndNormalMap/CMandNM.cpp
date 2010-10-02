@@ -134,9 +134,7 @@ void App::destroy(Renderer& renderer, const AppParam& param)
 
 void App::renderObject(Renderer& renderer)
 {
-	
-	renderer.clearColour(1.0f);
-	renderer.clearDepth(1.0f);
+
 
 	Material mat;
 	Matrix4X4 world;
@@ -179,6 +177,9 @@ void App::renderCubeMap(Renderer& renderer)
 		renderer.setRenderTarget(0,rt);
 		view =  mOrinViewMatrix[i] * viewDir ;
 		renderer.setMatrix(TS_VIEW,view);
+			
+		renderer.clearColour(1.0f);
+		renderer.clearDepth(1.0f);
 		renderObject(renderer);
 		
 	}
@@ -195,18 +196,10 @@ void App::renderOneFrame(Renderer& renderer, const AppParam& param)
 
 	renderer.setMatrix(TS_VIEW,mView);
 	renderer.setMatrix(TS_PROJECTION,mProjection);	
+		
+	renderer.clearColour(1.0f);
+	renderer.clearDepth(1.0f);
 	renderObject(renderer);
-	//renderer.setProperty("VertexShader",(VertexShader*)&mNMVS);
-	//renderer.setProperty("PixelShader",(PixelShader*)&mNMPS);
-	//renderer.setProperty("Matrix1",mView);
-	//renderer.setProperty("Matrix2",mProjection);
-	//renderer.setProperty("Vector0",Vector4(mCameraPos,1));
-	//renderer.setProperty("Vector1",Vector4(mLightPos,1));
-	//renderer.clearColour(1.0f);
-	//renderer.clearDepth(1.0f);
-	//renderer.setTexture(0,mNormalMap);	
-	////renderer.setVertexBuffer(mPlaneVB);
-	////renderer.draw(PT_TRIANGLESTRIP,0,2 );
 
 	renderer.setProperty("VertexShader",(VertexShader*)&mVS);
 	renderer.setProperty("PixelShader",(PixelShader*)&mPS);

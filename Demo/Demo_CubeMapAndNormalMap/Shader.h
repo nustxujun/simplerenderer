@@ -34,7 +34,7 @@ class VS:public VertexShader
 		//转换到模型空间
 		lightDir = matrix4X4[3] * lightDir;
 		cameraDir = matrix4X4[3] * cameraDir;
-	
+
 		Matrix4X4 tangentSpace;
 		tangentSpace.m[0][0] = vert.tan.x;
 		tangentSpace.m[0][1] = vert.tan.y;
@@ -51,7 +51,7 @@ class VS:public VertexShader
 		//tangentSpace
 		lightDir = tangentSpace * lightDir;
 		cameraDir = tangentSpace* cameraDir;
-		
+
 		//方向，在这里做完变换后直接和采出的normal进行运算
 		Vector3 temp(lightDir.x,lightDir.y,lightDir.z);
 		temp.normalise();
@@ -93,113 +93,4 @@ class PS:public PixelShader
 	}
 };
 
-class NMVS:public VertexShader
-{
-	void execute(Vertex& vert)
-	{
-		vert.color[0] = convert(vert.pos);
-		////light dir
-		//Vector4 lightDir = vector4[1] - vert.pos;
-		//Vector4 cameraDir = vector4[0] - vert.pos;
-		//lightDir.w = 0;
-		//cameraDir.w = 0;
-		////转换到模型空间
-		//lightDir = matrix4X4[3] * lightDir;
-		//cameraDir = matrix4X4[3] * cameraDir;
-	
-		//Matrix4X4 tangentSpace;
-		//tangentSpace.m[0][0] = vert.tan.x;
-		//tangentSpace.m[0][1] = vert.tan.y;
-		//tangentSpace.m[0][2] = vert.tan.z;
 
-		//tangentSpace.m[1][0] = vert.bino.x;
-		//tangentSpace.m[1][1] = vert.bino.y;
-		//tangentSpace.m[1][2] = vert.bino.z;
-
-		//tangentSpace.m[2][0] = vert.norm.x;
-		//tangentSpace.m[2][1] = vert.norm.y;
-		//tangentSpace.m[2][2] = vert.norm.z;
-
-		////tangentSpace
-		//lightDir = tangentSpace * lightDir;
-		//cameraDir = tangentSpace* cameraDir;
-		//
-		////方向，在这里做完变换后直接和采出的normal进行运算
-		//Vector3 temp(lightDir.x,lightDir.y,lightDir.z);
-		//temp.normalise();
-		//vert.color[1] = convert(temp);
-		//temp = Vector3(cameraDir.x,cameraDir.y,cameraDir.z);
-		//temp.normalise();
-		//vert.color[2] = convert(temp);
-
-		vert.color[1] = convert(vert.tan);
-		vert.color[2] = convert(vert.bino);
-		vert.color[3] = convert(vert.norm);
-
-		vert.pos = matrix4X4[2] * matrix4X4[1] * matrix4X4[0] * vert.pos;
-
-
-	}
-};
-
-class NMPS:public PixelShader
-{
-	Colour shade(const Pixel& p)
-	{
-		Colour temp;
-		temp = tex2D(0,p.u[0] ,p.v[0] );		
-		//temp = texCube(0,p.color[0].r,p.color[0].g,p.color[0].b);
-		
-		temp = temp * 2.0f - 1.0f;
-		Vector3 normal(temp.r,temp.g,temp.b);
-		normal.normalise();
-
-		Vector3 t(p.color[1].r,p.color[1].g,p.color[1].b);
-		Vector3 b(p.color[2].r,p.color[2].g,p.color[2].b);
-		Vector3 n(p.color[3].r,p.color[3].g,p.color[3].b);
-		
-		Matrix4X4 tangentSpace;
-		tangentSpace.m[0][0] = t.x;
-		tangentSpace.m[0][1] = t.y;
-		tangentSpace.m[0][2] = t.z;
-
-		tangentSpace.m[1][0] = b.x;
-		tangentSpace.m[1][1] = b.y;
-		tangentSpace.m[1][2] = b.z;
-
-		tangentSpace.m[2][0] = n.x;
-		tangentSpace.m[2][1] = n.y;
-		tangentSpace.m[2][2] = n.z;
-
-		Vector4 vec4 = vector4[1] - Vector4(p.color[0].r,p.color[0].g,p.color[0].b,1);
-		vec4 = tangentSpace * vec4;
-		Vector3 L(vec4.x,vec4.y,vec4.z);
-		L.normalise();
-		vec4 = vector4[0] - Vector4(p.color[0].r,p.color[0].g,p.color[0].b,1);
-		vec4 =  tangentSpace * vec4;
-		Vector3 V(vec4.x,vec4.y,vec4.z);
-		V.normalise();
-
-
-		//temp = p.color[1];
-		//Vector3 L(temp.r,temp.g,temp.b);
-		//L.normalise();
-
-		//temp = p.color[2];
-		//Vector3 V(temp.r,temp.g,temp.b);
-		//V.normalise();
-
-		Vector3 H = L + V;
-		H.normalise();
-
-		Matrix4X4 mattemp = tangentSpace.inverseAffine();
-		Vector4 normTemp(0,0,1,0);
-		normTemp = mattemp * normTemp;
-
-
-		Colour specular = pow(std::max<float>(0,H.dotProduct(normal)  ),100)  ;
-		Colour diffuse = std::max<float>(0,normal.dotProduct(L));
-
-		return (diffuse/* + specular*/).saturate();
-	}
-};
